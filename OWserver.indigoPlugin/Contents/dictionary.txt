@@ -1,0 +1,1530 @@
+Key:
+<VariableName> - ['OWServer state name'] - units (if applicable)
+    Sensors and /or devices supporting variable.
+    [W] - Writable variable.
+
+Read URL: http://IP-ADDRESS/details.xml
+Write URL: http://IP-ADDRESS/devices.htm?rom=ROM-ID-NUMBER&variable=VARIABLE-NAME&value=VALUE-TO-WRITE
+    - ROM — the ROM ID of the device to modify, alpha characters must be
+      upper case
+    - VARIABLE — the name of the variable to modify. The name is the same
+      as the XML field name, only XML fields with attributes of
+      ‘Writable=”True”’ may be written, (e.g., <Us- erByte....)
+    - VALUE — the new decimal value to write to the 1-Wire device
+
+Activity Latch A
+#################
+<ActivityLatch_A> - ['owsActivityLatch_A']
+    DS2406
+
+Activity Latch B
+#################
+<ActivityLatch_B> - ['owsActivityLatch_B']
+    DS2406
+
+Activity Latch Reset
+#################
+<ActivityLatchReset> - ['owsActivityLatchReset']
+    DS2406 [W]
+
+Barometric Pressure (Hg) - Inches of mercury
+#################
+<BarometricPressureHg> - ['owsBarometricPressureHg']
+    EDS0066
+    EDS0068
+
+Barometric Pressure High Alarm State (Hg)
+#################
+<BarometricPressureHgHighAlarmState> - ['owsBarometricPressureHgHighAlarmState']
+    EDS0066
+    EDS0068
+
+Barometric Pressure High Alarm Value (Hg) - Inches of Mercury
+#################
+Alarms are programmed as signed integers.
+<BarometricPressureHgHighAlarmValue> - ['owsBarometricPressureHgHighAlarmValue']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure High Conditional Search State (Hg)
+#################
+<BarometricPressureHgHighConditionalSearchState> - ['owsBarometricPressureHgHighConditionalSearchState']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure Low Alarm State (Hg)
+#################
+<BarometricPressureHgLowAlarmState> - ['owsBarometricPressureHgLowAlarmState']
+    EDS0066
+    EDS0068
+
+Barometric Pressure Low Alarm Value (Hg) - Inches of Mercury
+#################
+Alarms are programmed as signed integers.
+<BarometricPressureHgLowAlarmValue> - ['owsBarometricPressureHgLowAlarmValue']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure Low Conditional Search State (Hg)
+#################
+<BarometricPressureHgLowConditionalSearchState> - ['owsBarometricPressureHgLowConditionalSearchState']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure (Mb) - Millibars
+#################
+<BarometricPressureMb> - ['owsBarometricPressureMb']
+    EDS0066
+    EDS0068
+
+Barometric Pressure High Alarm State (Mb)
+#################
+<BarometricPressureMbHighAlarmState> - ['owsBarometricPressureMbHighAlarmState']
+    EDS0066
+    EDS0068
+
+Barometric Pressure High Alarm Value (Mb) - Millibars
+#################
+Alarms are programmed as signed integers.
+<BarometricPressureMbHighAlarmValue> - ['owsBarometricPressureMbHighAlarmValue']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure High Conditional Search State (Mb)
+#################
+<BarometricPressureMbHighConditionalSearchState> - ['owsBarometricPressureMbHighConditionalSearchState']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure Low Alarm State (Mb)
+#################
+<BarometricPressureMbLowAlarmState> - ['owsBarometricPressureMbLowAlarmState']
+    EDS0066
+    EDS0068
+
+Barometric Pressure Low Alarm Value (Mb) - Millibars
+#################
+Alarms are programmed as signed integers.
+<BarometricPressureMbLowAlarmValue> - ['owsBarometricPressureMbLowAlarmValue']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Barometric Pressure Low Conditional Search State
+#################
+<BarometricPressureMbLowConditionalSearchState> - ['owsBarometricPressureMbLowConditionalSearchState']
+    EDS0066 [W]
+    EDS0068 [W]
+
+Calibration Key
+#################
+<CalibrationKey> - ['owsCalibrationKey']
+    EDS0071 [W]
+
+Calibration Value
+#################
+<CalibrationValue> - ['owsCalibrationValue']
+    EDS0071
+
+Channel
+#################
+<Channel> - ['owsChannel']
+The channel location of the sensor (i.e., 1, 2, or 3).
+(Applies only when connected to OW-SERVER-ENET2, OW-SERVER-WiFi-2G.)
+    DS18B20
+    DS2406
+    DS2423
+    DS2450
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0083
+    EDS0085
+    EDS0090
+
+Channel Conversion Value (A-D) - Volts
+#################
+<ChannelAConversionValue> - ['owsChannelAConversionValue']
+<ChannelBConversionValue> - ['owsChannelBConversionValue']
+<ChannelCConversionValue> - ['owsChannelCConversionValue']
+<ChannelDConversionValue> - ['owsChannelDConversionValue']
+    DS2450
+
+Channel Conversion Range (A-D)
+#################
+<ChannelAConversionRange> - ['owsChannelAConversionRange']
+<ChannelBConversionRange> - ['owsChannelBConversionRange']
+<ChannelCConversionRange> - ['owsChannelCConversionRange']
+<ChannelDConversionRange> - ['owsChannelDConversionRange']
+    DS2450 [W]
+
+Channel Conversion Resolution (A-D) - Bits
+#################
+<ChannelAConversionResolution> - ['owsChannelAConversionResolution']
+<ChannelBConversionResolution> - ['owsChannelBConversionResolution']
+<ChannelCConversionResolution> - ['owsChannelCConversionResolution']
+<ChannelDConversionResolution> - ['owsChannelDConversionResolution']
+    DS2450 [W]
+
+Channel Output Control (A-D)
+#################
+<ChannelAOutputControl> - ['owsChannelAOutputControl']
+<ChannelBOutputControl> - ['owsChannelBOutputControl']
+<ChannelCOutputControl> - ['owsChannelCOutputControl']
+<ChannelDOutputControl> - ['owsChannelDOutputControl']
+    DS2450 [W]
+
+Channel Output Enable (A-D)
+#################
+<ChannelAOutputEnable> - ['owsChannelAOutputEnable']
+<ChannelAOutputEnable> - ['owsChannelBOutputEnable']
+<ChannelAOutputEnable> - ['owsChannelCOutputEnable']
+<ChannelAOutputEnable> - ['owsChannelDOutputEnable']
+    DS2450 [W]
+
+Clear Alarms
+#################
+Alarm bits can only be cleared by sending the clear alarms command,
+which clears all alarm bits. No provision is made to clear
+individually selected alarm bits.
+<ClearAlarms> - ['owsClearAlarms']
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0070 [W]
+    EDS0071 [W]
+    EDS0080 [W]
+    EDS0082 [W]
+    EDS0085 [W]
+    EDS0090 [W]
+
+Conversion Counter
+#################
+<ConversionCounter> - ['owsConversionCounter']
+    EDS0071
+
+Counter
+#################
+<Counter> - ['owsCounter']
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0085
+    EDS0090
+
+Counter A
+#################
+<CounterA> - ['owsCounterA']
+    DS2423
+
+Counter B
+#################
+<CounterB> - ['owsCounterB']
+    DS2423
+
+Counter 1
+#################
+These counters are set to zero at power up, and increment approximately
+once per second.
+<Counter1> - ['owsCounter1']
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+
+Counter 2
+#################
+These counters are set to zero at power up, and increment approximately
+once per second.
+<Counter2> - ['owsCounter2']
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+
+Data Errors
+#################
+<DataErrors> - ['owsDataErrors']
+    OWSERVER-ENET
+
+Data Errors Channels (1-3)
+#################
+<DataErrorsChannel1> - ['owsDataErrorsChannel1']
+<DataErrorsChannel2> - ['owsDataErrorsChannel2']
+<DataErrorsChannel3> - ['owsDataErrorsChannel3']
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Date / Time
+#################
+Date and Time are not available in all firmware versions.  Therefore,
+we can't use this as a valid value for all installations.
+<DateTime>  - ['owsDateTime']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Device Name
+#################
+<DeviceName> - ['owsDeviceName']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Devices Connected
+#################
+<DevicesConnected> - ['owsDevicesConnected']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+
+Devices Connected Channel (1-3)
+#################
+The Total number of devices connected to the EDS Server.
+<DevicesConnectedChannel1> - ['owsDevicesConnectedChannel1']
+<DevicesConnectedChannel2> - ['owsDevicesConnectedChannel2']
+<DevicesConnectedChannel3> - ['owsDevicesConnectedChannel3']
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Dew Point - Degrees centigrade
+#################
+<DewPoint> -['owsDewPoint']
+    EDS0065
+    EDS0068
+
+DewPoint High Alarm State
+#################
+<DewPointHighAlarmState> - ['owsDewPointHighAlarmState']
+    EDS0065
+    EDS0068
+
+Dew Point High Alarm Value - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<DewPointHighAlarmValue> - ['owsDewPointHighAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Dew Point High Conditional Search State
+#################
+<DewPointHighConditionalSearchState> - ['owsDewPointHighConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Dew Point Low Alarm State
+#################
+<DewPointLowAlarmState> - ['owsDewPointLowAlarmState']
+    EDS0065
+    EDS0068
+
+Dew Point Low Alarm Value - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<DewPointLowAlarmValue> - ['owsDewPointLowAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Dew Point Low Conditional Search State
+#################
+<DewPointLowConditionalSearchState> - ['owsDewPointLowConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Discrete IO Activity Latch
+#################
+<DiscreteIO1ActivityLatch> - ['owsDiscreteIO1ActivityLatch']
+<DiscreteIO2ActivityLatch> - ['owsDiscreteIO2ActivityLatch']
+<DiscreteIO3ActivityLatch> - ['owsDiscreteIO3ActivityLatch']
+<DiscreteIO4ActivityLatch> - ['owsDiscreteIO4ActivityLatch']
+<DiscreteIO5ActivityLatch> - ['owsDiscreteIO5ActivityLatch']
+<DiscreteIO6ActivityLatch> - ['owsDiscreteIO6ActivityLatch']
+<DiscreteIO7ActivityLatch> - ['owsDiscreteIO7ActivityLatch']
+<DiscreteIO8ActivityLatch> - ['owsDiscreteIO8ActivityLatch']
+    EDS0090
+
+Discrete IO Activity Latch Reset
+#################
+<DiscreteIO1ActivityLatchReset> - ['owsDiscreteIO1ActivityLatchReset']
+<DiscreteIO2ActivityLatchReset> - ['owsDiscreteIO2ActivityLatchReset']
+<DiscreteIO3ActivityLatchReset> - ['owsDiscreteIO3ActivityLatchReset']
+<DiscreteIO4ActivityLatchReset> - ['owsDiscreteIO4ActivityLatchReset']
+<DiscreteIO5ActivityLatchReset> - ['owsDiscreteIO5ActivityLatchReset']
+<DiscreteIO6ActivityLatchReset> - ['owsDiscreteIO6ActivityLatchReset']
+<DiscreteIO7ActivityLatchReset> - ['owsDiscreteIO7ActivityLatchReset']
+<DiscreteIO8ActivityLatchReset> - ['owsDiscreteIO8ActivityLatchReset']
+    EDS0090 [W]
+
+Discrete IO High Alarm State
+#################
+<DiscreteIO1HighAlarmState> - ['owsDiscreteIO1HighAlarmState']
+<DiscreteIO2HighAlarmState> - ['owsDiscreteIO2HighAlarmState']
+<DiscreteIO3HighAlarmState> - ['owsDiscreteIO3HighAlarmState']
+<DiscreteIO4HighAlarmState> - ['owsDiscreteIO4HighAlarmState']
+<DiscreteIO5HighAlarmState> - ['owsDiscreteIO5HighAlarmState']
+<DiscreteIO6HighAlarmState> - ['owsDiscreteIO6HighAlarmState']
+<DiscreteIO7HighAlarmState> - ['owsDiscreteIO7HighAlarmState']
+<DiscreteIO8HighAlarmState> - ['owsDiscreteIO8HighAlarmState']
+    EDS0090
+
+Discrete IO High Alarm Value
+#################
+Alarms are programmed as signed integers.
+<DiscreteIO1HighAlarmValue> - ['owsDiscreteIO1HighAlarmValue']
+<DiscreteIO2HighAlarmValue> - ['owsDiscreteIO2HighAlarmValue']
+<DiscreteIO3HighAlarmValue> - ['owsDiscreteIO3HighAlarmValue']
+<DiscreteIO4HighAlarmValue> - ['owsDiscreteIO4HighAlarmValue']
+<DiscreteIO5HighAlarmValue> - ['owsDiscreteIO5HighAlarmValue']
+<DiscreteIO6HighAlarmValue> - ['owsDiscreteIO6HighAlarmValue']
+<DiscreteIO7HighAlarmValue> - ['owsDiscreteIO7HighAlarmValue']
+<DiscreteIO8HighAlarmValue> - ['owsDiscreteIO8HighAlarmValue']
+    EDS0090 [W]
+
+Discrete IO High Conditional Search State
+#################
+<DiscreteIO1HighConditionalSearchState> - ['owsDiscreteIO1HighConditionalSearchState']
+<DiscreteIO2HighConditionalSearchState> - ['owsDiscreteIO2HighConditionalSearchState']
+<DiscreteIO3HighConditionalSearchState> - ['owsDiscreteIO3HighConditionalSearchState']
+<DiscreteIO4HighConditionalSearchState> - ['owsDiscreteIO4HighConditionalSearchState']
+<DiscreteIO5HighConditionalSearchState> - ['owsDiscreteIO5HighConditionalSearchState']
+<DiscreteIO6HighConditionalSearchState> - ['owsDiscreteIO6HighConditionalSearchState']
+<DiscreteIO7HighConditionalSearchState> - ['owsDiscreteIO7HighConditionalSearchState']
+<DiscreteIO8HighConditionalSearchState> - ['owsDiscreteIO8HighConditionalSearchState']
+    EDS0090 [W]
+
+Discrete IO Input State
+#################
+<DiscreteIO1InputState> - ['owsDiscreteIO1InputState']
+<DiscreteIO2InputState> - ['owsDiscreteIO2InputState']
+<DiscreteIO3InputState> - ['owsDiscreteIO3InputState']
+<DiscreteIO4InputState> - ['owsDiscreteIO4InputState']
+<DiscreteIO5InputState> - ['owsDiscreteIO5InputState']
+<DiscreteIO6InputState> - ['owsDiscreteIO6InputState']
+<DiscreteIO7InputState> - ['owsDiscreteIO7InputState']
+<DiscreteIO8InputState> - ['owsDiscreteIO8InputState']
+    EDS0090
+
+Discrete IO Low Alarm State
+#################
+<DiscreteIO1LowAlarmState> - ['owsDiscreteIO1LowAlarmState']
+<DiscreteIO2LowAlarmState> - ['owsDiscreteIO2LowAlarmState']
+<DiscreteIO3LowAlarmState> - ['owsDiscreteIO3LowAlarmState']
+<DiscreteIO4LowAlarmState> - ['owsDiscreteIO4LowAlarmState']
+<DiscreteIO5LowAlarmState> - ['owsDiscreteIO5LowAlarmState']
+<DiscreteIO6LowAlarmState> - ['owsDiscreteIO6LowAlarmState']
+<DiscreteIO7LowAlarmState> - ['owsDiscreteIO7LowAlarmState']
+<DiscreteIO8LowAlarmState> - ['owsDiscreteIO8LowAlarmState']
+    EDS0090
+
+Discrete IO Low Alarm Value
+#################
+Alarms are programmed as signed integers.
+<DiscreteIO1LowAlarmValue> - ['owsDiscreteIO1LowAlarmValue']
+<DiscreteIO2LowAlarmValue> - ['owsDiscreteIO2LowAlarmValue']
+<DiscreteIO3LowAlarmValue> - ['owsDiscreteIO3LowAlarmValue']
+<DiscreteIO4LowAlarmValue> - ['owsDiscreteIO4LowAlarmValue']
+<DiscreteIO5LowAlarmValue> - ['owsDiscreteIO5LowAlarmValue']
+<DiscreteIO6LowAlarmValue> - ['owsDiscreteIO6LowAlarmValue']
+<DiscreteIO7LowAlarmValue> - ['owsDiscreteIO7LowAlarmValue']
+<DiscreteIO8LowAlarmValue> - ['owsDiscreteIO8LowAlarmValue']
+    EDS0090 [W]
+
+Discrete IO Low Conditional Search State
+#################
+<DiscreteIO1LowConditionalSearchState> - ['owsDiscreteIO1LowConditionalSearchState']
+<DiscreteIO2LowConditionalSearchState> - ['owsDiscreteIO2LowConditionalSearchState']
+<DiscreteIO3LowConditionalSearchState> - ['owsDiscreteIO3LowConditionalSearchState']
+<DiscreteIO4LowConditionalSearchState> - ['owsDiscreteIO4LowConditionalSearchState']
+<DiscreteIO5LowConditionalSearchState> - ['owsDiscreteIO5LowConditionalSearchState']
+<DiscreteIO6LowConditionalSearchState> - ['owsDiscreteIO6LowConditionalSearchState']
+<DiscreteIO7LowConditionalSearchState> - ['owsDiscreteIO7LowConditionalSearchState']
+<DiscreteIO8LowConditionalSearchState> - ['owsDiscreteIO8LowConditionalSearchState']
+    EDS0090 [W]
+
+Discrete IO Output State
+#################
+<DiscreteIO1OutputState> - ['owsDiscreteIO1OutputState']
+<DiscreteIO2OutputState> - ['owsDiscreteIO2OutputState']
+<DiscreteIO3OutputState> - ['owsDiscreteIO3OutputState']
+<DiscreteIO4OutputState> - ['owsDiscreteIO4OutputState']
+<DiscreteIO5OutputState> - ['owsDiscreteIO5OutputState']
+<DiscreteIO6OutputState> - ['owsDiscreteIO6OutputState']
+<DiscreteIO7OutputState> - ['owsDiscreteIO7OutputState']
+<DiscreteIO8OutputState> - ['owsDiscreteIO8OutputState']
+    EDS0090 [W]
+
+Discrete IO Output Value
+#################
+<DiscreteIO1OutputValue> - ['owsDiscreteIO1OutputValue']
+<DiscreteIO2OutputValue> - ['owsDiscreteIO2OutputValue']
+<DiscreteIO3OutputValue> - ['owsDiscreteIO3OutputValue']
+<DiscreteIO4OutputValue> - ['owsDiscreteIO4OutputValue']
+<DiscreteIO5OutputValue> - ['owsDiscreteIO5OutputValue']
+<DiscreteIO6OutputValue> - ['owsDiscreteIO6OutputValue']
+<DiscreteIO7OutputValue> - ['owsDiscreteIO7OutputValue']
+<DiscreteIO8OutputValue> - ['owsDiscreteIO8OutputValue']
+    EDS0090
+
+Discrete IO PulldownState
+#################
+<DiscreteIO1PulldownState> - ['owsDiscreteIO1PulldownState']
+<DiscreteIO2PulldownState> - ['owsDiscreteIO2PulldownState']
+<DiscreteIO3PulldownState> - ['owsDiscreteIO3PulldownState']
+<DiscreteIO4PulldownState> - ['owsDiscreteIO4PulldownState']
+<DiscreteIO5PulldownState> - ['owsDiscreteIO5PulldownState']
+<DiscreteIO6PulldownState> - ['owsDiscreteIO6PulldownState']
+<DiscreteIO7PulldownState> - ['owsDiscreteIO7PulldownState']
+<DiscreteIO8PulldownState> - ['owsDiscreteIO8PulldownState']
+    EDS0090 [W]
+
+Discrete IO Pulldown Value
+#################
+<DiscreteIO1PulldownValue> - ['owsDiscreteIO1PulldownValue']
+<DiscreteIO2PulldownValue> - ['owsDiscreteIO2PulldownValue']
+<DiscreteIO3PulldownValue> - ['owsDiscreteIO3PulldownValue']
+<DiscreteIO4PulldownValue> - ['owsDiscreteIO4PulldownValue']
+<DiscreteIO5PulldownValue> - ['owsDiscreteIO5PulldownValue']
+<DiscreteIO6PulldownValue> - ['owsDiscreteIO6PulldownValue']
+<DiscreteIO7PulldownValue> - ['owsDiscreteIO7PulldownValue']
+<DiscreteIO8PulldownValue> - ['owsDiscreteIO8PulldownValue']
+    EDS0090
+
+Discrete IO Pulse Counter
+#################
+<DiscreteIO1PulseCounter> - ['owsDiscreteIO1PulseCounter']
+<DiscreteIO2PulseCounter> - ['owsDiscreteIO2PulseCounter']
+    EDS0090
+
+Discrete IO Pulse Counter Reset
+#################
+<DiscreteIO1PulseCounterReset> - ['owsDiscreteIO1PulseCounterReset']
+<DiscreteIO2PulseCounterReset> - ['owsDiscreteIO2PulseCounterReset']
+    EDS0090
+
+Family
+#################
+<Family> - ['owsFamily']
+	10 (DS18S20)
+	12 (DS2406)
+	20 (DS2450)
+	26 (DS2438)
+	28 (DS18B20)
+	29 (DS2408)
+	1D (DS2423)
+	7E (EDS0064, EDS0065, EDS0066, EDS0067, EDS0068, EDS0070, EDS0071,
+        EDS0080, EDS0082, EDS0083, EDS0085, EDS0090)
+
+Flip Flop A
+#################
+Setting a channel flip-flop to 0 will make the associated PIO-transistor
+conducting or on; setting the flip-flop to 1 will switch the transistor
+off, which is identical to the power-on default.
+<FlipFlop_A> - ['owsFlipFlop_A']
+    DS2406 [W]
+
+Flip Flop B
+#################
+Setting a channel flip-flop to 0 will make the associated PIO-transistor
+conducting or on; setting the flip-flop to 1 will switch the transistor
+off, which is identical to the power-on default.
+<FlipFlop_B> - ['owsFlipFlop_B']
+    DS2406 [W]
+
+Health
+#################
+<Health> - ['owsHealth']
+Signal health of the sensor (0 - 7), higher numbers better.
+	DS18B20
+	DS18S20
+    DS2406
+	DS2408
+    DS2423
+    DS2438
+    DS2450
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0082
+    EDS0080
+    EDS0083
+    EDS0085
+    EDS0090
+
+Heat Index - Degrees centigrade
+#################
+<HeatIndex> - ['owsHeatIndex']
+    EDS0065
+    EDS0068
+
+Heat Index High Alarm State
+#################
+<HeatIndexHighAlarmState> - ['owsHeatIndexHighAlarmState']
+    EDS0065
+    EDS0068
+
+Heat Index High Alarm Value - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<HeatIndexHighAlarmValue> - ['owsHeatIndexHighAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Heat Index High Conditional Search State
+#################
+<HeatIndexHighConditionalSearchState> - ['owsHeatIndexHighConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Heat Index Low Alarm State
+#################
+<HeatIndexLowAlarmState> - ['owsHeatIndexLowAlarmState']
+    EDS0065
+    EDS0068
+
+Heat Index Low Alarm Value - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<HeatIndexLowAlarmValue> - ['owsHeatIndexLowAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Heat Index Low Conditional Search State
+#################
+<HeatIndexLowConditionalSearchState> - ['owsHeatIndexLowConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Host Name
+#################
+<HostName> - ['owsHostName']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Humidex
+#################
+<Humidex> - ['owsHumidex']
+    EDS0065
+    EDS0068
+
+Humidex High Alarm State
+#################
+<HumidexHighAlarmState> - ['owsHumidexHighAlarmState']
+    EDS0065
+    EDS0068
+
+Humidex High Alarm Value
+#################
+Alarms are programmed as signed integers.
+<HumidexHighAlarmValue> - ['owsHumidexHighAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidex High Conditional Search State
+#################
+<HumidexHighConditionalSearchState> - ['owsHumidexHighConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidex Low Alarm State
+#################
+<HumidexLowAlarmState> - ['owsHumidexLowAlarmState']
+    EDS0065
+    EDS0068
+
+Humidex Low Alarm Value
+#################
+Alarms are programmed as signed integers.
+<HumidexLowAlarmValue> - ['owsHumidexLowAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidex Low Conditional Search State
+#################
+<HumidexLowConditionalSearchState> - ['owsHumidexLowConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidity - Percent Relative Humidity
+#################
+<Humidity> - ['owsHumidity']
+The devices don't seem to report usable humidity values.
+	DS2438
+    EDS0065
+    EDS0068
+
+Humidity High Alarm State
+#################
+<HumidityHighAlarmState> - ['owsHumidityHighAlarmState']
+    EDS0065
+    EDS0068
+
+Humidity High Alarm Value - Percent Relative Humidity
+#################
+Alarms are programmed as signed integers.
+<HumidityHighAlarmValue> - ['owsHumidityHighAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidity High Conditional Search State
+#################
+<HumidityHighConditionalSearchState> - ['owsHumidityHighConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidity Low Alarm State
+#################
+<HumidityLowAlarmState> - ['owsHumidityLowAlarmState']
+    EDS0065
+    EDS0068
+
+Humidity Low Alarm Value - Percent Relative Humidity
+#################
+Alarms are programmed as signed integers.
+<HumidityLowAlarmValue> - ['owsHumidityLowAlarmValue']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Humidity Low Conditional Search State
+#################
+<HumidityLowConditionalSearchState> - ['owsHumidityLowConditionalSearchState']
+    EDS0065 [W]
+    EDS0068 [W]
+
+Input Level A
+#################
+<InputLevel_A> - ['owsInputLevel_A']
+    DS2406
+
+Input Level B
+#################
+<InputLevel_B> - ['owsInputLevel_B']
+    DS2406
+
+LED
+#################
+The state of the LED is stored in non-volatile memory and is restored
+at power-up. Write to LEDState, this is the actual state of the LED.
+0: Off
+1: On
+<LED> - ['owsLED'] - BOOLEAN
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0085
+    EDS0090
+
+LED Function
+#################
+0: On with alarms, Off with no alarms
+1: On with alarms, Off with clear alarms command
+2: On/Off under command
+3: Always Off
+<LEDFunction> - ['owsLEDFunction'] - INTEGER
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0070 [W]
+    EDS0071 [W]
+    EDS0080 [W]
+    EDS0082 [W]
+    EDS0085 [W]
+    EDS0090 [W]
+
+LED State
+#################
+Write to this variable to control the LED. This is what the state of the 
+LED should be.
+0: off
+1: on
+<LEDState> - ['owsLEDState'] - BOOLEAN
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0070 [W]
+    EDS0071 [W]
+    EDS0080 [W]
+    EDS0082 [W]
+    EDS0085 [W]
+    EDS0090 [W]
+
+Light
+#################
+<Light> - ['owsLight']
+    EDS0067 - Lux
+    EDS0068 - Lux
+
+Light High Alarm State
+#################
+<LightHighAlarmState> - ['owsLightHighAlarmState']
+    EDS0067
+    EDS0068
+
+Light High Alarm Value - Lux
+#################
+Alarms are programmed as signed integers.
+<LightHighAlarmValue> - ['owsLightHighAlarmValue']
+    EDS0067 [W]
+    EDS0068 [W]
+
+Light High Conditional Search State
+#################
+<LightHighConditionalSearchState> - ['owsLightHighConditionalSearchState']
+    EDS0067 [W]
+    EDS0068 [W]
+
+Light Low Alarm State
+#################
+<LightLowAlarmState> - ['owsLightLowAlarmState']
+    EDS0067
+    EDS0068
+
+Light Low Alarm Value - Lux
+#################
+Alarms are programmed as signed integers.
+<LightLowAlarmValue> - ['owsLightLowAlarmValue']
+    EDS0067 [W]
+    EDS0068 [W]
+
+Light Low Conditional Search State
+#################
+<LightLowConditionalSearchState> - ['owsLightLowConditionalSearchState']
+    EDS0067 [W]
+    EDS0068 [W]
+
+Loop Time
+#################
+The time, in seconds, it takes for the server to cycle through polling
+all of the devices and receive a response. As more devices are added,
+each individual device gets read less frequently since only a single
+device can be read at a time. This value is useful for determining how
+frequently each sensor gets read.
+<LoopTime> - ['owsLoopTime']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+MAC Address
+#################
+<MACAddress> - ['owsMACAddress']
+    OWSERVER-ENET
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Name
+#################
+<Name> - ['owsSensorType']
+	DS18B20 	("Programmable resolution thermometer")
+	DS18S20 	("Parasite power thermometer")
+	DS2406		("Dual addressable switch plus memory")
+	DS2408		("8-Channel Addressable Switch")
+	DS2423 		("RAM with counters")
+	DS2438 		("Smart battery monitor")
+	DS2450		("Quad A/D Converter")
+				(Light Sensor)
+    EDS0064     ("Temperature Sensor")
+    EDS0065     ("Temperature and Humidity Sensor")
+    EDS0066     ("Temperature and Barometric Pressure Sensor")
+    EDS0067     ("Temperature and Light Sensor")
+	EDS0068		("Temperature, Humidity, Barometric Pressure and Light Sensor")
+    EDS0070     ("Vibration Sensor")
+    EDS0071     ("RTD Interface, 4 wire")
+    EDS0080     ("Octal 4-20 Milliamp Input")
+    EDS0082     ("Octal Current Input")
+    EDS0083     ("Quad 4-20 Milliamp Input")
+    EDS0085     ("Quad 0-10 Volt Input")
+    EDS0090     ("Octal Discrete IO")
+
+Number Of Channels
+#################
+<NumberOfChannels> - ['owsNumberOfChannels']
+    DS2406
+
+PIO Activity Latch State
+#################
+<PIOActivityLatchState> - ['owsPIOActivityLatchState']
+    DS2408 [W]
+
+PIO Logic State
+#################
+<PIOLogicState> - ['owsPIOLogicState']
+    DS2408
+
+PIO Output Latch State
+#################
+<PIOOutputLatchState> - ['owsPIOOutputLatchState']
+    DS2408 [W]
+
+Primary Value
+#################
+<PrimaryValue> - ['owsPrimaryValue']
+    DS18B20
+	DS18S20
+    DS2406
+	DS2408
+    DS2423
+    DS2438
+    DS2450
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0082
+    EDS0083
+    EDS0085
+    EDS0090
+
+Poll Count
+#################
+The number of times the server has cycled through polling all of the
+connected devices.
+<PollCount>  - ['owsPollCount']
+    OWSERVER-ENET 
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Power On Reset
+#################
+<PowerOnReset> - ['owsPowerOnReset']
+    DS2450 [W]
+
+Power On Reset Latch
+#################
+<PowerOnResetLatch> - ['owsPowerOnResetLatch']
+    DS2408 [W]
+
+Power Source
+#################
+<PowerSource> - ['owsSensorPowerSource']
+    DS18B20
+    DS2406
+
+Raw Data
+#################
+<RawData> - ['owsRawData']
+    DS18B20
+	DS18S20
+    DS2406
+	DS2408
+    DS2423
+    DS2438
+    DS2450
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0083
+    EDS0085
+    EDS0090
+
+Relay
+#################
+The relay is latching; its state￼remains the same, even when power is
+removed.
+0: Off
+1: On
+<Relay> - ['owsRelay'] - BOOLEAN
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0085
+    EDS0090
+
+Relay Function
+#################
+0: On with alarms, Off with no alarms
+1: On with alarms, Off with clear alarms command
+2: On/Off under command
+3: Always Off
+<RelayFunction> - ['owsRelayFunction'] - INTEGER
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0070 [W]
+    EDS0071 [W]
+    EDS0080 [W]
+    EDS0082 [W]
+    EDS0085 [W]
+    EDS0090 [W]
+
+Relay State
+#################
+0: Off
+1: On
+<RelayState> - ['owsRelayState'] - BOOLEAN
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0070 [W]
+    EDS0071 [W]
+    EDS0080 [W]
+    EDS0082 [W]
+    EDS0085 [W]
+    EDS0090 [W]
+
+Resolution
+#################
+<Resolution> - ['owsSensorResolution']
+Sensor resolution (8 bit, 12 bit)
+    DS18B20     12
+    DS18S20     Does not support
+
+ROM ID
+#################
+<ROMId> - ['owsSensorRomID']
+Serial number of the sensor's ROM.
+	DS18B20
+	DS18S20
+    DS2406
+	DS2408
+    DS2423
+    DS2438
+    DS2450
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0082
+    EDS0080
+    EDS0083
+    EDS0085
+    EDS0090
+
+RSTZ configuration
+#################
+<RSTZconfiguration> - ['owsRSTZconfiguration']
+    DS2408 [W]
+
+RTD Fault - (units?)
+#################
+<RTDFault> - ['owsRTDFault']
+    EDS0071
+
+RTD Fault Conditional Search State
+#################
+<RTDFaultConditionalSearchState> - ['owsRTDFaultConditionalSearchState']
+    EDS0071
+
+RTD Read Delay
+#################
+<RTDReadDelay> - ['owsRTDReadDelay']
+    EDS0071 [W]
+
+RTD Resistance High Alarm State - Ohms
+#################
+<RTDResistanceHighAlarmState> - ['owsRTDResistanceHighAlarmState']
+    EDS0071
+
+RTD Resistance High Alarm Value - Ohms
+#################
+Alarms are programmed as signed integers.
+<RTDResistanceHighAlarmValue> - ['owsRTDResistanceHighAlarmValue']
+    EDS0071 [W]
+
+RTD Resistance High Conditional Search State
+#################
+<RTDResistanceHighConditionalSearchState> - ['owsRTDResistanceHighConditionalSearchState']
+    EDS0071 [W]
+
+RTD Resistance Low Alarm State - Ohms
+#################
+<RTDResistanceLowAlarmState> - ['owsRTDResistanceLowAlarmState']
+    EDS0071
+
+RTD Resistance High Alarm Value - Ohms
+#################
+Alarms are programmed as signed integers.
+<RTDResistanceHighAlarmValue> - ['owsRTDResistanceHighAlarmValue']
+    EDS0071 [W]
+
+RTD Resistance Low Conditional Search State
+#################
+<RTDResistanceLowConditionalSearchState> - ['owsRTDResistanceLowConditionalSearchState']
+    EDS0071 [W]
+
+RTD Ohms - Ohms
+#################
+<RTDOhms> - ['owsRTDOhms']
+    EDS0071
+
+Temperature - Degrees centigrade
+#################
+<Temperature> - ['owsTemperature']
+	DS18B20 
+	DS18S20
+    DS2438
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0071
+
+Temperature High Alarm State
+#################
+<TemperatureHighAlarmState> - ['owsTemperatureHighAlarmState']
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0071
+
+Temperature High Alarm Value  - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<TemperatureHighAlarmValue> - ['owsTemperatureHighAlarmValue']
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0071 [W]
+
+Temperature High Conditional Search State
+#################
+<TemperatureHighConditionalSearchState> - [TemperatureHighConditionalSearchState']
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0071 [W]
+
+Temperature Low Alarm State
+#################
+<TemperatureLowAlarmState> - ['owsTemperatureLowAlarmState']
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0071
+
+Temperature Low Alarm Value - Degrees centigrade
+#################
+Alarms are programmed as signed integers.
+<TemperatureLowAlarmValue> - ['owsTemperatureLowAlarmValue']
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0071 [W]
+
+Temperature Low Conditional Search State
+#################
+<TemperatureLowConditionalSearchState> - ['owsTemperatureLowConditionalSearchState']
+    EDS0064 [W]
+    EDS0065 [W]
+    EDS0066 [W]
+    EDS0067 [W]
+    EDS0068 [W]
+    EDS0071 [W]
+
+User Byte 1
+#################
+<UserByte1> - ['owsSensorUserByte1']
+Two bit storage register.
+    DS18B20 [W]
+	DS18S20 [W]
+
+User Byte 2
+#################
+<UserByte2> - ['owsSensorUserByte2']
+Two bit storage register.
+    DS18B20 [W]
+	DS18S20 [W]
+
+0 to 10 Volt Input High Alarm State (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1HighAlarmState> - ['owsv0to10VoltInput1HighAlarmState'] (1-8) (1-4)
+<v0to10VoltInput2HighAlarmState> - ['owsv0to10VoltInput2HighAlarmState'] (1-8) (1-4)
+<v0to10VoltInput3HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8) (1-4)
+<v0to10VoltInput4HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8) (1-4)
+<v0to10VoltInput5HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8)
+<v0to10VoltInput6HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8)
+<v0to10VoltInput7HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8)
+<v0to10VoltInput8HighAlarmState> - ['owsv0to10VoltInput3HighAlarmState'] (1-8)
+    EDS0082
+    EDS0085
+
+0 to 10 Volt Input High Alarm Value (1-4) (1-8)
+#################
+Alarms are programmed as signed integers.
+<v0to10VoltInput1HighAlarmValue> - ['owsv0to10VoltInput1HighAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput2HighAlarmValue> - ['owsv0to10VoltInput2HighAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput3HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput4HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput5HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8)
+<v0to10VoltInput6HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8)
+<v0to10VoltInput7HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8)
+<v0to10VoltInput8HighAlarmValue> - ['owsv0to10VoltInput3HighAlarmValue'] (1-8)
+    EDS0082 [W]
+    EDS0085 [W]
+
+0 to 10 Volt Input High Conditional Search State (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1HighConditionalSearchState> - ['owsv0to10VoltInput1HighConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput2HighConditionalSearchState> - ['owsv0to10VoltInput2HighConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput3HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput4HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput5HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8)
+<v0to10VoltInput6HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8)
+<v0to10VoltInput7HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8)
+<v0to10VoltInput8HighConditionalSearchState> - ['owsv0to10VoltInput3HighConditionalSearchState'] (1-8)
+    EDS0082 [W]
+    EDS0085 [W]
+
+0 to 10 Volt Input Low Alarm State (1-4) (1-8)
+#################
+<v0to10VoltInput1LowAlarmState> - ['owsv0to10VoltInput1LowAlarmState'] (1-8) (1-4)
+<v0to10VoltInput2LowAlarmState> - ['owsv0to10VoltInput2LowAlarmState'] (1-8) (1-4)
+<v0to10VoltInput3LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8) (1-4)
+<v0to10VoltInput4LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8) (1-4)
+<v0to10VoltInput5LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8)
+<v0to10VoltInput6LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8)
+<v0to10VoltInput7LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8)
+<v0to10VoltInput8LowAlarmState> - ['owsv0to10VoltInput3LowAlarmState'] (1-8)
+    EDS0082
+    EDS0085
+
+0 to 10 Volt Input Low Alarm Value (1-4) (1-8) - Volts
+#################
+Alarms are programmed as signed integers.
+<v0to10VoltInput1LowAlarmValue> - ['owsv0to10VoltInput1LowAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput2LowAlarmValue> - ['owsv0to10VoltInput2LowAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput3LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput4LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8) (1-4)
+<v0to10VoltInput5LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8)
+<v0to10VoltInput6LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8)
+<v0to10VoltInput7LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8)
+<v0to10VoltInput8LowAlarmValue> - ['owsv0to10VoltInput3LowAlarmValue'] (1-8)
+    EDS0082 [W]
+    EDS0085 [W]
+
+0 to 10 Volt Input Low Conditional Search State (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1LowConditionalSearchState> - ['owsv0to10VoltInput1LowConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput2LowConditionalSearchState> - ['owsv0to10VoltInput2LowConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput3LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput4LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8) (1-4)
+<v0to10VoltInput5LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8)
+<v0to10VoltInput6LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8)
+<v0to10VoltInput7LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8)
+<v0to10VoltInput8LowConditionalSearchState> - ['owsv0to10VoltInput3LowConditionalSearchState'] (1-8)
+    EDS0082 [W]
+    EDS0085 [W]
+
+0 to 10 Volt Input Instant (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1Instant> - ['owsv0to10VoltInput1Instant'] (1-8) (1-4)
+<v0to10VoltInput2Instant> - ['owsv0to10VoltInput2Instant'] (1-8) (1-4)
+<v0to10VoltInput3Instant> - ['owsv0to10VoltInput3Instant'] (1-8) (1-4)
+<v0to10VoltInput4Instant> - ['owsv0to10VoltInput3Instant'] (1-8) (1-4)
+<v0to10VoltInput5Instant> - ['owsv0to10VoltInput3Instant'] (1-8)
+<v0to10VoltInput6Instant> - ['owsv0to10VoltInput3Instant'] (1-8)
+<v0to10VoltInput7Instant> - ['owsv0to10VoltInput3Instant'] (1-8)
+<v0to10VoltInput8Instant> - ['owsv0to10VoltInput3Instant'] (1-8)
+    EDS0082
+    EDS0085
+
+0 to 10 Volt Input Maximum (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1Maximum> - ['owsv0to10VoltInput1Maximum'] (1-8) (1-4)
+<v0to10VoltInput2Maximum> - ['owsv0to10VoltInput2Maximum'] (1-8) (1-4)
+<v0to10VoltInput3Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8) (1-4)
+<v0to10VoltInput4Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8) (1-4)
+<v0to10VoltInput5Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8)
+<v0to10VoltInput6Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8)
+<v0to10VoltInput7Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8)
+<v0to10VoltInput8Maximum> - ['owsv0to10VoltInput3Maximum'] (1-8)
+    EDS0082
+    EDS0085
+
+0 to 10 Volt Input Minimum (1-4) (1-8) - Volts
+#################
+<v0to10VoltInput1Minimum> - ['owsv0to10VoltInput1Minimum'] (1-8) (1-4)
+<v0to10VoltInput2Minimum> - ['owsv0to10VoltInput2Minimum'] (1-8) (1-4)
+<v0to10VoltInput3Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8) (1-4)
+<v0to10VoltInput4Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8) (1-4)
+<v0to10VoltInput5Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8)
+<v0to10VoltInput6Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8)
+<v0to10VoltInput7Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8)
+<v0to10VoltInput8Minimum> - ['owsv0to10VoltInput3Minimum'] (1-8)
+    EDS0082
+    EDS0085
+
+4 to 20 Milliamp High Alarm State (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1HighAlarmState> (1-8) (1-4)
+<v4to20mAInput2HighAlarmState> (1-8) (1-4)
+<v4to20mAInput3HighAlarmState> (1-8) (1-4)
+<v4to20mAInput4HighAlarmState> (1-8) (1-4)
+<v4to20mAInput5HighAlarmState> (1-8)
+<v4to20mAInput6HighAlarmState> (1-8)
+<v4to20mAInput7HighAlarmState> (1-8)
+<v4to20mAInput8HighAlarmState> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+4 to 20 Milliamp High Alarm Value (1-4, 1-8) - Milliamps
+#################
+Alarms are programmed as signed integers.
+<v4to20mAInput1HighAlarmValue> (1-8) (1-4)
+<v4to20mAInput2HighAlarmValue> (1-8) (1-4)
+<v4to20mAInput3HighAlarmValue> (1-8) (1-4)
+<v4to20mAInput4HighAlarmValue> (1-8) (1-4)
+<v4to20mAInput5HighAlarmValue> (1-8)
+<v4to20mAInput6HighAlarmValue> (1-8)
+<v4to20mAInput7HighAlarmValue> (1-8)
+<v4to20mAInput8HighAlarmValue> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+4 to 20 Milliamp High Conditional Search State (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1HighConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput2HighConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput3HighConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput4HighConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput5HighConditionalSearchState> (1-8)
+<v4to20mAInput6HighConditionalSearchState> (1-8)
+<v4to20mAInput7HighConditionalSearchState> (1-8)
+<v4to20mAInput8HighConditionalSearchState> (1-8)
+    EDS0080 [W] (1-8)
+    EDS0083 [W] (1-4)
+
+4 to 20 Milliamp Input Instant (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1Instant> (1-8) (1-4)
+<v4to20mAInput2Instant> (1-8) (1-4)
+<v4to20mAInput3Instant> (1-8) (1-4)
+<v4to20mAInput4Instant> (1-8) (1-4)
+<v4to20mAInput5Instant> (1-8)
+<v4to20mAInput6Instant> (1-8)
+<v4to20mAInput7Instant> (1-8)
+<v4to20mAInput8Instant> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+4 to 20 Milliamp Low Alarm State (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1LowAlarmState> (1-8) (1-4)
+<v4to20mAInput2LowAlarmState> (1-8) (1-4)
+<v4to20mAInput3LowAlarmState> (1-8) (1-4)
+<v4to20mAInput4LowAlarmState> (1-8) (1-4)
+<v4to20mAInput5LowAlarmState> (1-8)
+<v4to20mAInput6LowAlarmState> (1-8)
+<v4to20mAInput7LowAlarmState> (1-8)
+<v4to20mAInput8LowAlarmState> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+4 to 20 Milliamp Low Alarm Value (1-4, 1-8) - Milliamps
+#################
+Alarms are programmed as signed integers.
+<v4to20mAInput1LowAlarmValue> (1-8) (1-4)
+<v4to20mAInput2LowAlarmValue> (1-8) (1-4)
+<v4to20mAInput3LowAlarmValue> (1-8) (1-4)
+<v4to20mAInput4LowAlarmValue> (1-8) (1-4)
+<v4to20mAInput5LowAlarmValue> (1-8)
+<v4to20mAInput6LowAlarmValue> (1-8)
+<v4to20mAInput7LowAlarmValue> (1-8)
+<v4to20mAInput8LowAlarmValue> (1-8)
+    EDS0080 (1-8) [W]
+    EDS0083 (1-4) [W]
+
+4 to 20 Milliamp Low Conditional Search State (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1LowConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput2LowConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput3LowConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput4LowConditionalSearchState> (1-8) (1-4)
+<v4to20mAInput5LowConditionalSearchState> (1-8)
+<v4to20mAInput6LowConditionalSearchState> (1-8)
+<v4to20mAInput7LowConditionalSearchState> (1-8)
+<v4to20mAInput8LowConditionalSearchState> (1-8)
+    EDS0080 [W] (1-8)
+    EDS0083 [W] (1-4)
+
+4 to 20 Milliamp Input Maximum (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1Maximum> (1-8) (1-4)
+<v4to20mAInput2Maximum> (1-8) (1-4)
+<v4to20mAInput3Maximum> (1-8) (1-4)
+<v4to20mAInput4Maximum> (1-8) (1-4)
+<v4to20mAInput5Maximum> (1-8)
+<v4to20mAInput6Maximum> (1-8)
+<v4to20mAInput7Maximum> (1-8)
+<v4to20mAInput8Maximum> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+4 to 20 Milliamp Input Minimum (1-4, 1-8) - Milliamps
+#################
+<v4to20mAInput1Minimum> (1-8) (1-4)
+<v4to20mAInput2Minimum> (1-8) (1-4)
+<v4to20mAInput3Minimum> (1-8) (1-4)
+<v4to20mAInput4Minimum> (1-8) (1-4)
+<v4to20mAInput5Minimum> (1-8)
+<v4to20mAInput6Minimum> (1-8)
+<v4to20mAInput7Minimum> (1-8)
+<v4to20mAInput8Minimum> (1-8)
+    EDS0080 (1-8)
+    EDS0083 (1-4)
+
+Vad - Millivolts
+#################
+<Vad> - ['owsVad']
+    DS2438
+
+VCC Control
+#################
+<VCCControl> - ['owsVCCControl']
+    DS2450 [W]
+
+Vcc Power Status
+#################
+<VccPowerStatus> - ['owsVccPowerStatus']
+    DS2408
+
+Vdd - Volts
+#################
+<Vdd> - ['owsVdd']
+    DS2438
+
+Version
+#################
+<Version> - ['owsVersion']
+    EDS0064
+    EDS0065
+    EDS0066
+    EDS0067
+    EDS0068
+    EDS0070
+    EDS0071
+    EDS0080
+    EDS0082
+    EDS0085
+    EDS0090
+
+Vibration High Alarm State - (units?)
+#################
+<VibrationHighAlarmState> - ['owsVibrationHighAlarmState']
+    EDS0070
+
+Vibration High Alarm Value - (units?)
+#################
+Alarms are programmed as signed integers. (Min: 0 Max: 1023)
+<VibrationHighAlarmValue> - ['owsVibrationHighAlarmValue']
+    EDS0070
+
+Vibration High Conditional Search State - (units?)
+#################
+<VibrationHighConditionalSearchState> - ['owsVibrationHighConditionalSearchState']
+    EDS0070 [W]
+
+Vibration Instant - (units?)
+#################
+<VibrationInstant> - ['owsVibrationInstant']
+    EDS0070
+
+Vibration Low Alarm State - (units?)
+#################
+<VibrationLowAlarmState> - ['owsVibrationLowAlarmState']
+    EDS0070
+
+Vibration Low Alarm Value - (units?)
+#################
+Alarms are programmed as signed integers. (Min: 0 Max: 1023)
+<VibrationLowAlarmValue> - ['owsVibrationLowAlarmValue']
+    EDS0070
+
+Vibration Low Conditional Search State - (units?)
+#################
+<VibrationLowConditionalSearchState> - ['owsVibrationLowConditionalSearchState']
+    EDS0070 [W]
+
+Vibration Maximum- (units?)
+#################
+<VibrationMaximum> - ['owsVibrationMaximum']
+    EDS0070
+
+Vibration Minimum - (units?)
+#################
+<VibrationMinimum> - ['owsVibrationMinimum']
+    EDS0070
+
+Vibration Peak - (units?)
+#################
+<VibrationPeak> - ['owsVibrationPeak']
+    EDS0070
+
+Vsense - Millivolts
+#################
+<Vsense> - ['owsVsense']
+    DS2438
+
+Voltage Channel (1-3)
+#################
+<VoltageChannel1> - ['owsVoltageChannel1']
+<VoltageChannel2> - ['owsVoltageChannel2']
+<VoltageChannel3> - ['owsVoltageChannel3']
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+Voltage Power
+#################
+The voltage of the power supply
+<VoltagePower> - ['owsVoltagePower']
+    OWSERVER-ENET2
+    OWServer_v2G-WiFi
+
+HA7Net:
+#################
+Under development.

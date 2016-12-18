@@ -1,0 +1,251 @@
+<?xml version="1.0"?>
+<PluginConfig>
+	<Field
+        id="infoLabel0"
+        type="label"
+        fontColor="black">
+		<Label>OWServer Plugin - Developed by: DaveL17</Label>
+	</Field>
+
+	<Field id="simpleSeparator0" type="separator"/>
+
+	<Field
+        id="space0"
+        type="label"
+        fontColor="black">
+		<Label>Plugin Settings:</Label>
+	</Field>
+
+	<Field
+        id="space1"
+        type="label"
+        fontSize="small"
+        fontColor="black">
+		<Label>Try automatic server detection first. If this does not find all of your servers, uncheck this box and enter the IPs manually (please separate each IP address by a comma.)</Label>
+	</Field>
+
+	<Field
+        id="autoDetectServers"
+        type="checkbox"
+        defaultValue="True"
+        tooltip="Check this box to allow the plugin to attempt automatic detection of servers on your network. This will only work with EDS servers in infrastructure mode.">
+		<Label>Auto detect servers?:</Label>
+	</Field>
+	<Field
+        id="OWServerIP"
+        type="textfield"
+        visibleBindingId = "autoDetectServers"
+        visibleBindingValue = "false"
+        tooltip="Enter the IP address of the EDS 1-Wire Server device(s). Only required if automatic detection is disabled.">
+		<Label>Server IP address(es):</Label>
+	</Field>
+	<Field
+        id="configMenuServerType"
+        type="menu"
+        defaultValue="OW"
+        hidden="True"
+        tooltip="Select the EDS Server type.">
+		<Label>Server Type:</Label>
+		<List>
+			<Option value="OW">OW-SERVER-ENET (v1 and v2) and WiFi</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuPollInterval"
+        type="menu"
+        defaultValue="900"
+        tooltip="Select preference for how often the 1-wire network is polled.">
+		<Label>Polling interval:</Label>
+		<List>
+			<Option value="15">15 Seconds</Option>
+			<Option value="30">30 Seconds</Option>
+			<Option value="60">1 Minute</Option>
+			<Option value="120">2 Minutes</Option>
+			<Option value="300">5 Minutes</Option>
+			<Option value="900">15 Minutes</Option>
+			<Option value="3600">1 Hour</Option>
+			<Option value="14400">1 Hour</Option>
+			<Option value="86400">1 Day</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuServerTimeout"
+        type="menu"
+        defaultValue="15"
+        tooltip="Select preference for how long the plugin waits for the server to respond.">
+		<Label>Server timeout:</Label>
+		<List>
+			<Option value="5">5 Seconds</Option>
+			<Option value="10">10 Seconds</Option>
+			<Option value="15">15 Seconds</Option>
+			<Option value="20">20 Seconds</Option>
+			<Option value="25">25 Seconds</Option>
+			<Option value="30">30 Seconds</Option>
+		</List>
+	</Field>
+	<Field id="simpleSeparator1" type="separator"/>
+	<Field
+        id="space2"
+        type="label"
+        fontColor="black">
+		<Label>Display Settings:</Label>
+	</Field>
+	<Field
+        id="configMenuDegrees"
+        type="menu"
+        defaultValue="F"
+        tooltip="Select preference for Celsius or Fahrenheit.">
+		<Label>Temperature:</Label>
+		<List>
+			<Option value="C">Celsius</Option>
+			<Option value="F">Fahrenheit</Option>
+		</List>
+	</Field>
+	<Field
+        id="space3"
+        type="label"
+        fontColor="black">
+		<Label>Display Precision:</Label>
+	</Field>
+	<Field
+        id="configMenuHumidexDec"
+        type="menu"
+        defaultValue="1"
+        tooltip="Select preference for number of decimal places to display.">
+		<Label>Humidex:</Label>
+		<List>
+			<Option value="0">Zero (10)</Option>
+			<Option value="1">One (10.1)</Option>
+			<Option value="2">Two (10.12)</Option>
+			<Option value="3">Three (10.123)</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuHumidityDec"
+        type="menu"
+        defaultValue="1"
+        tooltip="Select preference for number of decimal places to display.">
+		<Label>Humidity:</Label>
+		<List>
+			<Option value="0">Zero (10%)</Option>
+			<Option value="1">One (10.1%)</Option>
+			<Option value="2">Two (10.12%)</Option>
+			<Option value="3">Three (10.123%)</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuDegreesDec"
+        type="menu"
+        defaultValue="1"
+        tooltip="Select preference for number of decimal places to display.">
+		<Label>Temperatures:</Label>
+		<List>
+			<Option value="0">Zero (10°)</Option>
+			<Option value="1">One (10.1°)</Option>
+			<Option value="2">Two (10.12°)</Option>
+			<Option value="3">Three (10.123°)</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuPressuresDec"
+        type="menu"
+        defaultValue="1"
+        tooltip="Select preference for number of decimal places to display.">
+		<Label>Pressures:</Label>
+		<List>
+			<Option value="0">Zero (10)</Option>
+			<Option value="1">One (10.1)</Option>
+			<Option value="2">Two (10.12)</Option>
+			<Option value="3">Three (10.123)</Option>
+		</List>
+	</Field>
+	<Field
+        id="configMenuVoltsDec"
+        type="menu"
+        defaultValue="1"
+        tooltip="Select preference for number of decimal places to display.">
+		<Label>Voltages:</Label>
+		<List>
+			<Option value="0">Zero (10)</Option>
+			<Option value="1">One (10.1)</Option>
+			<Option value="2">Two (10.12)</Option>
+			<Option value="3">Three (10.123)</Option>
+		</List>
+	</Field>
+	<Field
+        id="space4"
+        type="label"
+        fontColor="black">
+		<Label>Suppress results logging:</Label>
+	</Field>
+	<Field
+		id="suppressResultsLogging"
+		type="checkbox"
+		tooltip="Checking this box will suppress results logging.">
+		<Label> </Label>
+		<Description>Suppress log entries (will still log errors.)</Description>
+	</Field>
+	<Field id="simpleSeparator2" type="separator"/>
+	<Field
+        id="space5"
+        type="label"
+        fontColor="black">
+		<Label>Plugin Update Notifications (optional):</Label>
+	</Field>
+	<Field
+        id="updaterEmailsEnabled"
+        type="checkbox"
+        defaultValue="true">
+		<Label> </Label>
+		<Description>Enable/Disable</Description>
+	</Field>
+	<Field
+        id="updaterEmail"
+        visibleBindingId = "updaterEmailsEnabled"
+        visibleBindingValue = "true"
+        type="textfield">
+		<Label>Email address:</Label>
+	</Field>
+	<Field id="simpleSeparator3" type="separator"/>
+
+	<Field
+        id="space6"
+        type="label"
+        fontColor="black">
+		<Label>Plugin Debug Settings:</Label>
+	</Field>
+	<Field
+        id="space7"
+        type="checkbox"
+        fontColor="black">
+		<Label> </Label>
+		<Description>Enable/Disable</Description>
+	</Field>
+	<Field
+		id="showDebugLevel"
+		type="menu"
+		defaultValue="1"
+        visibleBindingId = "space7"
+        visibleBindingValue = "true"
+		tooltip="Controls the amount of debug information written to the log.">
+		<Label>Debug level:</Label>
+		<List>
+			<Option value="1">Low</Option>
+			<Option value="2">Medium</Option>
+			<Option value="3">High</Option>
+		</List>
+	</Field>
+	<Field
+		id = "space8"
+		type = "label"
+        visibleBindingId = "space7"
+        visibleBindingValue = "true"
+		fontSize = "small">
+		<Label>Turn on debugging only when needed. Be careful when posting the output to the forums or other public places as it could expose sensitive information.
+
+  Low = Minimal debugging.
+  Medium = All debug logging except sensitive information.
+  High = May contain sensitive information.</Label>
+	</Field>
+
+</PluginConfig>
