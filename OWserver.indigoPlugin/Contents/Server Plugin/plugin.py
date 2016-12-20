@@ -93,7 +93,7 @@ class Plugin(indigo.PluginBase):
         self.debug = self.pluginPrefs.get('showDebugInfo', False)
         self.padLog = "\n" + (" " * 34)  # 34 spaces to continue in line with log margin.
         self.xmlns = '{http://www.embeddeddatasystems.com/schema/owserver}'
-        updater_url = 'https://dl.dropboxusercontent.com/u/2796881/OWServer_version.html'
+        updater_url = 'https://davel17.github.io/OWServer/OWServer_version.html'
         self.updater = indigoPluginUpdateChecker.updateChecker(self, updater_url)
 
         # Convert old debugLevel scale to new scale.
