@@ -1,5 +1,8 @@
 OWServer Change Log
 
+v1.0.01
+- Moves project to GitHub and increments version number.
+
 v0.8.3
 - Modifies string substitution methods for future functionality.
 - Updates error trapping for future functionality.

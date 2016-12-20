@@ -22,6 +22,35 @@ The plugin does _not_ support the HTML-based output of the HA7NET
 server.
 """
 
+# TODO: Hide Temperature Adjustment field on EDS0071.
+# TODO: Expand DS2408 to include imputed values for PIOActivityLatchState (done in the same way as PIOOutputLatchSate.)
+# TODO: Add Conditional Search State buttons to EDS0071.
+# TODO: Consider hiding states that don't need to be displayed (i.e., clearAlarms)
+# TODO: Skip devices that are not dev.enabled == false (rather than sleep.)
+# TODO: Error checking on device config inputs.
+# TODO: Error checking on Action Item inputs.
+# TODO: Set up standard devices for LED, Relay, etc.
+#       - Pick an IP.
+#       - Pick a ROM ID.
+#       - That's all.
+# TODO: Indicate in the Indigo UI that an alarm state exists? How to distinguish between an alarm state and a plugin error state?
+# TODO: What happens when a known server is taken down (both with auto enabled and disabled.)
+#       - Also test what happens when IP of a server changes (DHCP). For starters, this:
+#           Oct 14, 2015, 7:51:44 PM
+#           OWServer Error                  Exception error getting server data: timed out
+#           OWServer Error                  Error parsing sensor states: Parse() argument 1 must be string or read-only buffer, not None
+#           OWServer Error                  Trying again in 60 seconds.
+# TODO: Continue to refine devices.xml <ValueType>...
+# TODO: Grab changes to plugin config dialog (besides pref poll and debug which are already in there. In other words, make sure that any changes that are made there are implemented
+#       instantly.
+# TODO: Add facility to update device states when config dialogs are closed. Do _NOT_ try to update the device state before it has been fully  configured.  For example, calling
+#       updateDeviceStates() directly from closedDeviceConfigUi() made Indigo very angry.  Perhaps there's a way to trap with dev.configured.
+# TODO: Consider bringing in the attributes of variables.  What would that look like?
+# TODO: Only list ROM IDs that are appropriate to the device type being created romIdGenerator().
+# TODO: Add pushPluginPrefs() method like WUnderground.
+# TODO: Move all convert routines to their own module (and standardize between all fogbert plugins.)
+# TODO: Convert updateDeviceStates() to a dict loop progression?
+
 import datetime as dt
 import json
 import stateDict
