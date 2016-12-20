@@ -284,7 +284,7 @@ the list.
       <Field id="AllowOnStateChange" type="checkbox" hidden="true" defaultValue="false">
         <Label>Enable controls to override on/off state</Label>
       </Field>
-      <Field id="AllowSensorValueChange" hidden="true" defaultValue="false">
+      <Field id="AllowSensorValueChange" type="checkbox" hidden="true" defaultValue="false">
         <Label>Enable controls to override sensor value state</Label>
       </Field>
     </ConfigUI>
