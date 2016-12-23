@@ -63,6 +63,13 @@ try:
 except:
     pass
 
+__author__    = "DaveL17"
+__build__     = ""
+__copyright__ = 'Copyright 2016 DaveL17'
+__license__   = "MIT"
+__title__     = 'OWServer Plugin for Indigo Home Control'
+__version__   = '1.0.01'
+
 kDefaultPluginPrefs = {
     u"configMenuDegrees"      : "F",    # Setting for devices that report temperature.
     u"configMenuDegreesDec"   : "1",    # For devices that report temperature.
