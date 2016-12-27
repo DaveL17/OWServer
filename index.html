@@ -1,78 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
+<head>
     <link rel="stylesheet" type="text/css" href="fogbert.css">
     <meta charset="UTF-8">
     <title>OWServer Plugin for Indigo Home Control Server</title>
-    </head>
-    <body>
+</head>
+<body>
 
-        <div style="text-align: center"><img src="img_OWServerLogo.png"></div>
+<div style="text-align: center"><img src="img_OWServerLogo.png"></div>
 
-        <nav>
-            <a href="https://github.com/DaveL17/OWServer/releases"><img src="img_download.png"></a>
-            <a href="http://forums.indigodomo.com/viewforum.php?f=150"><img src="img_forum.png"></a>
-            <a href="https://github.com/DaveL17/OWServer/wiki"><img src="img_wiki.png"></a>
-        </nav>
+<nav>
+    <a href="https://github.com/DaveL17/OWServer/releases"><img src="img_download.png"></a>
+    <a href="http://forums.indigodomo.com/viewforum.php?f=150"><img src="img_forum.png"></a>
+    <a href="https://github.com/DaveL17/OWServer/wiki"><img src="img_wiki.png"></a>
+</nav>
 
-        <h1>About</h1>
-        <p>The OWServer plugin allows users to connect the Embedded Data Systems (EDS) 1-Wire Server to the Indigo Home Control Server. The user creates devices that represent
-            individual 1-Wire devices.</p>
-        <h3>Installation</h3>
-            <img class="TextWrap" src="img_pluginConfigDialog.png">
-            <p>Installation is easy. Download and extract the Indigo Plugin file onto your Indigo server machine. Double-click the plugin file and follow the prompts. Presently, the
-                plugin contains functionality for many 1-Wire devices including:
-                <ul>
-                <li>EDS 1-Wire Server (OW-SERVER-ENET 1, 2 and WiFi) - the EDS server itself.
-                <li>Dallas DS18B20 Temperature Sensor
-                <li>Dallas DS18S20 Temperature Sensor
-                <li>Dallas DS2406 Dual Switch Plus Memory
-                <li>Dallas DS2408 8-Channel Addressable Switch
-                <li>Dallas DS2423 Ram with Counters
-                <li>Dallas DS2438 Smart Battery Monitor
-                <li>Dallas DS2450 Quad Converter
-                <li>EDS0064 Temperature Sensor with Counter
-                <li>EDS0065 Temperature and Humidity Sensor
-                <li>EDS0066 Temperature and Barometric Pressure Sensor
-                <li>EDS0067 Temperature and Light
-                <li>EDS0068 Temperature, Humidity, Pressure, Light
-                <li>EDS0070 Vibration Sensor
-                <li>EDS0071 RTD Interface, 4 wire
-                <li>EDS0080 Octal 4-20 Milliamp Input
-                <li>EDS0082 Octal Current Input
-                <li>EDS0083 Quad 4-20 Milliamp Input
-                <li>EDS0085 Quad 0-10 Volt Input
-                <li>EDS0090 Octal Discrete IO
-                </ul>
-            <p>The plugin supports multiple servers--and a theoretically unlimited number of devices.
-                <ol>
-                <li>Within the plugin preferences, enter the IP number(s) of the server(s) you want to use.  The plugin has the ability to auto-detect servers, so you may want to try
-                    this feature first. If auto-detect is selected, the manually-entered list of IP addresses will be ignored.
-                <li>To get the most out of the plugin, you should create a set of devices.  It is recommended that you create a server device which you can use to monitor the health
-                    of your EDS server.  You should also creat a 1-Wire device to track the information reported by that device for use in Indigo.
-                </ol>
-        <h3>Devices</h3>
-            <p>Under construction.
-                <ul>
-                <li>Under construction.
-                </ul>
-        <h3>Actions</h3>
-            <p>Under construction.
-                <ul>
-                <li>Under construction.
-                </ul>
-        <h3>Menu Items</h3>
-            <p>Under construction.
-                <ul>
-                <li>Under construction.
-                </ul>
-        <h3>Scripting and Technical Details</h3>
-            <p>Under construction.
-                <ul>
-                <li><em>com.fogbert.indigoplugin.OWServer</em>
-                </ul>
-    <footer>
-      <p>You are free to use the plugin as you see fit, but there are no warranties or guarantees. Use at your own risk.</p>
-    </footer>
-    </body>
+<h1>About</h1>
+<p>The OWServer plugin allows users to connect the Embedded Data Systems (EDS) 1-Wire Server to the Indigo Home Control Server. The user creates devices that represent
+    individual 1-Wire devices.</p>
+<h3>Installation</h3>
+<img class="TextWrap" src="img_pluginConfigDialog.png">
+<p>Installation is easy. Download and extract the Indigo Plugin file onto your Indigo server machine. Double-click the plugin file and follow the prompts. Presently, the
+    plugin contains functionality for many 1-Wire devices including:
+<ul>
+    <li>EDS 1-Wire Server (OW-SERVER-ENET 1, 2 and WiFi) - the EDS server itself.</li>
+    <li>Dallas DS18B20 Temperature Sensor</li>
+    <li>Dallas DS18S20 Temperature Sensor</li>
+    <li>Dallas DS2406 Dual Switch Plus Memory</li>
+    <li>Dallas DS2408 8-Channel Addressable Switch</li>
+    <li>Dallas DS2423 Ram with Counters</li>
+    <li>Dallas DS2438 Smart Battery Monitor</li>
+    <li>Dallas DS2450 Quad Converter</li>
+    <li>EDS0064 Temperature Sensor with Counter</li>
+    <li>EDS0065 Temperature and Humidity Sensor</li>
+    <li>EDS0066 Temperature and Barometric Pressure Sensor</li>
+    <li>EDS0067 Temperature and Light</li>
+    <li>EDS0068 Temperature, Humidity, Pressure, Light</li>
+    <li>EDS0070 Vibration Sensor</li>
+    <li>EDS0071 RTD Interface, 4 wire</li>
+    <li>EDS0080 Octal 4-20 Milliamp Input</li>
+    <li>EDS0082 Octal Current Input</li>
+    <li>EDS0083 Quad 4-20 Milliamp Input</li>
+    <li>EDS0085 Quad 0-10 Volt Input</li>
+    <li>EDS0090 Octal Discrete IO</li>
+</ul>
+<p>The plugin supports multiple servers--and a theoretically unlimited number of devices.
+<ol>
+    <li>Within the plugin preferences, enter the IP number(s) of the server(s) you want to use. The plugin has the ability to auto-detect servers, so you may want to try
+        this feature first. If auto-detect is selected, the manually-entered list of IP addresses will be ignored.
+    </li>
+    <li>To get the most out of the plugin, you should create a set of devices. It is recommended that you create a server device which you can use to monitor the health
+        of your EDS server. You should also create a 1-Wire device to track the information reported by that device for use in Indigo.
+    </li>
+</ol>
+<h3>Devices</h3>
+<p>Under construction.
+<ul>
+    <li>Under construction.</li>
+</ul>
+<h3>Actions</h3>
+<p>Under construction.
+<ul>
+    <li>Under construction.</li>
+</ul>
+<h3>Menu Items</h3>
+<p>Under construction.
+<ul>
+    <li>Under construction.</li>
+</ul>
+<h3>Scripting and Technical Details</h3>
+<p>Under construction.
+<ul>
+    <li><em>com.fogbert.indigoplugin.OWServer</em>
+</ul>
+<footer>
+    <hr>
+    <p>The OWServer Plugin is a third-party plugin for Indigo. Indigo Domotics—other than providing invaluable technical support and an absolutely fantastic product—have nothing
+        to do with the format, function, or results that this plugin provides. There are no warranties, either expressed or implied, that come with using this software. While I
+        have done my best to make a quality product, and will endeavor to fix any and all problems when they’re identified, I can’t guarantee that this plugin will be
+        trouble-free. Therefore, please do use the plugin, but use at your own risk.</p>
+</footer>
+</body>
 </html>
