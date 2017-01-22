@@ -65,10 +65,10 @@ except:
 
 __author__    = "DaveL17"
 __build__     = ""
-__copyright__ = 'Copyright 2016 DaveL17'
+__copyright__ = 'Copyright 2017 DaveL17'
 __license__   = "MIT"
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.01'
+__version__   = '1.0.02'
 
 kDefaultPluginPrefs = {
     u"configMenuDegrees"      : "F",    # Setting for devices that report temperature.
@@ -292,7 +292,7 @@ class Plugin(indigo.PluginBase):
             self.errorLog(u"{0}".format(error))
             pass
 
-        return valuesDict
+        return True
 
     def actionControlSensor(self, action, dev):
         """Get sensor update when user selects 'Send Status Request'. This

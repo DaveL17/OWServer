@@ -1,5 +1,10 @@
 OWServer Change Log
 
+v1.0.02
+- Moves support URL to Github.
+- Fixes bug in plugin configuration dialog validation.
+- Code refinements.
+
 v1.0.01
 - Moves project to GitHub and increments version number.
 

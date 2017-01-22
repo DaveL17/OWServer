@@ -2585,7 +2585,7 @@ the list.
         <Title>Clear High Conditional Search State</Title>
         <CallbackMethod>clearBarometricPressureHgHighConditionalSearchState</CallbackMethod>
       </Field>
-      <Field id="EDS0068barometricHgLowAlarmValue" type="textfield" defaultValue="" visibleBindingId = "EDS0068barometricHgLabel" visibleBindingValue = "true" readonly="true"
+      <Field id="EDS0068barometricHgLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068barometricHgLabel" visibleBindingValue="true" readonly="true"
              tooltip="Please enter the barometric low alarm value (in Hg.)">
         <Label>Low Alarm Value (Hg):</Label>
       </Field>
