@@ -2,7 +2,10 @@ OWServer Change Log
 
 v1.0.02
 - Moves support URL to Github.
+- Minor UI refinements.
 - Fixes bug in plugin configuration dialog validation.
+- Fixes bug in device configuration dialog validation.
+- Fixes bug in test server communication routine.
 - Code refinements.
 
 v1.0.01

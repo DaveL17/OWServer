@@ -350,7 +350,7 @@ class Plugin(indigo.PluginBase):
             f.close()
 
             indigo.server.log(u"{0}: {1} written successfully.".format(write_to_variable, write_to_value))
-            return valuesDict
+            return True
 
         # What happens if we're unsuccessful.
         except urllib2.HTTPError as error:
@@ -412,7 +412,7 @@ class Plugin(indigo.PluginBase):
                 self.errorLog(u"Reason: {0}".format(error))
                 pass
 
-        return valuesDict
+        return True
 
     def getDetailsXML(self, server_ip):
         """getDetailsXML(): This method goes out to the 1-Wire server at

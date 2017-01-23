@@ -4,11 +4,10 @@
         <Label>OWServer Plugin - Developed by: DaveL17</Label>
     </Field>
 
-    <Field id="simpleSeparator0" type="separator"/>
-
-    <Field id="space0" type="label" fontColor="black">
+    <Field id="space0" type="label" fontColor="black" alignText="right">
         <Label>Plugin Settings:</Label>
     </Field>
+    <Field id="simpleSeparator0" type="separator"/>
 
     <Field id="space1" type="label" fontSize="small" fontColor="black">
         <Label>Try automatic server detection first. If this does not find all of your servers, uncheck this box and enter the IPs manually (please separate each IP address by a comma.)</Label>
@@ -53,10 +52,10 @@
             <Option value="30">30 Seconds</Option>
         </List>
     </Field>
-    <Field id="simpleSeparator1" type="separator"/>
-    <Field id="space2" type="label" fontColor="black">
+    <Field id="space2" type="label" fontColor="black" alignText="right">
         <Label>Display Settings:</Label>
     </Field>
+    <Field id="simpleSeparator1" type="separator"/>
     <Field id="configMenuDegrees" type="menu" defaultValue="F" tooltip="Select preference for Celsius or Fahrenheit.">
         <Label>Temperature:</Label>
         <List>
@@ -119,10 +118,10 @@
         <Label/>
         <Description>Suppress log entries (will still log errors.)</Description>
     </Field>
-    <Field id="simpleSeparator2" type="separator"/>
-    <Field id="space5" type="label" fontColor="black">
+    <Field id="space5" type="label" fontColor="black" alignText="right">
         <Label>Plugin Update Notifications (optional):</Label>
     </Field>
+    <Field id="simpleSeparator2" type="separator"/>
     <Field id="updaterEmailsEnabled" type="checkbox" defaultValue="true">
         <Label/>
         <Description>Enable/Disable</Description>
@@ -130,11 +129,12 @@
     <Field id="updaterEmail" type="textfield" visibleBindingId="updaterEmailsEnabled" visibleBindingValue="true">
         <Label>Email address:</Label>
     </Field>
-    <Field id="simpleSeparator3" type="separator"/>
 
-    <Field id="space6" type="label" fontColor="black">
+    <Field id="space6" type="label" fontColor="black" alignText="right">
         <Label>Plugin Debug Settings:</Label>
     </Field>
+    <Field id="simpleSeparator3" type="separator"/>
+
     <Field id="space7" type="checkbox" fontColor="black">
         <Label/>
         <Description>Enable/Disable</Description>
