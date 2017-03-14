@@ -160,7 +160,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds18b20.png">
         <span>Dallas DS18B20 Temperature Sensor</span>
         <p>
@@ -175,7 +174,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds18s20.png">
         <span>Dallas DS18S20 Temperature Sensor</span>
         <p>
@@ -190,7 +188,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds2406.png">
         <span>Dallas DS2406 Dual Switch Plus Memory</span>
         <p>
@@ -204,7 +201,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds2408.png">
         <span>Dallas DS2408 8-Channel Addressable Switch</span>
         <p>
@@ -223,7 +219,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds2423.png">
         <span>Dallas DS2423 Ram with Counters</span>
         <p>
@@ -237,7 +232,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds2438.png">
         <span>Dallas DS2438 Smart Battery Monitor</span>
         <p>
@@ -254,7 +248,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_ds2450.png">
         <span>Dallas DS2450 Quad Converter</span>
         <p>
@@ -267,24 +260,23 @@
             regular operation can resume.
         </p>
         <p>
-            Select the relevant IP address from the Server IP drop-down menu. Likewise, select the relevant ROM ID for your sensor using the Sensor ID drop-down menu. The Primary
-            Sensor Value setting allows for display of the Conversion Value for Channels A - D for the Indigo UI. All other sensor values are retained and can be referred to in
-            scripts, triggers, actions and control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and
-            ROM ID) and select a second primary sensor value. This allows you to be able to display any channel in the Indigo UI.
+            Select the relevant IP address from the Server IP drop-down menu. Likewise, select the relevant ROM ID for your sensor using the Sensor ID drop-down menu. The Primary Sensor
+            Value setting allows for display of the Conversion Value for Channels A - D for the Indigo UI. All other sensor values are retained and can be referred to in scripts,
+            triggers, actions and control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and
+            select a second primary sensor value. This allows you to be able to display any channel in the Indigo UI.
         </p>
         <p>
-            In addition to the settings above, there are two other settings related to all channels on the device. Power on Reset controls whether the state of the device will
-            reset after power loss. As long as this bit is set the device will always respond to the Conditional Search command in order to notify the bus master that the control
-            and threshold data is no longer valid. It is possible for the bus master to write the Power on Reset bit to a 1. This will make the device participate in the
-            conditional search but will not generate a reset cycle. All device settings are stored and kept non-volatile while the device gets power either through the 1-Wire bus
-            or through its Vcc pin.</p>
+            In addition to the settings above, there are two other settings related to all channels on the device. Power on Reset controls whether the state of the device will reset
+            after power loss. As long as this bit is set the device will always respond to the Conditional Search command in order to notify the bus master that the control and threshold
+            data is no longer valid. It is possible for the bus master to write the Power on Reset bit to a 1. This will make the device participate in the conditional search but will
+            not generate a reset cycle. All device settings are stored and kept non-volatile while the device gets power either through the 1-Wire bus or through its Vcc pin.
+        </p>
         <p>
             There are four sensor information blocks that contain information and controls for each of the four channels. They display read-only information regarding writeable
             variables, the current value of each variable and, where appropriate a button to enable or disable Output and Output Control.
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0064.png">
         <span>EDS0064 Temperature Sensor with Counter</span>
         <p>
@@ -293,10 +285,10 @@
             state when power is lost. The states of the LED and the relay are nonvolatile; their states will be restored at power-up.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. The control allows you to display the Temperature, the value of Counter 1 and Counter 2,
-            the LED State or the Relay State. All other sensor values are retained and can be referred to in scripts, triggers, actions and control pages. If you would like to
-            have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second primary sensor value. This allows you
-            to be able to display both a temperature device and a humidity device (for example.)
+            The Primary Sensor Value will control what is shown in the Indigo Item List. The control allows you to display the Temperature, the value of Counter 1 and Counter 2, the LED
+            State or the Relay State. All other sensor values are retained and can be referred to in scripts, triggers, actions and control pages. If you would like to have more than one
+            primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second primary sensor value. This allows you to be able to display both a
+            temperature device and a humidity device (for example.)
         </p>
         <p>The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
         <ol>
@@ -309,18 +301,16 @@
             The Toggle Sensor LED and Toggle Sensor Relay buttons work as you would expect. If the item is presently off, clicking the button will turn it on (and vice versa.)
         </p>
         <p>
-            There is one sensor information block that contains information and controls for Temperature. It displays read-only information regarding writeable variables, the
-            current value of each variable, a Temperature Adjustment textfield and, where appropriate, a button to clear Conditional Search States. In most cases, you won’t need
-            to use the Temperature Adjustment feature; however, it’s provided as a convenience. The adjustment factor is in degrees Celsius. If you are reporting temperatures in
-            Celsius, simply add a positive or negative value to adjust the temperature up or down (for example, -0.5 or +1.0). If you are reporting values in Fahrenheit, for
-            every 1 degree Celsius temperature adjustment, your temperature will be adjusted 1.8° F. Enter the adjustment factor in the Temperature Adjustment textfield. (See
-            Conditional Search States for More Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear
-            individual alarms so this is not an option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will
-            apply the change to the requesting device only.
+            There is one sensor information block that contains information and controls for Temperature. It displays read-only information regarding writeable variables, the current
+            value of each variable, a Temperature Adjustment textfield and, where appropriate, a button to clear Conditional Search States. In most cases, you won’t need to use the
+            Temperature Adjustment feature; however, it’s provided as a convenience. The adjustment factor is in degrees Celsius. If you are reporting temperatures in Celsius, simply add
+            a positive or negative value to adjust the temperature up or down (for example, -0.5 or +1.0). If you are reporting values in Fahrenheit, for every 1 degree Celsius
+            temperature adjustment, your temperature will be adjusted 1.8° F. Enter the adjustment factor in the Temperature Adjustment textfield. (See Conditional Search States for More
+            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within
+            the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0065.png">
         <span>EDS0065 Temperature and Humidity Sensor</span>
         <p>
@@ -344,14 +334,13 @@
         <p>The Toggle Sensor LED and Toggle Sensor Relay buttons work as you would expect. If the item is presently off, clicking the button will turn it on (and vice versa.)</p>
         <p>
             There are five sensor information blocks that contain information and controls for each of the various sensors groups—Dewpoint, Heat Index, Humidex, Humidity, and
-            Temperature. They display read-only information regarding writeable variables, the current value of each variable and, where appropriate a button to clear conditional
-            search states. (See Conditional Search States for More Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not
-            possible to clear individual alarms so this is not an option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no
-            alarm) and will apply the change to the requesting device only.
+            Temperature. They display read-only information regarding writeable variables, the current value of each variable and, where appropriate a button to clear conditional search
+            states. (See Conditional Search States for More Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear
+            individual alarms so this is not an option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the
+            change to the requesting device only.
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0066.png">
         <span>EDS0066 Temperature and Barometric Pressure Sensor</span>
         <p>
@@ -361,9 +350,9 @@
             latching relay; it will retain its state when power is lost. The states of the LED and the relay are nonvolatile; their states will be restored at power-up.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions
-            and control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second
-            primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.)
+            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions and
+            control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second primary
+            sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.)
         </p>
         <p>The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
         <ol>
@@ -376,15 +365,13 @@
             The Toggle Sensor LED and Toggle Sensor Relay buttons work as you would expect. If the item is presently off, clicking the button will turn it on (and vice versa.)
         </p>
         <p>
-            There are three sensor information blocks that contain information and controls for each of the various sensors. They display read-only information regarding
-            writeable variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More
-            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an
-            option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            There are three sensor information blocks that contain information and controls for each of the various sensors. They display read-only information regarding writeable
+            variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More Information.)
+            Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0067.png">
         <span>EDS0067 Temperature and Light</span>
         <p>
@@ -414,14 +401,12 @@
         </p>
         <p>
             There are two sensor information blocks that contain information and controls for each of the various sensors. They display read-only information regarding writeable
-            variables, the current value of each variable and, where appropriate a button to clear conditional search states. (See Conditional Search States for More
-            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an
-            option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            variables, the current value of each variable and, where appropriate a button to clear conditional search states. (See Conditional Search States for More Information.)
+            Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0068.png">
         <span>EDS0068 Temperature, Humidity, Pressure, Light</span>
         <p>
@@ -453,7 +438,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0070.png">
         <span>EDS0070 Vibration Sensor</span>
         <p>
@@ -463,10 +447,10 @@
             of the LED and the relay are nonvolatile; their states will be restored at power-up.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. The options available as a primary sensor value include Counter, LED, Relay, and
-            Vibration Instant. All other sensor values are retained and can be referred to in scripts, triggers, actions and control pages. If you would like to have more than
-            one primary sensor value (which seems a bit of a misnomer), merely create another instance of the device (same IP and ROM ID) and select a second primary sensor
-            value. This allows you to be able to display both a temperature device and a humidity device (for example.)
+            The Primary Sensor Value will control what is shown in the Indigo Item List. The options available as a primary sensor value include Counter, LED, Relay, and Vibration
+            Instant. All other sensor values are retained and can be referred to in scripts, triggers, actions and control pages. If you would like to have more than one primary sensor
+            value (which seems a bit of a misnomer), merely create another instance of the device (same IP and ROM ID) and select a second primary sensor value. This allows you to be
+            able to display both a temperature device and a humidity device (for example.)
         </p>
         <p>
             The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
@@ -488,7 +472,6 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0071.png">
         <span>EDS0071 RTD Interface, 4 wire</span>
         <p>
@@ -497,11 +480,11 @@
             relay.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions
-            and control pages. If you would like to have more than one primary sensor value (which seems a bit of a misnomer), merely create another instance of the device (same
-            IP and ROM ID) and select a second primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The
-            device is also available with an optional relay. The optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the
-            relay are nonvolatile; their states will be restored at power-up.
+            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions and
+            control pages. If you would like to have more than one primary sensor value (which seems a bit of a misnomer), merely create another instance of the device (same IP and ROM
+            ID) and select a second primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The device is also
+            available with an optional relay. The optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the relay are nonvolatile;
+            their states will be restored at power-up.
         </p>
         <p>
             The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
@@ -517,10 +500,9 @@
         </p>
         <p>
             There are two sensor information blocks that contain information and controls for each of the various sensors. They display read-only information regarding writeable
-            variables, the current value of each variable and, where appropriate a button to clear conditional search states. (See Conditional Search States for More
-            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an
-            option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            variables, the current value of each variable and, where appropriate a button to clear conditional search states. (See Conditional Search States for More Information.)
+            Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
     </li>
     <li><span>EDS0072 RTD transmitter 3-Wire</span>
@@ -529,18 +511,17 @@
         </p>
         <br><br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0080.png">
         <span>EDS0080 Octal 4-20 Milliamp Input</span>
         <p>
             The EDS0080 4 to 20 mA Analog Input Device monitors up to 8 analog inputs. In addition to the current reading, each input maintains a minimum value and a maximum value.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions
-            and control pages. If you would like to have more than one primary sensor value (which seems a bit of a misnomer), merely create another instance of the device (same
-            IP and ROM ID) and select a second primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The
-            device is also available with an optional relay. The optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the
-            relay are nonvolatile; their states will be restored at power-up.
+            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions and
+            control pages. If you would like to have more than one primary sensor value (which seems a bit of a misnomer), merely create another instance of the device (same IP and ROM
+            ID) and select a second primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The device is also
+            available with an optional relay. The optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the relay are nonvolatile;
+            their states will be restored at power-up.
         </p>
         <p>
             The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
@@ -556,14 +537,12 @@
         </p>
         <p>
             There are eight input information blocks that contain information and controls for each of the various inputs. They display read-only information regarding writeable
-            variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More
-            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an
-            option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More Information.)
+            Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0082.png">
         <span>EDS0082 Octal Current Input</span>
         <p>
@@ -571,11 +550,11 @@
             and programmable high and low alarms. Channels 1 & 2 include 32 bit pulse counters. The Octal Discrete I/O also includes an LED and an optional latching relay.
         </p>
         <p>
-            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions
-            and control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second
-            primary sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The device is also available with an
-            optional relay. The optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the relay are nonvolatile; their states
-            will be restored at power-up.
+            The Primary Sensor Value will control what is shown in the Indigo Item List. All other sensor values are retained and can be referred to in scripts, triggers, actions and
+            control pages. If you would like to have more than one primary sensor value, merely create another instance of the device (same IP and ROM ID) and select a second primary
+            sensor value. This allows you to be able to display both a temperature device and a humidity device (for example.) The device is also available with an optional relay. The
+            optional relay is a latching relay; it will retain its state when power is lost. The states of the LED and the relay are nonvolatile; their states will be restored at
+            power-up.
         </p>
         <p>
             The LED Function and Relay Function drop-down menus control how the sensor reacts to system inputs. There are four possible settings:
@@ -591,14 +570,12 @@
         </p>
         <p>
             There are eight input information blocks that contain information and controls for each of the various inputs. They display read-only information regarding writeable
-            variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More
-            Information.) Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an
-            option within the OWServer Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More Information.)
+            Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0083.png">
         <span>EDS0083 Quad 4-20 Milliamp Input</span>
         <p>
@@ -632,7 +609,6 @@
         </p>
         <br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0085.png">
         <span>EDS0085 Quad 0-10 Volt Input</span>
         <p>
@@ -662,12 +638,10 @@
             There are four input information blocks that contain information and controls for each of the various inputs. They display read-only information regarding writeable
             variables, the current value of each variable and, where appropriate a button to clear Conditional Search States. (See Conditional Search States for More Information.)
             Finally, there is a Clear Sensor Alarms button which will clear all sensor alarms. It is not possible to clear individual alarms so this is not an option within the OWServer
-            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting
-            device only.
+            Plugin. Clicking this button will set all alarm variables for the device to zero (no alarm) and will apply the change to the requesting device only.
         </p>
         <br style="clear:both"/>
     </li>
-
     <li><img class="TextWrap" src="img/img_eds0090.png">
         <span>EDS0090 Octal Discrete IO</span>
         <p>
@@ -723,10 +697,12 @@
 </ul>
 <p>The plugin supports multiple servers--and a theoretically unlimited number of devices.
 <ol>
-    <li>Within the plugin preferences, enter the IP number(s) of the server(s) you want to use. The plugin has the ability to auto-detect servers, so you may want to try this feature
+    <li>
+        Within the plugin preferences, enter the IP number(s) of the server(s) you want to use. The plugin has the ability to auto-detect servers, so you may want to try this feature
         first. If auto-detect is selected, the manually-entered list of IP addresses will be ignored.
     </li>
-    <li>To get the most out of the plugin, you should create a set of devices. It is recommended that you create a server device which you can use to monitor the health of your EDS
+    <li>
+        To get the most out of the plugin, you should create a set of devices. It is recommended that you create a server device which you can use to monitor the health of your EDS
         server. You should also create a 1-Wire device to track the information reported by that device for use in Indigo.
     </li>
 </ol>
@@ -745,7 +721,8 @@
     <li><span>Send Command to 1-Wire Device</span>
         <p>
             Select Send Command to 1-Wire Device to send a custom command to the 1-Wire device of your choice. When you select this item, you will be presented with a configuration
-            dialog that will require four pieces of information to be entered:</p>
+            dialog that will require four pieces of information to be entered:
+        </p>
         <ol>
             <li>the IP address of the server where the sensor resides,</li>
             <li>the ROM ID address of the sensor itself,</li>
@@ -790,7 +767,6 @@
         <br><br><img src="img/img_scriptingPlugin.png">
     </li>
 </ol>
-
 <p>
     As noted above, you can write values to individual sensor parameters to cause various things to take place. Below is a list of all of the variables to which you can write data, and
     information about valid parameter values (and their meaning.) These values are not writeable from configuration dialog boxes, but they are writeable from several other places via the
@@ -1059,7 +1035,6 @@
             [Possible Values: ] - VCC Control information coming soon.
         </p>
     </li>
-
 </ul>
 
 <h3>Framework</h3>
