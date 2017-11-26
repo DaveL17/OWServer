@@ -16,7 +16,7 @@
 
     <!-- Check for plugin updates. -->
     <MenuItem id="checkForUpdates">
-        <Name>Check for Plugin Updates...</Name>
+        <Name>Check for Plugin Updates</Name>
         <CallbackMethod>checkVersionNow</CallbackMethod>
     </MenuItem>
 
@@ -31,46 +31,57 @@
         <Name>Send Command to 1-Wire Device...</Name>
         <CallbackMethod>customWriteToDevice</CallbackMethod>
         <ConfigUI>
+
             <Field id="instructions" type="label">
                 <Label>This facility allows you to write data to select sensor variables. Only variables designated as writable can be changed. These variables are designated in the
-                    details.xml file as Writable="True"
+details.xml file as Writable="True"
                 </Label>
             </Field>
+
             <Field id="writeToServer" type="menu">
                 <Label>Server IP:</Label>
                 <List class="self" filter="" method="getServerList" dynamicReload="true"/>
             </Field>
+
             <Field id="writeToROM" type="menu" tooltip="Enter the ROM address of the device you want to write to. You can copy this from the devices.xml file." defaultValue="None">
                 <Label>Sensor ID:</Label>
                 <List class="self" filter="" method="getSensorList" dynamicReload="true"/>
             </Field>
+
             <Field id="writeToVariable" type="textfield" tooltip="Enter the variable name that you want to write to. You can copy this from the devices.xml file.">
                 <Label>Variable Name:</Label>
             </Field>
+
             <Field id="writeToValue" type="textfield" tooltip="Enter the value you want to write. This is dependent on the variable that you are writing to.">
                 <Label>Value:</Label>
             </Field>
+
         </ConfigUI>
     </MenuItem>
 
     <!-- Test communication with 1-Wire server. -->
     <MenuItem id="testServerCommunication">
-        <Name>Test Server Communication</Name>
+        <Name>Test Server Communication...</Name>
         <CallbackMethod>dumpXML</CallbackMethod>
         <ConfigUI>
+
             <Field id="space2" type="label" fontColor="black">
                 <Label>Select server IP and then select enter (or click Execute.)</Label>
             </Field>
+
             <Field id="writeToServer" type="menu">
                 <Label>Server IP:</Label>
                 <List class="self" filter="" method="getServerList" dynamicReload="true"/>
             </Field>
+
             <Field id="writeXMLToLog" type="checkbox" defaultValue="False" tooltip="Check this box to write the details.xml data to the log.">
                 <Label>Write XML to Log:</Label>
                 <List class="self" filter=""/>
             </Field>
+
         </ConfigUI>
     </MenuItem>
+
     <!-- Stop/Start debugging. -->
     <MenuItem id="toggleDebug">
         <Name>Toggle Debugging</Name>

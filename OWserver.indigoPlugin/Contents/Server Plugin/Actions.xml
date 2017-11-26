@@ -1,28 +1,35 @@
 <?xml version="1.0"?>
 <Actions>
     <SupportURL>http://www.perceptiveautomation.com/userforum/viewtopic.php?f=134&amp;t=11593</SupportURL>
+
     <Action id="refreshSensorsNow">
         <Name>Refresh All Sensors</Name>
         <CallbackMethod>updateDeviceStatesAction</CallbackMethod>
     </Action>
+
     <Action id="sendToServerAction">
         <Name>Send Command to 1-Wire Device</Name>
         <CallbackMethod>sendToServerAction</CallbackMethod>
         <ConfigUI>
+
             <Field id="server" type="menu">
                 <Label>Server IP:</Label>
                 <List class="self" filter="" method="getServerList" dynamicReload="true"/>
             </Field>
+
             <Field id="romId" type="menu">
                 <Label>Sensor ID:</Label>
                 <List class="self" filter="" method="getSensorList" dynamicReload="true"/>
             </Field>
+
             <Field id="variable" type="textfield">
                 <Label>Variable Name:</Label>
             </Field>
+
             <Field id="value" type="textfield">
                 <Label>Value:</Label>
             </Field>
+
         </ConfigUI>
     </Action>
 </Actions>

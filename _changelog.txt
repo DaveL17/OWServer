@@ -1,5 +1,16 @@
 OWServer Change Log
 
+v1.0.04
+- Code consolidation using DLFramework.
+- Adds note to documentation that the plugin does not require Internet access to function.
+
+v1.0.03
+- Stylistic changes to Indigo Plugin Update Checker module.
+- Improves code used to write sensor data to the Indigo Logs folder.
+- Standardizes plugin menu item styles. Menu items with an ellipsis (...)
+  denote that a dialog box will open. Menu items without an ellipsis denote
+  that the plugin will take immediate action.
+
 v1.0.02
 - Moves support URL to Github.
 - Minor UI refinements.

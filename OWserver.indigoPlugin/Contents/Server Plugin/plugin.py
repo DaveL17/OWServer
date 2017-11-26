@@ -22,6 +22,8 @@ The plugin does _not_ support the HTML-based output of the HA7NET
 server.
 """
 
+# =================================== TO DO ===================================
+
 # TODO: Hide Temperature Adjustment field on EDS0071.
 # TODO: Expand DS2408 to include imputed values for PIOActivityLatchState (done in the same way as PIOOutputLatchSate.)
 # TODO: Add Conditional Search State buttons to EDS0071.
@@ -51,24 +53,40 @@ server.
 # TODO: Move all convert routines to their own module (and standardize between all fogbert plugins.)
 # TODO: Convert updateDeviceStates() to a dict loop progression?
 
+# ================================== IMPORTS ==================================
+
+# Built-in modules
 import datetime as dt
 import json
-import stateDict
-import indigoPluginUpdateChecker
 import socket
 import urllib2
 import xml.etree.ElementTree as eTree
+
+# Third-party modules
+from DLFramework import indigoPluginUpdateChecker
 try:
     import indigo
-except:
+except ImportError:
+    pass
+try:
+    import pydevd
+except ImportError:
     pass
 
-__author__    = "DaveL17"
-__build__     = ""
-__copyright__ = 'Copyright 2017 DaveL17'
-__license__   = "MIT"
+# My modules
+import DLFramework.DLFramework as Dave
+import stateDict
+
+# =================================== HEADER ==================================
+
+__author__    = Dave.__author__
+__copyright__ = Dave.__copyright__
+__license__   = Dave.__license__
+__build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.02'
+__version__   = '1.0.04'
+
+# =============================================================================
 
 kDefaultPluginPrefs = {
     u"configMenuDegrees"      : "F",    # Setting for devices that report temperature.
@@ -91,7 +109,6 @@ class Plugin(indigo.PluginBase):
 
     def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
         indigo.PluginBase.__init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
-        self.debugLog(u'Initializing OWServer plugin. Setting up global variables.')
 
         self.stateDict = stateDict.OWServer(self)
         self.deviceList = []
@@ -103,15 +120,18 @@ class Plugin(indigo.PluginBase):
         updater_url = 'https://davel17.github.io/OWServer/OWServer_version.html'
         self.updater = indigoPluginUpdateChecker.updateChecker(self, updater_url)
 
-        # Convert old debugLevel scale to new scale.
-        # =============================================================
-        if not 0 < self.pluginPrefs['showDebugLevel'] <= 3:
-            if self.pluginPrefs['showDebugLevel'] == "High":
-                self.pluginPrefs['showDebugLevel'] = 3
-            elif self.pluginPrefs['showDebugLevel'] == "Medium":
-                self.pluginPrefs['showDebugLevel'] = 2
-            else:
-                self.pluginPrefs['showDebugLevel'] = 1
+        # ====================== Initialize DLFramework =======================
+
+        self.Fogbert = Dave.Fogbert(self)
+
+        # Log pluginEnvironment information when plugin is first started
+        self.Fogbert.pluginEnvironment()
+
+        # Convert old debugLevel scale (low, medium, high) to new scale (1, 2, 3).
+        if not 0 < self.pluginPrefs.get('showDebugLevel', 1) <= 3:
+            self.pluginPrefs['showDebugLevel'] = self.Fogbert.convertDebugLevel(self.pluginPrefs['showDebugLevel'])
+
+        # =====================================================================
 
         if self.pluginPrefs['showDebugLevel'] >= 3:
             self.debugLog(u"=" * 101 + self.padLog +
@@ -126,6 +146,11 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"{0}".format(pluginPrefs))
         else:
             self.debugLog(u"Plugin preferences suppressed. Set debug level to [High] to write them to the log.")
+
+        # try:
+        #     pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
+        # except:
+        #     pass
 
     def __del__(self):
         self.debugLog(u"__del__ method called.")
@@ -250,33 +275,35 @@ class Plugin(indigo.PluginBase):
         self.debugLog(u"validatePrefsConfigUi() method called.")
 
         addr = valuesDict['OWServerIP']
+        auto_detect_servers = valuesDict['autoDetectServers']
         error_msg_dict = indigo.Dict()
         split_ip = addr.replace(" ", "").split(",")
         update_email = valuesDict['updaterEmail']
         update_wanted = valuesDict['updaterEmailsEnabled']
 
         # A valid IP address must be at least 7 characters long.
-        if len(addr) < 7:
+        if not auto_detect_servers and len(addr) < 7:
             error_msg_dict['OWServerIP'] = u"An IP address is not long enough (at least 0.0.0.0)."
             return False, valuesDict, error_msg_dict
 
         # Split apart the IP address(es) to ensure that they have at least four parts.
-        for server_ip in split_ip:
-            address_parts = server_ip.split(".")
-            if len(address_parts) != 4:
-                error_msg_dict['OWServerIP'] = u"Please enter a valid IP address with four valid parts (0.0.0.0)."
-                return False, valuesDict, error_msg_dict
-
-            # Each part must be between the values of 0 and 255 (inclusive).
-            for part in address_parts:
-                try:
-                    part = int(part)
-                    if part < 0 or part > 255:
-                        error_msg_dict['OWServerIP'] = u"You have entered a value out of range (not 0-255)."
-                        return False, valuesDict, error_msg_dict
-                except ValueError as error:
-                    error_msg_dict['OWServerIP'] = u"You have entered an IP address that contains a non-numeric character."
+        if not auto_detect_servers:
+            for server_ip in split_ip:
+                address_parts = server_ip.split(".")
+                if len(address_parts) != 4:
+                    error_msg_dict['OWServerIP'] = u"Please enter a valid IP address with four valid parts (0.0.0.0)."
                     return False, valuesDict, error_msg_dict
+
+                # Each part must be between the values of 0 and 255 (inclusive).
+                for part in address_parts:
+                    try:
+                        part = int(part)
+                        if part < 0 or part > 255:
+                            error_msg_dict['OWServerIP'] = u"You have entered a value out of range (not 0-255)."
+                            return False, valuesDict, error_msg_dict
+                    except ValueError as error:
+                        error_msg_dict['OWServerIP'] = u"You have entered an IP address that contains a non-numeric character."
+                        return False, valuesDict, error_msg_dict
 
         # Test plugin update notification settings.
         try:
@@ -389,7 +416,7 @@ class Plugin(indigo.PluginBase):
             try:
                 ows_xml = self.getDetailsXML(server_ip)
                 if valuesDict['writeXMLToLog']:
-                    file_name = ('/Library/Application Support/Perceptive Automation/Indigo 6/Logs/{0} OWServer.txt'.format(dt.datetime.today().date()))
+                    file_name = ('{0}/{1} OWServer.txt'.format(indigo.server.getLogsFolderPath(), dt.datetime.today().date()))
                     data = open(file_name, "w")
                     data.write("OWServer details.xml Log\n")
                     data.write("Written at: {0}\n".format(dt.datetime.today()))
