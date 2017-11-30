@@ -3,6 +3,7 @@ OWServer Change Log
 v1.0.04
 - Code consolidation using DLFramework.
 - Adds note to documentation that the plugin does not require Internet access to function.
+- IPS configuration.
 
 v1.0.03
 - Stylistic changes to Indigo Plugin Update Checker module.
