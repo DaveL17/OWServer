@@ -1,4 +1,0 @@
-OWServer Plugin - Developed by: DaveL17
-
-
-deprecated.
