@@ -84,7 +84,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.04'
+__version__   = '1.0.05'
 
 # =============================================================================
 
@@ -117,7 +117,7 @@ class Plugin(indigo.PluginBase):
         self.debug = self.pluginPrefs.get('showDebugInfo', False)
         self.padLog = "\n" + (" " * 34)  # 34 spaces to continue in line with log margin.
         self.xmlns = '{http://www.embeddeddatasystems.com/schema/owserver}'
-        updater_url = 'https://davel17.github.io/OWServer/OWServer_version.html'
+        updater_url = 'https://raw.githubusercontent.com/DaveL17/OWServer/master/OWServer_version.html'
         self.updater = indigoPluginUpdateChecker.updateChecker(self, updater_url)
 
         # ====================== Initialize DLFramework =======================

@@ -1,5 +1,10 @@
 OWServer Change Log
 
+v1.0.05
+- Updates plist link to wiki.
+- Updates plugin update checker to use curl to overcome outdated security of
+  Apple's Python install.
+
 v1.0.04
 - Code consolidation using DLFramework.
 - Adds note to documentation that the plugin does not require Internet access to function.
