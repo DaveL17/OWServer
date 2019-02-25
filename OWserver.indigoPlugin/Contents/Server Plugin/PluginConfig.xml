@@ -140,9 +140,6 @@
         <Description>Suppress log entries (will still log errors.)</Description>
     </Field>
 
-    <!-- Notifications Template -->
-    <Template file="DLFramework/template_notifications.xml" />
-
     <Field id="debugSpacer" type="label"/>
 
     <Field id="space6" type="label" fontColor="black" alignText="right">

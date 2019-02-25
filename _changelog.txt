@@ -1,5 +1,9 @@
 OWServer Change Log
 
+v1.0.06
+- Removes plugin update notifications.
+- Code refinements.
+
 v1.0.05
 - Updates plist link to wiki.
 - Updates plugin update checker to use curl to overcome outdated security of

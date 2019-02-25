@@ -14,12 +14,6 @@
 
     <MenuItem id="titleSeparator" type="separator"/>
 
-    <!-- Check for plugin updates. -->
-    <MenuItem id="checkForUpdates">
-        <Name>Check for Plugin Updates</Name>
-        <CallbackMethod>checkVersionNow</CallbackMethod>
-    </MenuItem>
-
     <!-- Refresh data for all sensors. -->
     <MenuItem id="refreshSensorsNow">
         <Name>Refresh All Sensors Now</Name>

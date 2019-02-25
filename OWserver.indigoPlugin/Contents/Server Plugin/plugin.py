@@ -22,37 +22,6 @@ The plugin does _not_ support the HTML-based output of the HA7NET
 server.
 """
 
-# =================================== TO DO ===================================
-
-# TODO: Hide Temperature Adjustment field on EDS0071.
-# TODO: Expand DS2408 to include imputed values for PIOActivityLatchState (done in the same way as PIOOutputLatchSate.)
-# TODO: Add Conditional Search State buttons to EDS0071.
-# TODO: Consider hiding states that don't need to be displayed (i.e., clearAlarms)
-# TODO: Skip devices that are not dev.enabled == false (rather than sleep.)
-# TODO: Error checking on device config inputs.
-# TODO: Error checking on Action Item inputs.
-# TODO: Set up standard devices for LED, Relay, etc.
-#       - Pick an IP.
-#       - Pick a ROM ID.
-#       - That's all.
-# TODO: Indicate in the Indigo UI that an alarm state exists? How to distinguish between an alarm state and a plugin error state?
-# TODO: What happens when a known server is taken down (both with auto enabled and disabled.)
-#       - Also test what happens when IP of a server changes (DHCP). For starters, this:
-#           Oct 14, 2015, 7:51:44 PM
-#           OWServer Error                  Exception error getting server data: timed out
-#           OWServer Error                  Error parsing sensor states: Parse() argument 1 must be string or read-only buffer, not None
-#           OWServer Error                  Trying again in 60 seconds.
-# TODO: Continue to refine devices.xml <ValueType>...
-# TODO: Grab changes to plugin config dialog (besides pref poll and debug which are already in there. In other words, make sure that any changes that are made there are implemented
-#       instantly.
-# TODO: Add facility to update device states when config dialogs are closed. Do _NOT_ try to update the device state before it has been fully  configured.  For example, calling
-#       updateDeviceStates() directly from closedDeviceConfigUi() made Indigo very angry.  Perhaps there's a way to trap with dev.configured.
-# TODO: Consider bringing in the attributes of variables.  What would that look like?
-# TODO: Only list ROM IDs that are appropriate to the device type being created romIdGenerator().
-# TODO: Add pushPluginPrefs() method like WUnderground.
-# TODO: Move all convert routines to their own module (and standardize between all fogbert plugins.)
-# TODO: Convert updateDeviceStates() to a dict loop progression?
-
 # ================================== IMPORTS ==================================
 
 # Built-in modules
@@ -84,7 +53,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.05'
+__version__   = '1.0.06'
 
 # =============================================================================
 
@@ -100,8 +69,6 @@ kDefaultPluginPrefs = {
     u"showDebugInfo"          : False,  # Verbose debug logging?
     u"showDebugLevel"         : "1",    # Low, Medium or High debug output.
     u"suppressResultsLogging" : False,  # Don't log unless there's a problem.
-    u"updaterEmail"           : "",     # Email to notify of plugin updates.
-    u"updaterEmailsEnabled"   : False   # Notification of plugin updates wanted.
 }
 
 
@@ -110,6 +77,9 @@ class Plugin(indigo.PluginBase):
     def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
         indigo.PluginBase.__init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
 
+        self.pluginIsInitializing = True
+        self.pluginIsShuttingDown = False
+
         self.stateDict = stateDict.OWServer(self)
         self.deviceList = []
         self.numberOfSensors = 0
@@ -117,8 +87,6 @@ class Plugin(indigo.PluginBase):
         self.debug = self.pluginPrefs.get('showDebugInfo', False)
         self.padLog = "\n" + (" " * 34)  # 34 spaces to continue in line with log margin.
         self.xmlns = '{http://www.embeddeddatasystems.com/schema/owserver}'
-        updater_url = 'https://raw.githubusercontent.com/DaveL17/OWServer/master/OWServer_version.html'
-        self.updater = indigoPluginUpdateChecker.updateChecker(self, updater_url)
 
         # ====================== Initialize DLFramework =======================
 
@@ -152,90 +120,28 @@ class Plugin(indigo.PluginBase):
         # except:
         #     pass
 
+        self.pluginIsInitializing = False
+
     def __del__(self):
         self.debugLog(u"__del__ method called.")
         indigo.PluginBase.__del__(self)
 
-    def startup(self):
-        indigo.server.log(u"Starting OWServer.")
-        self.updater.checkVersionPoll()
-
-    def checkVersionNow(self):
-        self.debugLog(u"checkVersionNow() method called.")
-        self.updater.checkVersionNow()
-
-    def sendToServer(self, val):
-        """The sendToServer() method merely logs the url sent to the server
-        for the purposes of confirmation and a signal that the event took
-        place.  This is a temporary method which will be removed if it's
-        no longer needed.
-        """
-        write_url = 'http://{0}/devices.htm?rom={1}&variable={2}&value={3}'.format(val[0], val[1], val[2], val[3])
-
-        try:
-            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            socket.setdefaulttimeout(time_out)
-            f = urllib2.urlopen(write_url)
-            f.close()
-        except Exception as error:
-            self.errorLog(u"{0}".format(error))
-
-        self.debugLog(u"Write to server URL: {0}".format(write_url))
-        return
-
-    def sendToServerAction(self, val):
-        """The sendToServerExternal() method is for scripters to be able to
-        send individual commands to devices through Indigo Python scripts.
-        The syntax for the call is:
-        =======================================================================
-        pluginId = "com.fogbert.indigoplugin.OWServer"
-        plugin = indigo.server.getPlugin(pluginId)
-        props = {"server": "10.0.1.44", "romId": "5D000003C74F4528", "variable": "clearAlarms", "value": "0"}
-        if plugin.isEnabled():
-            plugin.executeAction("sendToServerAction", props)
-        =======================================================================
-        """
-        parm_list = (val.props.get("server"), val.props.get("romId"), val.props.get("variable"), val.props.get("value"))
-        write_url = 'http://{0}/devices.htm?rom={1}&variable={2}&value={3}'.format(*parm_list)
- 
-        try:
-            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            socket.setdefaulttimeout(time_out)
-            f = urllib2.urlopen(write_url)
-            f.close()
-        except Exception as error:
-            self.errorLog(u"{0}".format(error))
-
-        self.debugLog(u"Write to server URL: {0}".format(write_url))
-        return
-
+    # =============================================================================
+    # ============================== Indigo Methods ===============================
+    # =============================================================================
     def closedDeviceConfigUi(self, valuesDict, userCancelled, typeId, devId):
-        """This method is called whenever a device config dialog is closed.
-        If you call the wrong thing from here, for example, if you try
-        to update a device before it's fully configured, you can make
-        Indigo very angry.
-        """
+
         self.debugLog(u'closedDeviceConfigUi() method called:')
+
         if userCancelled:
             self.debugLog(u"Device configuration cancelled.")
             return
         else:
             pass
 
-    def deviceStartComm(self, dev):
-        self.debugLog(u"Starting OWServer device: {0}".format(dev.name))
-        dev.stateListOrDisplayStateIdChanged()
-        dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-
-    def deviceStopComm(self, dev):
-        self.debugLog(u"Stopping OWServer device: {0}".format(dev.name))
-        dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
-        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-
-    def shutdown(self):
-        self.debugLog(u"Shutting down OWServer plugin.")
-
+    # =============================================================================
     def closedPrefsConfigUi(self, valuesDict, userCancelled):
+
         self.debugLog(u"Plugin config dialog window closed.")
 
         if userCancelled:
@@ -257,29 +163,58 @@ class Plugin(indigo.PluginBase):
 
             return
 
-    def toggleDebugEnabled(self):
-        # Toggle debug on/off.
-        self.debugLog(u"toggleDebugEnabled() method called.")
+    # =============================================================================
+    def deviceStartComm(self, dev):
 
-        if not self.debug:
-            self.debug = True
-            self.pluginPrefs['showDebugInfo'] = True
-            indigo.server.log(u"Debugging on.")
-            self.debugLog(u"Debug level: {0}".format(self.pluginPrefs.get('showDebugLevel', 1)))
-        else:
-            self.debug = False
-            self.pluginPrefs['showDebugInfo'] = False
-            indigo.server.log(u"Debugging off.")
+        self.debugLog(u"Starting OWServer device: {0}".format(dev.name))
+        dev.stateListOrDisplayStateIdChanged()
+        dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
 
+    # =============================================================================
+    def deviceStopComm(self, dev):
+
+        self.debugLog(u"Stopping OWServer device: {0}".format(dev.name))
+        dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
+        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+
+    # =============================================================================
+    def runConcurrentThread(self):
+
+        self.debugLog(u"Starting main OWServer thread.")
+
+        self.sleep(5)
+
+        try:
+            while True:
+                self.spotDeadSensors()
+                self.updateDeviceStates()
+                sleep_time = int(self.pluginPrefs.get('configMenuPollInterval', 900))
+                self.sleep(sleep_time-5)
+
+        except self.StopThread:
+            self.debugLog(u"Fatal error. Stopping OWServer thread.")
+            pass
+
+    # =============================================================================
+    def shutdown(self):
+
+        self.pluginIsShuttingDown = True
+        self.debugLog(u"Shutting down OWServer plugin.")
+
+    # =============================================================================
+    def startup(self):
+
+        indigo.server.log(u"Starting OWServer.")
+
+    # =============================================================================
     def validatePrefsConfigUi(self, valuesDict):
+
         self.debugLog(u"validatePrefsConfigUi() method called.")
 
         addr = valuesDict['OWServerIP']
         auto_detect_servers = valuesDict['autoDetectServers']
         error_msg_dict = indigo.Dict()
         split_ip = addr.replace(" ", "").split(",")
-        update_email = valuesDict['updaterEmail']
-        update_wanted = valuesDict['updaterEmailsEnabled']
 
         # A valid IP address must be at least 7 characters long.
         if not auto_detect_servers and len(addr) < 7:
@@ -305,38 +240,125 @@ class Plugin(indigo.PluginBase):
                         error_msg_dict['OWServerIP'] = u"You have entered an IP address that contains a non-numeric character."
                         return False, valuesDict, error_msg_dict
 
-        # Test plugin update notification settings.
-        try:
-            if update_wanted and not update_email:
-                error_msg_dict['updaterEmail'] = u"If you want to be notified, you must enter a valid email address."
-                return False, valuesDict, error_msg_dict
-
-            elif update_wanted and "@" not in update_email:
-                error_msg_dict['updaterEmail'] = u"Valid email addresses have at least one @ symbol in them (foo@bar.com)."
-                return False, valuesDict, error_msg_dict
-
-        except Exception as error:
-            self.errorLog(u"{0}".format(error))
-            pass
-
         return True
 
+    # =============================================================================
+    # ============================== Plugin Methods ===============================
+    # =============================================================================
+    def sendToServer(self, val):
+        """
+        Title Placeholder
+
+        The sendToServer() method merely logs the url sent to the server
+        for the purposes of confirmation and a signal that the event took
+        place.  This is a temporary method which will be removed if it's
+        no longer needed.
+
+        -----
+
+
+        """
+        write_url = 'http://{0}/devices.htm?rom={1}&variable={2}&value={3}'.format(val[0], val[1], val[2], val[3])
+
+        try:
+            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
+            socket.setdefaulttimeout(time_out)
+            f = urllib2.urlopen(write_url)
+            f.close()
+        except Exception as error:
+            self.errorLog(u"{0}".format(error))
+
+        self.debugLog(u"Write to server URL: {0}".format(write_url))
+        return
+
+    # =============================================================================
+    def sendToServerAction(self, val):
+        """
+        Title Placeholder
+
+        The sendToServerExternal() method is for scripters to be able to
+        send individual commands to devices through Indigo Python scripts.
+        The syntax for the call is:
+        =======================================================================
+        pluginId = "com.fogbert.indigoplugin.OWServer"
+        plugin = indigo.server.getPlugin(pluginId)
+        props = {"server": "10.0.1.44", "romId": "5D000003C74F4528", "variable": "clearAlarms", "value": "0"}
+        if plugin.isEnabled():
+            plugin.executeAction("sendToServerAction", props)
+        =======================================================================
+
+        -----
+
+        """
+        parm_list = (val.props.get("server"), val.props.get("romId"), val.props.get("variable"), val.props.get("value"))
+        write_url = 'http://{0}/devices.htm?rom={1}&variable={2}&value={3}'.format(*parm_list)
+ 
+        try:
+            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
+            socket.setdefaulttimeout(time_out)
+            f = urllib2.urlopen(write_url)
+            f.close()
+        except Exception as error:
+            self.errorLog(u"{0}".format(error))
+
+        self.debugLog(u"Write to server URL: {0}".format(write_url))
+        return
+
+    # =============================================================================
+    def toggleDebugEnabled(self):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
+
+        # Toggle debug on/off.
+        self.debugLog(u"toggleDebugEnabled() method called.")
+
+        if not self.debug:
+            self.debug = True
+            self.pluginPrefs['showDebugInfo'] = True
+            indigo.server.log(u"Debugging on.")
+            self.debugLog(u"Debug level: {0}".format(self.pluginPrefs.get('showDebugLevel', 1)))
+        else:
+            self.debug = False
+            self.pluginPrefs['showDebugInfo'] = False
+            indigo.server.log(u"Debugging off.")
+
+    # =============================================================================
     def actionControlSensor(self, action, dev):
-        """Get sensor update when user selects 'Send Status Request'. This
+        """
+        Title Placeholder
+
+        Get sensor update when user selects 'Send Status Request'. This
         updates all devices.
+
+        -----
+
         """
         self.debugLog(u"User request for status update.")
         self.debugLog(u"actionControlSensor() method called.")
         self.updateDeviceStates()
 
+    # =============================================================================
     def customWriteToDevice(self, valuesDict, typeId):
-        """The customWriteToDevice() method is called when a user selects
+        """
+        Title Placeholder
+
+        The customWriteToDevice() method is called when a user selects
         the "Write Value to 1-Wire Device" item from the OWServer Plugin
         menu. Selecting this menu item causes a dialog to open which
         asks the user to select the relevant server IP and ROM ID, and
         enter both the variable to change and the value to write. There
         is limited error checking (obvious things) but mostly relies on
         user entering valid information.
+
+        -----
+
         """
         self.debugLog(u'customWriteToDevice() method called.')
 
@@ -399,13 +421,20 @@ class Plugin(indigo.PluginBase):
             error_msg_dict['writeToServer'] = u"{0}".format(error)
             return False, valuesDict, error_msg_dict
 
+    # =============================================================================
     def dumpXML(self, valuesDict, typeId):
-        """dumpXML(self, valuesDict): This method grabs a copy of the
+        """
+        Title Placeholder
+
+        dumpXML(self, valuesDict): This method grabs a copy of the
         details.xml file from the server at the specified IP address,
         parses it, and dumps a copy to a log file. The purpose is for
         the user to be able to confirm that the 1-Wire server is online
         and that the plugin can talk to it. Log file is written to the
         Indigo server logs folder.
+
+        -----
+
         """
         self.debugLog(u"Dumping details.xml file to Indigo log file...")
 
@@ -441,10 +470,17 @@ class Plugin(indigo.PluginBase):
 
         return True
 
+    # =============================================================================
     def getDetailsXML(self, server_ip):
-        """getDetailsXML(): This method goes out to the 1-Wire server at
+        """
+        Title Placeholder
+
+        getDetailsXML(): This method goes out to the 1-Wire server at
         the specified OWServerIP address and pulls in a copy of the
         details.xml file. It doesn't process it any way.
+
+        -----
+
         """
         self.debugLog(u"getDetailsXML() method called.")
 
@@ -474,8 +510,12 @@ class Plugin(indigo.PluginBase):
                           u"configuration dialog and check user forum for more information.")
             self.errorLog(u"Reason: {0}".format(error))
 
+    # =============================================================================
     def getSensorList(self, filter="indigo.sensor", typeId=0, valuesDict=None, targetId=0):
-        """getSensorList(): This method constructs a list of 1-Wire
+        """
+        Title Placeholder
+
+        getSensorList(): This method constructs a list of 1-Wire
         sensors that have  been added to all servers. It's called when
         the user opens up a device config dialog. If there are no
         sensors left to assign (they have all been assigned to other
@@ -483,6 +523,10 @@ class Plugin(indigo.PluginBase):
         This string is necessary to address conditions where the method
         returns a noneType value instead of a list (Indigo throws an
         error when this happens.)
+
+        -----
+
+
         """
         self.debugLog(u"getSensorList() method called.")
         self.debugLog(u"Generating list of 1-Wire sensors...")
@@ -521,8 +565,12 @@ class Plugin(indigo.PluginBase):
 
         return sorted_sensor_list
 
+    # =============================================================================
     def getServerList(self, filter="indigo.sensor", typeId=0, valuesDict=None, targetId=0):
-        """getServerList(): This method provides the callback for defining
+        """
+        Title Placeholder
+
+        getServerList(): This method provides the callback for defining
         server devices. It obtains its list of server IP addresses from
         one of two distinct procedures: (1) automatic server detection,
         and (2) manual declaration of server IPs. Within the plugin
@@ -532,6 +580,9 @@ class Plugin(indigo.PluginBase):
         (sorted_server_list) containing the list of IPs. This list is
         used to assign IP addresses when the user creates OWServer
         devices.
+
+        -----
+
         """
         self.debugLog(u"getServerList() method called.")
 
@@ -580,9 +631,16 @@ class Plugin(indigo.PluginBase):
                     self.errorLog(u"{0}".format(e))
                     response = ""
 
+    # =============================================================================
     def killAllComms(self):
-        """killAllComms() sets the enabled status of all plugin devices to
+        """
+        Title Placeholder
+
+        killAllComms() sets the enabled status of all plugin devices to
         false.
+
+        -----
+
         """
         self.debugLog(u"killAllComms() method called.")
 
@@ -592,9 +650,16 @@ class Plugin(indigo.PluginBase):
             except Exception as error:
                 self.errorLog(u"Unable to kill communication with all devices. Reason: {0}".format(error))
 
+    # =============================================================================
     def unkillAllComms(self):
-        """unkillAllComms() sets the enabled status of all plugin devices
+        """
+        Title Placeholder
+
+        unkillAllComms() sets the enabled status of all plugin devices
         to true.
+
+        -----
+
         """
         self.debugLog(u"unkillAllComms() method called.")
 
@@ -604,12 +669,19 @@ class Plugin(indigo.PluginBase):
             except Exception as error:
                 self.errorLog(u"Unable to enable communication with all devices. Reason: {0}".format(error))
 
+    # =============================================================================
     def romIdGenerator(self, filter="indigo.sensor", valuesDict=None, typeId=0, targetId=0):
-        """The romIdGenerator() method will return a list of the ROM IDs
+        """
+        Title Placeholder
+
+        The romIdGenerator() method will return a list of the ROM IDs
         appropriate to the calling device. That is, when the user
         selects an IP address for the appropriate server, the method
         will refresh the ROM ID list to show only those IDs that are
         appropriate to that IP.
+
+        -----
+
         """
         self.debugLog(u"romIdGenerator() method called.")
 
@@ -620,14 +692,21 @@ class Plugin(indigo.PluginBase):
 
         # this is not in the dict for a new device. could have the user save the device and then come back, but that's kludgy.
 
+    # =============================================================================
     def spotDeadSensors(self):
-        """spotDeadSensors(self): This method compares the time each
+        """
+        Title Placeholder
+
+        spotDeadSensors(self): This method compares the time each
         plugin device was last updated to the current Indigo time. If
         the difference exceeds a set interval (currently set to 60
         seconds, then the sensor's onOffState is set to false and an
         error is thrown to the log. This condition could be for a
         number of reasons including sensor fail, wiring fail, 1-Wire
         network collisions, etc.
+
+        -----
+
         """
         self.debugLog(u"spotDeadSensors() method called.")
 
@@ -650,10 +729,17 @@ class Plugin(indigo.PluginBase):
                     except Exception as error:
                         self.errorLog(u"Unable to spot dead sensors. Reason: {0}".format(error))
 
+    # =============================================================================
     def humidexConvert(self, ows_humidex):
-        """humidexConvert(self): This method converts any humidex values
+        """
+        Title Placeholder
+
+        humidexConvert(self): This method converts any humidex values
         used in the plugin based on user preference:
         self.pluginPrefs[u'configMenuHumidexDec'].
+
+        -----
+
         """
         self.debugLog(u"  Converting humidex values.")
 
@@ -668,10 +754,17 @@ class Plugin(indigo.PluginBase):
             self.errorLog(u"Error formatting humidex value. Returning value unchanged. Reason: {0}".format(error))
             return ows_humidex
 
+    # =============================================================================
     def humidityConvert(self, ows_humidity):
-        """humidityConvert(self): This method converts any humidity values
+        """
+        Title Placeholder
+
+        humidityConvert(self): This method converts any humidity values
         used in the plugin based on user preference:
         self.pluginPrefs[u'configMenuHumidityDec'].
+
+        -----
+
         """
         self.debugLog(u"  Converting humidity values.")
 
@@ -686,10 +779,17 @@ class Plugin(indigo.PluginBase):
             self.errorLog(u"Error formatting humidity value. Returning value unchanged. Reason: {0}".format(error))
             return ows_humidity
 
+    # =============================================================================
     def pressureConvert(self, ows_pressure):
-        """pressureConvert(self): This method converts any pressure values
+        """
+        Title Placeholder
+
+        pressureConvert(self): This method converts any pressure values
         used in the plugin based on user preference:
         self.pluginPrefs[u'configMenuPressureDec'].
+
+        -----
+
         """
         self.debugLog(u"  Converting pressure values.")
 
@@ -704,11 +804,18 @@ class Plugin(indigo.PluginBase):
             self.errorLog(u"Error formatting pressure value. Returning value unchanged. Reason: {0}".format(error))
             return ows_pressure
 
+    # =============================================================================
     def tempConvert(self, ows_temp):
-        """tempConvert(self): This method converts any temperature values
+        """
+        Title Placeholder
+
+        tempConvert(self): This method converts any temperature values
         used in the plugin based on user preference:
         self.pluginPrefs[u'configMenuDegreesDec']. This method returns
         a string that is formatted based on user preferences.
+
+        -----
+
         """
         self.debugLog(u"  Converting temperature values.")
 
@@ -725,11 +832,18 @@ class Plugin(indigo.PluginBase):
             ows_temp = (format_temp % ows_temp)
             return ows_temp
 
+    # =============================================================================
     def voltsConvert(self, ows_volts):
-        """voltsConvert(self): This method converts any voltages values
+        """
+        Title Placeholder
+
+        voltsConvert(self): This method converts any voltages values
         used in the plugin based on user preference:
         self.pluginPrefs[u'configMenuVoltsDec']. This method returns
         a string that is formatted based on user preferences.
+
+        -----
+
         """
         self.debugLog(u"  Converting volts values.")
 
@@ -739,11 +853,17 @@ class Plugin(indigo.PluginBase):
         ows_volts    = (format_volts % ows_volts)
         return ows_volts
 
-###############################################################################
-# Server and Sensor Device Update Methods
-###############################################################################
+    # =============================================================================
+    # ================== Server and Sensor Device Update Methods ==================
+    #  =============================================================================
     def updateOWServer(self, dev, root, server_ip):
-        """Server Type: Covers OWSERVER-ENET Rev. 1 and Rev. 2
+        """
+        Title Placeholder
+
+        Server Type: Covers OWSERVER-ENET Rev. 1 and Rev. 2
+
+        -----
+
         """
         self.debugLog(u"updateOWServer() method called.")
 
@@ -788,8 +908,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS18B20(self, dev, owsSensor, server_ip):
-        """ DS18B20 Description = "Programmable resolution thermometer"
+        """
+        Title Placeholder
+
+        DS18B20 Description = "Programmable resolution thermometer"
+
+        -----
+
         """
         self.debugLog(u"updateDS18B20() method called.")
 
@@ -843,8 +970,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS18S20(self, dev, owsSensor, server_ip):
-        """DS18S20 Description = "Parasite Power Thermometer"
+        """
+        Title Placeholder
+
+        DS18S20 Description = "Parasite Power Thermometer"
+
+        -----
+
         """
         self.debugLog(u"updateDS18S20() method called.")
 
@@ -898,8 +1032,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS2406(self, dev, owsSensor, server_ip):
-        """DS2406 Description = "Dual Addressable Switch Plus Memory"
+        """
+        Title Placeholder
+
+        DS2406 Description = "Dual Addressable Switch Plus Memory"
+
+        -----
+
         """
         self.debugLog(u"updateDS2406() method called.")
 
@@ -955,8 +1096,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS2408(self, dev, owsSensor, server_ip):
-        """DS2408 Description = "8-Channel Addressable Switch"
+        """
+        Title Placeholder
+
+        DS2408 Description = "8-Channel Addressable Switch"
+
+        -----
+
         """
         self.debugLog(u"updateDS2408() method called.")
 
@@ -1068,8 +1216,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS2423(self, dev, owsSensor, server_ip):
-        """DS2423 Description = "RAM with Counters"
+        """
+        Title Placeholder
+
+        DS2423 Description = "RAM with Counters"
+
+        -----
+
         """
         self.debugLog(u"updateDS2423() method called.")
 
@@ -1120,8 +1275,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS2438(self, dev, owsSensor, server_ip):
-        """DS2438 Description = "Smart battery monitor"
+        """
+        Title Placeholder
+
+        DS2438 Description = "Smart battery monitor"
+
+        -----
+
         """
         self.debugLog(u"updateDS2438() method called.")
 
@@ -1174,8 +1336,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateDS2450(self, dev, owsSensor, server_ip):
-        """DS2450 Description = "Quad A/D Converter"
+        """
+        Title Placeholder
+
+        DS2450 Description = "Quad A/D Converter"
+
+        -----
+
         """
         self.debugLog(u"updateDS2450() method called.")
 
@@ -1246,8 +1415,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0064(self, dev, owsSensor, server_ip):
-        """EDS0064 Description = "Octal Current Input Device"
+        """
+        Title Placeholder
+
+        EDS0064 Description = "Octal Current Input Device"
+
+        _____
+
         """
         self.debugLog(u"updateEDS0064() method called.")
 
@@ -1325,8 +1501,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0065(self, dev, owsSensor, server_ip):
-        """EDS0065 Description = "Temperature and Humidity Sensor"
+        """
+        Title Placeholder
+
+        EDS0065 Description = "Temperature and Humidity Sensor"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0065() method called.")
 
@@ -1428,8 +1611,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0066(self, dev, owsSensor, server_ip):
-        """EDS0066 Description = "Temperature and Barometric Pressure Sensor"
+        """
+        Title Placeholder
+
+        EDS0066 Description = "Temperature and Barometric Pressure Sensor"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0066() method called.")
 
@@ -1519,8 +1709,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0067(self, dev, owsSensor, server_ip):
-        """EDS0067 Description = "Temperature and Light Sensor"
+        """
+        Title Placeholder
+
+        EDS0067 Description = "Temperature and Light Sensor"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0067() method called.")
 
@@ -1603,9 +1800,16 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0068(self, dev, owsSensor, server_ip):
-        """EDS0068 Description = "Temperature, Humidity,Barometric
+        """
+        Title Placeholder
+
+        EDS0068 Description = "Temperature, Humidity,Barometric
         Pressure and Light Sensor"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0068() method called.")
 
@@ -1741,8 +1945,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0070(self, dev, owsSensor, server_ip):
-        """EDS0070 Description = "Vibration Sensor"
+        """
+        Title Placeholder
+
+        EDS0070 Description = "Vibration Sensor"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0070() method called.")
 
@@ -1807,8 +2018,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0071(self, dev, owsSensor, server_ip):
-        """EDS0071 Description = "RTD Interface, 4 Wire"
+        """
+        Title Placeholder
+
+        EDS0071 Description = "RTD Interface, 4 Wire"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0071() method called.")
 
@@ -1881,8 +2099,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0080(self, dev, owsSensor, server_ip):
-        """EDS0080 Description = "Octal 4-20 Milliamp Input"
+        """
+        Title Placeholder
+
+        EDS0080 Description = "Octal 4-20 Milliamp Input"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0080() method called.")
 
@@ -1989,8 +2214,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0082(self, dev, owsSensor, server_ip):
-        """EDS0082 Description = "Octal Current Input Device"
+        """
+        Title Placeholder
+
+        EDS0082 Description = "Octal Current Input Device"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0082() method called.")
 
@@ -2095,8 +2327,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0083(self, dev, owsSensor, server_ip):
-        """EDS0083 Description = "Octal Current Input Device"
+        """
+        Title Placeholder
+
+        EDS0083 Description = "Octal Current Input Device"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0083() method called.")
 
@@ -2177,8 +2416,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    #  =============================================================================
     def updateEDS0085(self, dev, owsSensor, server_ip):
-        """EDS0085 Description = "Octal Current Input Device"
+        """
+        Title Placeholder
+
+        EDS0085 Description = "Octal Current Input Device"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0085() method called.")
 
@@ -2259,8 +2505,15 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    # =============================================================================
     def updateEDS0090(self, dev, owsSensor, server_ip):
-        """EDS0090 Description = "Octal Discrete IO"
+        """
+        Title Placeholder
+
+        EDS0090 Description = "Octal Discrete IO"
+
+        -----
+
         """
         self.debugLog(u"updateEDS0090() method called.")
 
@@ -2386,292 +2639,1000 @@ class Plugin(indigo.PluginBase):
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
-###############################################################################
-# Server and Sensor Device Config Dialog Button Methods
-###############################################################################
-    # While we are always sending a "0" as the setting value, this may not always be the case. So we keep them separate for this reason.
+    # =============================================================================
+    # =========== Server and Sensor Device Config Dialog Button Methods ===========    
+    # =============================================================================
+    # While we are always sending a "0" as the setting value, this may not always
+    # be the case. So we keep them separate for this reason.
     def clearAlarms(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
+
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "clearAlarms", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearBarometricPressureHgHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "BarometricPressureHgHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearBarometricPressureHgLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "BarometricPressureHgLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearBarometricPressureMbHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "BarometricPressureMbHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearBarometricPressureMbLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "BarometricPressureMbLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDewpointHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DewpointHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDewpointLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DewpointLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO1HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO1LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO2HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO2LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO3HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO3LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO4HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO4LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO5HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO5LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO6HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO6LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO7HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO7LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO8HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearDiscreteIO8LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "DiscreteIO8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHeatIndexHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HeatIndexHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHeatIndexLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HeatIndexLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHumidexHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HumidexHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHumidexLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HumidexLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHumidityHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HumidityHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearHumidityLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "HumidityLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input1HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input1LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input2HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input2LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input3HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input3LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input4HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input4LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input5HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input5LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input6HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input6LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input7HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input7LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input8HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v0Input8LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v0to10VoltInput8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input1HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input1LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input2HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input2LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input3HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input3LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input4HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input4LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input5HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input5LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input6HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input6LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input7HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input7LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input8HighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clear_v4Input8LowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "v4to20mAInput8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearLightHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "LightHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearLightLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "LightLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearRTDResistanceHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "RTDResistanceHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearRTDResistanceLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "RTDResistanceLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearRTDFaultConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "RTDFaultConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearTemperatureHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "TemperatureHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearTemperatureLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "TemperatureLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearVibrationHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "VibrationHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def clearVibrationLowConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
+        """
+        Title Placeholder
+
+        Docstring Placeholder
+
+        -----
+
+        :return:
+        """
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "VibrationLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def toggleLED(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
-        """The toggleLED() method is used to toggle the LED of the calling device.
+        """
+        Title Placeholder
+
+        The toggleLED() method is used to toggle the LED of the calling device.
+
+        -----
+
         """
         new_var = ""
         try:
@@ -2687,8 +3648,15 @@ class Plugin(indigo.PluginBase):
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "LEDState", new_var)
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def toggleRelay(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
-        """The toggleRelay() method is used to toggle the relay of the calling device.
+        """
+        Title Placeholder
+
+        The toggleRelay() method is used to toggle the relay of the calling device.
+
+        -----
+
         """
         new_var = ""
         try:
@@ -2704,17 +3672,32 @@ class Plugin(indigo.PluginBase):
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "RelayState", new_var)
         self.sendToServer(parm_list)
 
+    # =============================================================================
     def updateDeviceStatesAction(self, valuesDict):
-        """The updateDeviceStatesAction() method is used to invoke the
+        """
+        Title Placeholder
+
+        The updateDeviceStatesAction() method is used to invoke the
         updateDeviceStates() method when it is called for from an Action item.
+
+        -----
+
         """
         self.updateDeviceStates()
         return
 
+    # =============================================================================
     def updateDeviceStates(self):
-        """The updateDeviceStates() method initiates an update for each
-        established Indigo device.
         """
+        Title Placeholder
+
+        The updateDeviceStates() method initiates an update for each
+        established Indigo device.
+
+        -----
+
+
+    """
         self.debugLog(u"updateDeviceStates() method called.")
 
         addr = self.pluginPrefs['OWServerIP']
@@ -2896,20 +3879,3 @@ class Plugin(indigo.PluginBase):
 
         ows_xml = ''  # Empty the variable to conserve memory resources.
         return
-
-    def runConcurrentThread(self):
-        self.debugLog(u"Starting main OWServer thread.")
-
-        self.updater.checkVersionPoll()
-        self.sleep(5)
-
-        try:
-            while True:
-                self.spotDeadSensors()
-                self.updateDeviceStates()
-                sleep_time = int(self.pluginPrefs.get('configMenuPollInterval', 900))
-                self.sleep(sleep_time-5)
-
-        except self.StopThread:
-            self.debugLog(u"Fatal error. Stopping OWServer thread.")
-            pass
