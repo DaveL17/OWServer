@@ -32,7 +32,6 @@ import urllib2
 import xml.etree.ElementTree as eTree
 
 # Third-party modules
-from DLFramework import indigoPluginUpdateChecker
 try:
     import indigo
 except ImportError:
