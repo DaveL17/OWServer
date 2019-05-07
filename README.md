@@ -1,5 +1,5 @@
 # ![Logo](https://github.com/DaveL17/OWServer/wiki/img/img_OWServerLogo.png)
-# ![shield](https://img.shields.io/github/release/DaveL17/OWServer.svg)
+# ![shield](https://img.shields.io/github/release/DaveL17/OWServer.svg) ![indigo-version](https://img.shields.io/badge/Indigo-7.0-blueviolet.svg) ![indigo-version](https://img.shields.io/badge/Python-2.7-darkgreen.svg)
 
 The OWServer Plugin for the Indigo Home Control Server (Indigo) is 
 used to provide a bridge between the OW-SERVER line of products from 
