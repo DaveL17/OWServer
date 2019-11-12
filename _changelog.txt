@@ -1,5 +1,8 @@
 OWServer Change Log
 
+v1.0.07
+- Removes all references to legacy version checking.
+
 v1.0.06
 - Removes plugin update notifications.
 - Code refinements.

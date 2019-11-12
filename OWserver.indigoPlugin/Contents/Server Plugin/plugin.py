@@ -52,7 +52,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.06'
+__version__   = '1.0.07'
 
 # =============================================================================
 
