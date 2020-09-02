@@ -28,6 +28,7 @@ server.
 import datetime as dt
 import json
 import socket
+import traceback
 import urllib2
 import xml.etree.ElementTree as eTree
 
@@ -52,7 +53,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.07'
+__version__   = '1.0.08'
 
 # =============================================================================
 
@@ -205,6 +206,9 @@ class Plugin(indigo.PluginBase):
 
         indigo.server.log(u"Starting OWServer.")
 
+        # =========================== Audit Server Version ============================
+        self.Fogbert.audit_server_version(min_ver=7)
+
     # =============================================================================
     def validatePrefsConfigUi(self, valuesDict):
 
@@ -235,8 +239,9 @@ class Plugin(indigo.PluginBase):
                         if part < 0 or part > 255:
                             error_msg_dict['OWServerIP'] = u"You have entered a value out of range (not 0-255)."
                             return False, valuesDict, error_msg_dict
-                    except ValueError as error:
-                        error_msg_dict['OWServerIP'] = u"You have entered an IP address that contains a non-numeric character."
+                    except ValueError:
+                        error_msg_dict['OWServerIP'] = u"You have entered an IP address that contains a non-numeric " \
+                                                       u"character."
                         return False, valuesDict, error_msg_dict
 
         return True
@@ -264,8 +269,8 @@ class Plugin(indigo.PluginBase):
             socket.setdefaulttimeout(time_out)
             f = urllib2.urlopen(write_url)
             f.close()
-        except Exception as error:
-            self.errorLog(u"{0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
 
         self.debugLog(u"Write to server URL: {0}".format(write_url))
         return
@@ -297,8 +302,8 @@ class Plugin(indigo.PluginBase):
             socket.setdefaulttimeout(time_out)
             f = urllib2.urlopen(write_url)
             f.close()
-        except Exception as error:
-            self.errorLog(u"{0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
 
         self.debugLog(u"Write to server URL: {0}".format(write_url))
         return
@@ -402,11 +407,13 @@ class Plugin(indigo.PluginBase):
 
         # What happens if we're unsuccessful.
         except urllib2.HTTPError as error:
-            self.errorLog(u"HTTP error writing server data: {0}".format(error.reason))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"HTTP error writing server data.")
             error_msg_dict['writeToServer'] = u"{0}".format(error.reason)
             return False, valuesDict, error_msg_dict
         except IOError as error:  # TODO: Check to see if these are IOErrors.
-            self.errorLog(u"Exception error getting server data: {0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Exception error getting server data.")
             # (no number, timed out)
             # (51, Network is unreachable) - OWServer has no LAN access
             # (50, Network is down) - EDS hardware offline
@@ -414,9 +421,9 @@ class Plugin(indigo.PluginBase):
             error_msg_dict['writeToServer'] = u"{0}".format(error)
             return False, valuesDict, error_msg_dict
         except Exception as error:
-            self.errorLog(u"Misc. error downloading details.xml file. If the problem persists, please enable debugging in the OWServer "
-                          u"configuration dialog and check user forum for more information.")
-            self.errorLog(u"Reason: {0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Misc. error downloading details.xml file. If the problem persists, please enable debugging "
+                          u"in the OWServer configuration dialog and check user forum for more information.")
             error_msg_dict['writeToServer'] = u"{0}".format(error)
             return False, valuesDict, error_msg_dict
 
@@ -462,9 +469,9 @@ class Plugin(indigo.PluginBase):
 
                 ows_xml = ''
 
-            except Exception as error:
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
                 self.errorLog(u"Can't dump XML to log. Check server connection.")
-                self.errorLog(u"Reason: {0}".format(error))
                 pass
 
         return True
@@ -497,17 +504,19 @@ class Plugin(indigo.PluginBase):
 
         # What happens if we're unsuccessful.
         except urllib2.HTTPError as error:
-            self.errorLog(u"HTTP error getting server data: {0}".format(error.reason))
-        except IOError as error:
-            self.errorLog(u"Exception error getting server data: {0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"HTTP error getting server data.")
+        except IOError:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Error getting server data.")
             # (no number, timed out)
             # (51, Network is unreachable) - OWServer has no LAN access
             # (50, Network is down) - EDS hardware offline
             # (54, Connection reset by peer) - EDS hardware offline
-        except Exception as error:
-            self.errorLog(u"Misc. error downloading details.xml file. If the problem persists, please enable debugging in the OWServer "
-                          u"configuration dialog and check user forum for more information.")
-            self.errorLog(u"Reason: {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Misc. error downloading details.xml file. If the problem persists, please enable debugging "
+                          u"in the OWServer configuration dialog and check user forum for more information.")
 
     # =============================================================================
     def getSensorList(self, filter="indigo.sensor", typeId=0, valuesDict=None, targetId=0):
@@ -557,9 +566,9 @@ class Plugin(indigo.PluginBase):
                 # Sort the list (to make it easy to find the ROM ID needed), and return the list.
                 sorted_sensor_list = sorted(sensor_id_list)
 
-            except Exception as error:
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
                 self.debugLog(u"Error reading sensor data from servers.")
-                self.errorLog(u"Reason: {0}".format(error))
                 sorted_sensor_list = [u"Error reading data from servers."]
 
         return sorted_sensor_list
@@ -627,7 +636,7 @@ class Plugin(indigo.PluginBase):
                     self.errorLog(u"The network is unreachable.")
                     response = ""
                 else:
-                    self.errorLog(u"{0}".format(e))
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
                     response = ""
 
     # =============================================================================
@@ -646,8 +655,9 @@ class Plugin(indigo.PluginBase):
         for dev in indigo.devices.itervalues("self"):
             try:
                 indigo.device.enable(dev, value=False)
-            except Exception as error:
-                self.errorLog(u"Unable to kill communication with all devices. Reason: {0}".format(error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.errorLog(u"Unable to kill communication with all devices.")
 
     # =============================================================================
     def unkillAllComms(self):
@@ -665,8 +675,9 @@ class Plugin(indigo.PluginBase):
         for dev in indigo.devices.itervalues("self"):
             try:
                 indigo.device.enable(dev, value=True)
-            except Exception as error:
-                self.errorLog(u"Unable to enable communication with all devices. Reason: {0}".format(error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.errorLog(u"Unable to enable communication with all devices.")
 
     # =============================================================================
     def romIdGenerator(self, filter="indigo.sensor", valuesDict=None, typeId=0, targetId=0):
@@ -684,12 +695,13 @@ class Plugin(indigo.PluginBase):
         """
         self.debugLog(u"romIdGenerator() method called.")
 
-        # This is a placeholder for future functionality. Not sure it's possible to return the list of ROM IDs specific to the server IP selected as it hasn't been returned to the
-        # device dict yet.
+        # This is a placeholder for future functionality. Not sure it's possible to return the list of ROM IDs
+        # specific to the server IP selected as it hasn't been returned to the device dict yet.
 
         indigo.server.log(u"{0}".format(indigo.devices[typeId].pluginProps['serverList']))
 
-        # this is not in the dict for a new device. could have the user save the device and then come back, but that's kludgy.
+        # this is not in the dict for a new device. could have the user save the device and then come back, but that's
+        # kludgy.
 
     # =============================================================================
     def spotDeadSensors(self):
@@ -725,8 +737,9 @@ class Plugin(indigo.PluginBase):
                     self.errorLog(u"{0} hasn't been updated in {1}. If this condition persists, check it's connection.".format(dev.name, diff_time))
                     try:
                         dev.updateStateOnServer('onOffState', value=False, uiValue="")
-                    except Exception as error:
-                        self.errorLog(u"Unable to spot dead sensors. Reason: {0}".format(error))
+                    except Exception:
+                        self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                        self.errorLog(u"Unable to spot dead sensors.")
 
     # =============================================================================
     def humidexConvert(self, ows_humidex):
@@ -749,8 +762,9 @@ class Plugin(indigo.PluginBase):
             ows_humidex = (format_humidex % ows_humidex)
             return ows_humidex
 
-        except Exception as error:
-            self.errorLog(u"Error formatting humidex value. Returning value unchanged. Reason: {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Error formatting humidex value. Returning value unchanged.")
             return ows_humidex
 
     # =============================================================================
@@ -774,8 +788,9 @@ class Plugin(indigo.PluginBase):
             ows_humidity    = (format_humidity % ows_humidity)
             return ows_humidity
 
-        except Exception as error:
-            self.errorLog(u"Error formatting humidity value. Returning value unchanged. Reason: {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Error formatting humidity value. Returning value unchanged.")
             return ows_humidity
 
     # =============================================================================
@@ -799,8 +814,9 @@ class Plugin(indigo.PluginBase):
             ows_pressure = (format_pressure % ows_pressure)
             return ows_pressure
 
-        except Exception as error:
-            self.errorLog(u"Error formatting pressure value. Returning value unchanged. Reason: {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
+            self.errorLog(u"Error formatting pressure value. Returning value unchanged.")
             return ows_pressure
 
     # =============================================================================
@@ -872,8 +888,9 @@ class Plugin(indigo.PluginBase):
             for key, value in server_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=root.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -885,8 +902,9 @@ class Plugin(indigo.PluginBase):
                     input_value = u"{0} sensors".format(devices_connected)
                 dev.updateStateOnServer('onOffState', value=True, uiValue=input_value)
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
                 dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
 
@@ -900,9 +918,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next server if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Server update failure. Check settings.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -932,8 +950,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -943,8 +962,9 @@ class Plugin(indigo.PluginBase):
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.tempConvert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -962,9 +982,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -994,8 +1014,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1005,8 +1026,8 @@ class Plugin(indigo.PluginBase):
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.tempConvert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1024,9 +1045,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1049,8 +1070,9 @@ class Plugin(indigo.PluginBase):
             for key, value in DS2406_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1071,8 +1093,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1088,9 +1111,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1113,8 +1136,9 @@ class Plugin(indigo.PluginBase):
             for key, value in DS2408_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1188,8 +1212,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1208,9 +1233,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1233,9 +1258,9 @@ class Plugin(indigo.PluginBase):
             for key, value in DS2423_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error\
-                        :
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1249,8 +1274,9 @@ class Plugin(indigo.PluginBase):
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1267,9 +1293,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1299,8 +1325,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1310,8 +1337,9 @@ class Plugin(indigo.PluginBase):
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.tempConvert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1328,9 +1356,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1353,8 +1381,9 @@ class Plugin(indigo.PluginBase):
             for key, value in DS2450_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1372,8 +1401,9 @@ class Plugin(indigo.PluginBase):
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1407,9 +1437,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1439,8 +1469,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1473,8 +1504,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1493,9 +1525,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1525,8 +1557,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1575,8 +1608,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1603,9 +1637,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1635,8 +1669,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1677,8 +1712,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1701,9 +1737,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1733,8 +1769,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1770,8 +1807,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1792,9 +1830,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1825,8 +1863,9 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=input_value)
                     else:
                         dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1886,8 +1925,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -1937,9 +1977,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1962,8 +2002,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0070_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -1990,8 +2031,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2010,9 +2052,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2035,8 +2077,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0071_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2067,8 +2110,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2091,9 +2135,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2116,8 +2160,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0080_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2172,8 +2217,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2206,9 +2252,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2231,8 +2277,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0082_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2285,8 +2332,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2319,9 +2367,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2344,8 +2392,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0083_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2382,8 +2431,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2408,9 +2458,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2433,8 +2483,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0085_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2471,8 +2522,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2497,9 +2549,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2522,8 +2574,9 @@ class Plugin(indigo.PluginBase):
             for key, value in EDS0090_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=owsSensor.find(self.xmlns + value).text)
-                except Exception as error:
-                    self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+                except Exception:
+                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                     self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
@@ -2571,8 +2624,9 @@ class Plugin(indigo.PluginBase):
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
-            except Exception as error:
-                self.debugLog(u"Unable to update device state on server. Device: {0}, Reason: {1}".format(dev.name, error))
+            except Exception:
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
                 dev.updateStateOnServer('sensorValue', value=u"Unsupported", uiValue=u"Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -2631,9 +2685,9 @@ class Plugin(indigo.PluginBase):
             self.debugLog(u"Success. Polling next sensor if appropriate.")
             return True
 
-        except Exception as error:
+        except Exception:
             self.errorLog(u"Sensor update failure. Check connection.")
-            self.errorLog(u"{0}".format(error))
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -3641,8 +3695,8 @@ class Plugin(indigo.PluginBase):
                 new_var = "1"
             else:
                 self.errorLog(u"Error toggling sensor LED.")
-        except Exception as error:
-                self.errorLog(u"Error toggling sensor LED. {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
 
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "LEDState", new_var)
         self.sendToServer(parm_list)
@@ -3665,8 +3719,8 @@ class Plugin(indigo.PluginBase):
                 new_var = "1"
             else:
                 self.errorLog(u"Error toggling sensor relay.")
-        except Exception as error:
-                self.errorLog(u"Error toggling sensor relay. {0}".format(error))
+        except Exception:
+            self.Fogbert.pluginErrorHandler(traceback.format_exc())
 
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "RelayState", new_var)
         self.sendToServer(parm_list)
@@ -3858,15 +3912,16 @@ class Plugin(indigo.PluginBase):
                             else:
                                 pass
 
-                        except Exception as error:
+                        except Exception:
                             self.errorLog(u"Error in server parsing routine.")
-                            self.errorLog(u"{0}".format(error))
+                            self.Fogbert.pluginErrorHandler(traceback.format_exc())
                             pass
 
-            except Exception as error:
+            except Exception:
                 # There has been a problem reaching the server. "Turn off" all sensors until next successful poll.
                 [dev.updateStateOnServer('onOffState', value=False) for dev in indigo.devices.itervalues("self")]
-                self.errorLog(u"Error parsing sensor states: {0}".format(error))
+                self.Fogbert.pluginErrorHandler(traceback.format_exc())
+                self.errorLog(u"Error parsing sensor states.")
                 self.errorLog(u"Trying again in {0} seconds.".format(pref_poll))
 
         self.debugLog(u"  No more sensors to poll.")
