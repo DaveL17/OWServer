@@ -1,5 +1,8 @@
 OWServer Change Log
 
+v1.0.09
+- Fixes broken link to readme logo.
+
 v1.0.08
 - Better integration of DLFramework.
 
