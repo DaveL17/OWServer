@@ -53,7 +53,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.09'
+__version__   = '1.0.10'
 
 # =============================================================================
 
@@ -888,10 +888,7 @@ class Plugin(indigo.PluginBase):
             for key, value in server_state_dict.iteritems():
                 try:
                     dev.updateStateOnServer(key, value=root.find(self.xmlns + value).text)
-                except Exception:
-                    self.Fogbert.pluginErrorHandler(traceback.format_exc())
-                    self.debugLog(u"Unable to update device state on server. Device: {0}".format(dev.name))
-                    self.debugLog(u"Key: {0} : Value: Unsupported".format(key))
+                except AttributeError:
                     dev.updateStateOnServer(key, value=u"Unsupported")
 
             try:

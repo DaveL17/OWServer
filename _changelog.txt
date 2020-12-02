@@ -1,5 +1,8 @@
 OWServer Change Log
 
+v1.0.10
+- Removes aggressive logging of unsupported data elements for Server devices.
+
 v1.0.09
 - Fixes broken link to readme logo.
 
