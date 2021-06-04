@@ -53,7 +53,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '1.0.10'
+__version__   = '1.0.11'
 
 # =============================================================================
 
@@ -503,9 +503,11 @@ class Plugin(indigo.PluginBase):
             return ows_xml
 
         # What happens if we're unsuccessful.
-        except urllib2.HTTPError as error:
+        except urllib2.HTTPError:
             self.Fogbert.pluginErrorHandler(traceback.format_exc())
             self.errorLog(u"HTTP error getting server data.")
+        except urllib2.URLError:
+            self.errorLog(u"Network is unreachable.")
         except IOError:
             self.Fogbert.pluginErrorHandler(traceback.format_exc())
             self.errorLog(u"Error getting server data.")
@@ -2708,6 +2710,8 @@ class Plugin(indigo.PluginBase):
         parm_list = (valuesDict['serverList'], valuesDict['romID'], "clearAlarms", "0")
         self.sendToServer(parm_list)
 
+    # TODO: All these callbacks can be combined down to one for each type using the
+    #       filter payload value. See Matplotlib Stock Bar as an example.
     # =============================================================================
     def clearBarometricPressureHgHighConditionalSearchState(self, valuesDict, typeId, targetId, filter="indigo.sensor"):
         """
@@ -3917,7 +3921,6 @@ class Plugin(indigo.PluginBase):
             except Exception:
                 # There has been a problem reaching the server. "Turn off" all sensors until next successful poll.
                 [dev.updateStateOnServer('onOffState', value=False) for dev in indigo.devices.itervalues("self")]
-                self.Fogbert.pluginErrorHandler(traceback.format_exc())
                 self.errorLog(u"Error parsing sensor states.")
                 self.errorLog(u"Trying again in {0} seconds.".format(pref_poll))
 
