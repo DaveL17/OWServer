@@ -1,26 +1,37 @@
-#! /usr/bin/env python2.6
-# -*- coding: utf-8 -*-
+# pylint: disable=too-many-lines, line-too-long, invalid-name
 
-'''
+"""
 filename: stateDict.py
 author: DaveL17
 
-stateDict.py is a module designed to support the OWServer plugin for
-Indigo Home Control Server.  The module contains a series of dictionaries
-that contain {'Indigo Device States': 'details.xml key'}. These dictionaries
-are returned to the host plugin for iteration and device state value
+stateDict.py is a module designed to support the OWServer plugin for Indigo Home Control Server.
+The module contains a series of dictionaries that contain {'Indigo Device States': 'details.xml
+key'}. These dictionaries are returned to the host plugin for iteration and device state value
 assignment.
-'''
+"""
 
-import indigo
+try:
+    import indigo  # noqa  pylint: disable=unused-import
+except ImportError:
+    pass
 
 
-class OWServer(object):
+class OWServer():
+    """
+    Title Placeholder
 
+    Body placeholder
+    """
     def __init__(self, plugin):
         self.plugin = plugin
 
-    def serverStateDict(self):
+    @staticmethod
+    def server_state_dict():
+        """
+        Title Placeholder
+
+        Body placeholder
+        """
         server_state_dict = {
             'owsDataErrors': 'DataErrors',
             'owsDataErrorsChannel1': 'DataErrorsChannel1',
@@ -44,9 +55,15 @@ class OWServer(object):
         }
         return server_state_dict
 
-    def DS18B20StateDict(self):
+    @staticmethod
+    def ds18b20_state_dict():
+        """
+        Title Placeholder
 
-        DS18B20_state_dict = {
+        Body placeholder
+        """
+
+        ds18b20_state_dict = {
             'owsChannel': 'Channel',
             'owsFamily': 'Family',
             'owsHealth': 'Health',
@@ -61,11 +78,17 @@ class OWServer(object):
             'owsUserByte2': 'UserByte2'
         }
 
-        return DS18B20_state_dict
+        return ds18b20_state_dict
 
-    def DS18S20StateDict(self):
+    @staticmethod
+    def ds18s20_state_dict():
+        """
+        Title Placeholder
 
-        DS18S20_state_dict ={
+        Body placeholder
+        """
+
+        ds18s20_state_dict = {
             'owsChannel': 'Channel',
             'owsFamily': 'Family',
             'owsHealth': 'Health',
@@ -78,11 +101,17 @@ class OWServer(object):
             'owsUserByte2': 'UserByte2'
         }
 
-        return DS18S20_state_dict
+        return ds18s20_state_dict
 
-    def DS2406StateDict(self):
+    @staticmethod
+    def ds2406_state_dict():
+        """
+        Title Placeholder
 
-        DS2406_state_dict = {
+        Body placeholder
+        """
+
+        ds2406_state_dict = {
             'owsActivityLatch_A': 'ActivityLatch_A',
             'owsActivityLatch_B': 'ActivityLatch_B',
             'owsActivityLatchReset': 'ActivityLatchReset',
@@ -101,11 +130,17 @@ class OWServer(object):
             'owsType': 'Name'
         }
 
-        return DS2406_state_dict
+        return ds2406_state_dict
 
-    def DS2408StateDict(self):
+    @staticmethod
+    def ds2408_state_dict():
+        """
+        Title Placeholder
 
-        DS2408_state_dict = {
+        Body placeholder
+        """
+
+        ds2408_state_dict = {
             'owsChannel': 'Channel',
             'owsFamily': 'Family',
             'owsHealth': 'Health',
@@ -121,11 +156,17 @@ class OWServer(object):
             'owsVccPowerStatus': 'VccPowerStatus'
         }
 
-        return DS2408_state_dict
+        return ds2408_state_dict
 
-    def DS2423StateDict(self):
+    @staticmethod
+    def ds2423_state_dict():
+        """
+        Title Placeholder
 
-        DS2423_state_dict = {
+        Body placeholder
+        """
+
+        ds2423_state_dict = {
             'owsChannel': 'Channel',
             'owsCounterA': 'Counter_A',
             'owsCounterB': 'Counter_B',
@@ -137,11 +178,17 @@ class OWServer(object):
             'owsType': 'Name'
         }
 
-        return DS2423_state_dict
+        return ds2423_state_dict
 
-    def DS2438StateDict(self):
+    @staticmethod
+    def ds2438_state_dict():
+        """
+        Title Placeholder
 
-        DS2438_state_dict = {
+        Body placeholder
+        """
+
+        ds2438_state_dict = {
             'owsChannel': 'Channel',
             'owsFamily': 'Family',
             'owsHealth': 'Health',
@@ -156,11 +203,17 @@ class OWServer(object):
             'owsVsense': 'Vsense'
         }
 
-        return DS2438_state_dict
+        return ds2438_state_dict
 
-    def DS2450StateDict(self):
+    @staticmethod
+    def ds2450_state_dict():
+        """
+        Title Placeholder
 
-        DS2450_state_dict = {
+        Body placeholder
+        """
+
+        ds2450_state_dict = {
         'owsChannel': 'Channel',
         'owsChannelAConversionRange': 'ChannelAConversionRange',
         'owsChannelAConversionResolution': 'ChannelAConversionResolution',
@@ -192,11 +245,17 @@ class OWServer(object):
         'owsVCCControl': 'VCCControl',
         }
 
-        return DS2450_state_dict
+        return ds2450_state_dict
 
-    def EDS0064StateDict(self):
+    @staticmethod
+    def eds0064_state_dict():
+        """
+        Title Placeholder
 
-        EDS0064_state_dict = {
+        Body placeholder
+        """
+
+        eds0064_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter1': 'Counter1',
@@ -223,11 +282,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0064_state_dict
+        return eds0064_state_dict
 
-    def EDS0065StateDict(self):
+    @staticmethod
+    def eds0065_state_dict():
+        """
+        Title Placeholder
 
-        EDS0065_state_dict = {
+        Body placeholder
+        """
+
+        eds0065_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter1': 'Counter1',
@@ -282,11 +347,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0065_state_dict
+        return eds0065_state_dict
 
-    def EDS0066StateDict(self):
+    @staticmethod
+    def eds0066_state_dict():
+        """
+        Title Placeholder
 
-        EDS0066_state_dict = {
+        Body placeholder
+        """
+
+        eds0066_state_dict = {
             'owsBarometricPressureHg': 'BarometricPressureHg',
             'owsBarometricPressureHgHighAlarmState': 'BarometricPressureHgHighAlarmState',
             'owsBarometricPressureHgHighAlarmValue': 'BarometricPressureHgHighAlarmValue',
@@ -327,11 +398,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0066_state_dict
+        return eds0066_state_dict
 
-    def EDS0067StateDict(self):
+    @staticmethod
+    def eds0067_state_dict():
+        """
+        Title Placeholder
 
-        EDS0067_state_dict = {
+        Body placeholder
+        """
+
+        eds0067_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter1': 'Counter1',
@@ -365,11 +442,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0067_state_dict
+        return eds0067_state_dict
 
-    def EDS0068StateDict(self):
+    @staticmethod
+    def eds0068_state_dict():
+        """
+        Title Placeholder
 
-        EDS0068_state_dict = {
+        Body placeholder
+        """
+
+        eds0068_state_dict = {
             'owsBarometricPressureHg': 'BarometricPressureHg',
             'owsBarometricPressureHgHighAlarmState': 'BarometricPressureHgHighAlarmState',
             'owsBarometricPressureHgHighAlarmValue': 'BarometricPressureHgHighAlarmValue',
@@ -445,11 +528,17 @@ class OWServer(object):
             'owsVersion': 'Version'
         }
 
-        return EDS0068_state_dict
+        return eds0068_state_dict
 
-    def EDS0070StateDict(self):
+    @staticmethod
+    def eds0070_state_dict():
+        """
+        Title Placeholder
 
-        EDS0070_state_dict = {
+        Body placeholder
+        """
+
+        eds0070_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter': 'Counter',
@@ -478,11 +567,17 @@ class OWServer(object):
             'owsVibrationPeak': 'VibrationPeak',
         }
 
-        return EDS0070_state_dict
+        return eds0070_state_dict
 
-    def EDS0071StateDict(self):
+    @staticmethod
+    def eds0071_state_dict():
+        """
+        Title Placeholder
 
-        EDS0071_state_dict = {
+        Body placeholder
+        """
+
+        eds0071_state_dict = {
             'owsCalibrationKey': 'CalibrationKey',
             'owsCalibrationValue': 'CalibrationValue',
             'owsChannel': 'Channel',
@@ -521,11 +616,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0071_state_dict
+        return eds0071_state_dict
 
-    def EDS0080StateDict(self):
+    @staticmethod
+    def eds0080_state_dict():
+        """
+        Title Placeholder
 
-        EDS0080_state_dict = {
+        Body placeholder
+        """
+
+        eds0080_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter': 'Counter',
@@ -616,11 +717,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0080_state_dict
+        return eds0080_state_dict
 
-    def EDS0082StateDict(self):
+    @staticmethod
+    def eds0082_state_dict():
+        """
+        Title Placeholder
 
-        EDS0082_state_dict = {
+        Body placeholder
+        """
+
+        eds0082_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter': 'Counter',
@@ -711,11 +818,17 @@ class OWServer(object):
             'owsVersion': 'Version'
         }
 
-        return EDS0082_state_dict
+        return eds0082_state_dict
 
-    def EDS0083StateDict(self):
+    @staticmethod
+    def eds0083_state_dict():
+        """
+        Title Placeholder
 
-        EDS0083_state_dict = {
+        Body placeholder
+        """
+
+        eds0083_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter': 'Counter',
@@ -770,11 +883,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0083_state_dict
+        return eds0083_state_dict
 
-    def EDS0085StateDict(self):
+    @staticmethod
+    def eds0085_state_dict():
+        """
+        Title Placeholder
 
-        EDS0085_state_dict = {
+        Body placeholder
+        """
+
+        eds0085_state_dict = {
             'owsChannel': 'Channel',
             'owsClearAlarms': 'ClearAlarms',
             'owsCounter': 'Counter',
@@ -829,11 +948,17 @@ class OWServer(object):
             'owsVersion': 'Version',
         }
 
-        return EDS0085_state_dict
+        return eds0085_state_dict
 
-    def EDS0090StateDict(self):
+    @staticmethod
+    def eds0090_state_dict():
+        """
+        Title Placeholder
 
-        EDS0090_state_dict = {
+        Body placeholder
+        """
+
+        eds0090_state_dict = {
                 'owsChannel': 'Channel',
                 'owsClearAlarms': 'ClearAlarms',
                 'owsCounter': 'Counter',
@@ -960,4 +1085,4 @@ class OWServer(object):
                 'owsVersion': 'Version',
         }
 
-        return EDS0090_state_dict
+        return eds0090_state_dict

@@ -1422,7 +1422,7 @@ the list.
       <Field id="EDS0064toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0064RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -1439,7 +1439,7 @@ the list.
       <Field id="EDS0064toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0064InputsSeparator" type="separator"/>
@@ -1464,7 +1464,7 @@ the list.
       <Field id="EDS0064TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0064TemperatureLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0064TemperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0064TemperatureLabel" visibleBindingValue="true" readonly="true" 
@@ -1475,7 +1475,7 @@ the list.
       <Field id="EDS0064TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0064TemperatureLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0064clearAlarms" type="button">
@@ -1703,7 +1703,7 @@ the list.
       <Field id="EDS0065toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0065RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -1720,7 +1720,7 @@ the list.
       <Field id="EDS0065toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0065AlarmSeparator" type="separator"/>
@@ -1740,7 +1740,7 @@ the list.
       <Field id="EDS0065DewpointHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065DewpointLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDewpointHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_dewpoint_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065DewPointLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0065DewpointLabel" visibleBindingValue="true" readonly="true" 
@@ -1751,7 +1751,7 @@ the list.
       <Field id="EDS0065DewpointLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065DewpointLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDewpointHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_dewpoint_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HeatIndexLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -1766,7 +1766,7 @@ the list.
       <Field id="EDS0065HeatIndexHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HeatIndexLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHeatIndexHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_heat_index_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HeatIndexLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0065HeatIndexLabel" visibleBindingValue="true" readonly="true" 
@@ -1777,7 +1777,7 @@ the list.
       <Field id="EDS0065HeatIndexLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HeatIndexLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHeatIndexLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_heat_index_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HumidexLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -1792,7 +1792,7 @@ the list.
       <Field id="EDS0065HumidexHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HumidexLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHumidexHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidex_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HumidexLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0065HumidexLabel" visibleBindingValue="true" readonly="true" 
@@ -1803,7 +1803,7 @@ the list.
       <Field id="EDS0065HumidexLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HumidexLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHumidexLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidex_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HumidityLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -1818,7 +1818,7 @@ the list.
       <Field id="EDS0065HumidityHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HumidityLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHumidityHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidity_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065HumidityLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0065HumidityLabel" visibleBindingValue="true" readonly="true" 
@@ -1829,7 +1829,7 @@ the list.
       <Field id="EDS0065HumidityLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HumidityLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHumidityHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidity_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065TemperatureLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -1849,7 +1849,7 @@ the list.
       <Field id="EDS0065TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065TemperatureLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065TemperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0065TemperatureLabel" visibleBindingValue="true" readonly="true" 
@@ -1860,7 +1860,7 @@ the list.
       <Field id="EDS0065TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065TemperatureLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0065clearAlarms" type="button">
@@ -2254,7 +2254,7 @@ the list.
       <Field id="EDS0066toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0066RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -2271,7 +2271,7 @@ the list.
       <Field id="EDS0066toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0066AlarmSeparator" type="separator"/>
@@ -2291,7 +2291,7 @@ the list.
       <Field id="EDS0066BarometricPressureHgHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066BarometricHgLabel" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureHgHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_hg_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066BarometricPressureHgLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0066BarometricHgLabel" visibleBindingValue="true" readonly="true" 
@@ -2302,7 +2302,7 @@ the list.
       <Field id="EDS0066BarometricPressureHgLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066BarometricHgLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureHgLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_hg_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066BarometricMbLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -2317,7 +2317,7 @@ the list.
       <Field id="EDS0066BarometricPressureMbHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066BarometricMbLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureMbHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_mb_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066BarometricPressureMbLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0066BarometricMbLabel" visibleBindingValue="true" readonly="true"
@@ -2328,7 +2328,7 @@ the list.
       <Field id="EDS0066BarometricPressureMbLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066BarometricMbLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureMbLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_mb_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066TemperatureLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -2348,7 +2348,7 @@ the list.
       <Field id="EDS0066TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066TemperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0066TemperatureLabel" visibleBindingValue="true" readonly="true"
@@ -2359,7 +2359,7 @@ the list.
       <Field id="EDS0066TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0066TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0066clearAlarms" type="button">
@@ -2670,7 +2670,7 @@ the list.
       <Field id="EDS0067toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0067RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -2687,7 +2687,7 @@ the list.
       <Field id="EDS0067toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0067AlarmSeparator" type="separator"/>
@@ -2707,7 +2707,7 @@ the list.
       <Field id="EDS0067LightHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0067LightLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearLightHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_light_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0067LightLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0067LightLabel" visibleBindingValue="true" readonly="true"
@@ -2718,7 +2718,7 @@ the list.
       <Field id="EDS0067LightLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0067LightLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearLightLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_light_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0067TemperatureLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -2738,7 +2738,7 @@ the list.
       <Field id="EDS0067TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0067TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0067TemperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0067TemperatureLabel" visibleBindingValue="true" readonly="true"
@@ -2749,7 +2749,7 @@ the list.
       <Field id="EDS0067TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0067TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0067clearAlarms" type="button">
@@ -3024,7 +3024,7 @@ the list.
       <Field id="EDS0068toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0068RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -3041,7 +3041,7 @@ the list.
       <Field id="EDS0068toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0068AlarmSeparator" type="separator"/>
@@ -3061,7 +3061,7 @@ the list.
       <Field id="EDS0068BarometricPressureHgHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068barometricHgLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureHgHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_hg_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068barometricHgLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068barometricHgLabel" visibleBindingValue="true" readonly="true"
@@ -3072,7 +3072,7 @@ the list.
       <Field id="EDS0068BarometricPressureHgLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068barometricHgLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureHgLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_hg_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068barometricMbLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -3087,7 +3087,7 @@ the list.
       <Field id="EDS0068BarometricPressureMbHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068barometricMbLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureMbHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_mb_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068barometricMbLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068barometricMbLabel" visibleBindingValue="true" readonly="true"
@@ -3098,7 +3098,7 @@ the list.
       <Field id="EDS0068BarometricPressureMbLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068barometricMbLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearBarometricPressureMbLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_barometric_pressure_mb_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068dewpointLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -3113,7 +3113,7 @@ the list.
       <Field id="EDS0068DewpointHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068dewpointLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDewpointHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_dewpoint_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068dewpointLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068dewpointLabel" visibleBindingValue="true" readonly="true"
@@ -3124,7 +3124,7 @@ the list.
       <Field id="EDS0068DewpointLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068dewpointLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDewpointLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_dewpoint_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068heatIndexLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -3139,7 +3139,7 @@ the list.
       <Field id="EDS0068HeatIndexHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068heatIndexLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHeatIndexHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_heat_index_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068heatIndexLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068heatIndexLabel" visibleBindingValue="true" readonly="true"
@@ -3150,7 +3150,7 @@ the list.
       <Field id="EDS0068HeatIndexLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068heatIndexLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHeatIndexLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_heat_index_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068humidexLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -3165,7 +3165,7 @@ the list.
       <Field id="EDS0068HumidexHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068humidexLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHumidexHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidex_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068humidexLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068humidexLabel" visibleBindingValue="true" readonly="true"
@@ -3176,7 +3176,7 @@ the list.
       <Field id="EDS0068HumidexLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068humidexLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHumidexLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidex_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068humidityLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -3191,7 +3191,7 @@ the list.
       <Field id="EDS0068HumidityHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068humidityLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearHumidityHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidity_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068humidityLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068humidityLabel" visibleBindingValue="true" readonly="true"
@@ -3202,7 +3202,7 @@ the list.
       <Field id="EDS0068HumidityLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068humidityLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearHumidityLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_humidity_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068lightLabel" type="checkbox" defaultValue="false"
@@ -3218,7 +3218,7 @@ the list.
       <Field id="EDS0068LightHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068lightLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearLightHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_light_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068lightLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068lightLabel" visibleBindingValue="true" readonly="true"
@@ -3229,7 +3229,7 @@ the list.
       <Field id="EDS0068LightLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068lightLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearLightLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_light_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068TemperatureLabel" type="checkbox" defaultValue="false"
@@ -3250,7 +3250,7 @@ the list.
       <Field id="EDS0068TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068temperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0068TemperatureLabel" visibleBindingValue="true" readonly="true"
@@ -3261,7 +3261,7 @@ the list.
       <Field id="EDS0068TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0068TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0068clearAlarms" type="button">
@@ -3786,7 +3786,7 @@ the list.
       <Field id="EDS0070toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0070RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -3803,7 +3803,7 @@ the list.
       <Field id="EDS0070toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0070Separator" type="separator"/>
@@ -3823,7 +3823,7 @@ the list.
       <Field id="EDS0070VibrationHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0070VibrationLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearVibrationHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_vibration_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0070VibrationLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0070VibrationLabel" visibleBindingValue="true" readonly="true"
@@ -3834,7 +3834,7 @@ the list.
       <Field id="EDS0070VibrationLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0070VibrationLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearVibrationLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_vibration_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0070clearAlarms" type="button">
@@ -4072,7 +4072,7 @@ the list.
       <Field id="EDS0071toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0071RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -4089,7 +4089,7 @@ the list.
       <Field id="EDS0071toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0071AlarmSeparator" type="separator"/>
@@ -4109,7 +4109,7 @@ the list.
       <Field id="EDS0071RTDResistanceHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0071RTDResistanceLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearRTDResistanceHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_rtd_resistance_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0071RTDResistanceLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0071RTDResistanceLabel" visibleBindingValue="true" readonly="true"
@@ -4120,13 +4120,13 @@ the list.
       <Field id="EDS0071RTDResistanceLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0071RTDResistanceLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearRTDResistanceLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_rtd_resistance_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0071RTDFaultConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0071RTDResistanceLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the fault conditional search state.">
         <Title>Clear Fault Conditional Search State</Title>
-        <CallbackMethod>clearRTDFaultConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_rtd_fault_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0071CalibrationKey" type="textfield" defaultValue="" visibleBindingId="EDS0071RTDResistanceLabel" visibleBindingValue="true" readonly="true"
@@ -4155,7 +4155,7 @@ the list.
       <Field id="EDS0071TemperatureHighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0071TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureHighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0071TemperatureLowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0071TemperatureLabel" visibleBindingValue="true" readonly="true"
@@ -4166,7 +4166,7 @@ the list.
       <Field id="EDS0071TemperatureLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0071TemperatureLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearTemperatureLowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_temperature_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0071clearAlarms" type="button">
@@ -4470,7 +4470,7 @@ the list.
       <Field id="EDS0080toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0080RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -4487,7 +4487,7 @@ the list.
       <Field id="EDS0080toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0080AlarmSeparator" type="separator"/>
@@ -4507,7 +4507,7 @@ the list.
       <Field id="EDS0080v4to20mAInput1HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input1Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input1HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input1_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput1LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input1Label" visibleBindingValue="true" readonly="true"
@@ -4518,7 +4518,7 @@ the list.
       <Field id="EDS0080v4to20mAInput1LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input1Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input1LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input1_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input2Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4533,7 +4533,7 @@ the list.
       <Field id="EDS0080v4to20mAInput2HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input2Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput2LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input2Label" visibleBindingValue="true" readonly="true"
@@ -4544,7 +4544,7 @@ the list.
       <Field id="EDS0080v4to20mAInput2LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input2Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input2LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input2_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input3Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4559,7 +4559,7 @@ the list.
       <Field id="EDS0080v4to20mAInput3HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input3Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput3LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input3Label" visibleBindingValue="true" readonly="true"
@@ -4570,7 +4570,7 @@ the list.
       <Field id="EDS0080v4to20mAInput3LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input3Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input3LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input3_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input4Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4585,7 +4585,7 @@ the list.
       <Field id="EDS0080v4to20mAInput4HighwConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input4Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input4HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input4_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput4LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input4Label" visibleBindingValue="true" readonly="true"
@@ -4596,7 +4596,7 @@ the list.
       <Field id="EDS0080v4to20mAInput4LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input4Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input4LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input4_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input5Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4611,7 +4611,7 @@ the list.
       <Field id="EDS0080v4to20mAInput5HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input5Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input5HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input5_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput5LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input5Label" visibleBindingValue="true" readonly="true"
@@ -4622,7 +4622,7 @@ the list.
       <Field id="EDS0080v4to20mAInput5LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input5Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input5LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input5_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input6Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4637,7 +4637,7 @@ the list.
       <Field id="EDS0080v4to20mAInput6HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input6Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input6HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input6_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput6LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input6Label" visibleBindingValue="true" readonly="true"
@@ -4648,7 +4648,7 @@ the list.
       <Field id="EDS0080v4to20mAInput6LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input6Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input6LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input6_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input7Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4663,7 +4663,7 @@ the list.
       <Field id="EDS0080v4to20mAInput7HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input7Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input7HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input7_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput7LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input7Label" visibleBindingValue="true" readonly="true"
@@ -4674,7 +4674,7 @@ the list.
       <Field id="EDS0080v4to20mAInput7LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input7Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input7LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input7_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080Input8Label" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -4689,7 +4689,7 @@ the list.
       <Field id="EDS0080v4to20mAInput8HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input8Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input8HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input8_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080v4to20mAInput8LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0080Input8Label" visibleBindingValue="true" readonly="true"
@@ -4700,7 +4700,7 @@ the list.
       <Field id="EDS0080v4to20mAInput8LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0080Input8Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input8LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input8_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0080clearAlarms" type="button">
@@ -5313,7 +5313,7 @@ the list.
       <Field id="EDS0082toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0082RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -5330,7 +5330,7 @@ the list.
       <Field id="EDS0082toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0082AlarmSeparator" type="separator"/>
@@ -5350,7 +5350,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput1HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input1HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input1_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput1LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input1Label" visibleBindingValue="true" readonly="true" 
@@ -5361,7 +5361,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput1LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input1LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input1_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input2Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5376,7 +5376,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput2HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput2LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input2Label" visibleBindingValue="true" readonly="true" 
@@ -5387,7 +5387,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput2LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input2LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input2_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input3Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5402,7 +5402,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput3HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input3HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input3_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput3LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input3Label" visibleBindingValue="true" readonly="true" 
@@ -5413,7 +5413,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput3LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input3LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input3_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input4Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5428,7 +5428,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput4HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input4HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input4_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput4LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input4Label" visibleBindingValue="true" readonly="true" 
@@ -5439,7 +5439,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput4LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input4LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input4_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input5Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5454,7 +5454,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput5HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input5Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input5HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input5_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput5LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input5Label" visibleBindingValue="true" readonly="true" 
@@ -5465,7 +5465,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput5LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input5Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input5LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input5_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input6Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5480,7 +5480,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput6HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input6Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input6HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input6_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput6LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input6Label" visibleBindingValue="true" readonly="true" 
@@ -5491,7 +5491,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput6LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input6Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input6LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input6_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input7Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5506,7 +5506,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput7HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input7Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input7HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input7_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput7LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input7Label" visibleBindingValue="true" readonly="true" 
@@ -5517,7 +5517,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput7LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input7Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input7LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input7_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082Input8Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -5532,7 +5532,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput8HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input8Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input8HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input8_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082v0to10VoltInput8LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0082Input8Label" visibleBindingValue="true" readonly="true" 
@@ -5543,7 +5543,7 @@ the list.
       <Field id="EDS0082v0to10VoltInput8LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0082Input8Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input8LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input8_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0082clearAlarms" type="button">
@@ -6152,7 +6152,7 @@ the list.
       <Field id="EDS0083toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0083RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -6169,7 +6169,7 @@ the list.
       <Field id="EDS0083toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0083AlarmSeparator" type="separator"/>
@@ -6189,7 +6189,7 @@ the list.
       <Field id="EDS0083v4to20mAInput1HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input1HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input1_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083v4to20mAInput1LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0083Input1Label" visibleBindingValue="true" readonly="true" 
@@ -6200,7 +6200,7 @@ the list.
       <Field id="EDS0083v4to20mAInput1LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input1LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input1_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083Input2Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6215,7 +6215,7 @@ the list.
       <Field id="EDS0083v4to20mAInput2HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input2Label" visibleBindingValue="true"
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083v4to20mAInput2LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0083Input2Label" visibleBindingValue="true" readonly="true" 
@@ -6226,7 +6226,7 @@ the list.
       <Field id="EDS0083v4to20mAInput2LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear LOw Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input2LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input2_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083Input3Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6241,7 +6241,7 @@ the list.
       <Field id="EDS0083v4to20mAInput3HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input3HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input3_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083v4to20mAInput3LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0083Input3Label" visibleBindingValue="true" readonly="true" 
@@ -6252,7 +6252,7 @@ the list.
       <Field id="EDS0083v4to20mAInput3LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input3LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input3_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083Input4Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6267,7 +6267,7 @@ the list.
       <Field id="EDS0083v4to20mAInput4HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input4HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input4_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083v4to20mAInput4LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0083Input4Label" visibleBindingValue="true" readonly="true" 
@@ -6278,7 +6278,7 @@ the list.
       <Field id="EDS0083v4to20mAInput4LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0083Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v4Input4LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v4_input4_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0083clearAlarms" type="button">
@@ -6671,7 +6671,7 @@ the list.
       <Field id="EDS0085toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0085RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -6688,7 +6688,7 @@ the list.
       <Field id="EDS0085toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0085AlarmSeparator" type="separator"/>
@@ -6708,7 +6708,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput1HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input1HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input1_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085v0to10VoltInput1LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0085Input1Label" visibleBindingValue="true" readonly="true" 
@@ -6719,7 +6719,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput1LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input1LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input1_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085Input2Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6734,7 +6734,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput2HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085v0to10VoltInput2LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0085Input2Label" visibleBindingValue="true" readonly="true" 
@@ -6745,7 +6745,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput2LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input2LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input2_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085Input3Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6760,7 +6760,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput3HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input3HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input3_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085v0to10VoltInput3LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0085Input3Label" visibleBindingValue="true" readonly="true" 
@@ -6771,7 +6771,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput3LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input3Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input3LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input3_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085Input4Label" type="checkbox" tooltip="Show/Hide advanced settings for this feature.">
@@ -6786,7 +6786,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput4HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input4HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input4_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085v0to10VoltInput4LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0085Input4Label" visibleBindingValue="true" readonly="true" 
@@ -6797,7 +6797,7 @@ the list.
       <Field id="EDS0085v0to10VoltInput4LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0085Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_v0Input4LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_v0_input4_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0085clearAlarms" type="button">
@@ -7197,7 +7197,7 @@ the list.
       <Field id="EDS0090toggleLED" type="button" tooltip="If LED is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor LED</Title>
-        <CallbackMethod>toggleLED</CallbackMethod>
+        <CallbackMethod>toggle_led</CallbackMethod>
       </Field>
         
       <Field id="EDS0090RelayFunction" type="menu" defaultValue="-" tooltip="Please select the desired primary relay function.">
@@ -7214,7 +7214,7 @@ the list.
       <Field id="EDS0090toggleRelay" type="button" tooltip="If relay is on, clicking the button will turn it off (and vice versa.)">
         <Label> </Label>
         <Title>Toggle Sensor Relay</Title>
-        <CallbackMethod>toggleRelay</CallbackMethod>
+        <CallbackMethod>toggle_relay</CallbackMethod>
       </Field>
         
       <Field id="EDS0090AlarmSeparator" type="separator"/>
@@ -7234,7 +7234,7 @@ the list.
       <Field id="EDS0090DiscreteIO1HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO1HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io1_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO1LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input1Label" visibleBindingValue="true" readonly="true" 
@@ -7245,7 +7245,7 @@ the list.
       <Field id="EDS0090DiscreteIO1LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input1Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO1LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io1_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO1PulseCounterReset" type="textfield" defaultValue="" visibleBindingId="EDS0090Input1Label" visibleBindingValue="true" readonly="true" 
@@ -7275,7 +7275,7 @@ the list.
       <Field id="EDS0090DiscreteIO2HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO2HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io2_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO2LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input2Label" visibleBindingValue="true" readonly="true" 
@@ -7286,7 +7286,7 @@ the list.
       <Field id="EDS0090DiscreteIO2LOwConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input2Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO2LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io2_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO2PulseCounterReset" type="textfield" defaultValue="" visibleBindingId="EDS0090Input2Label" visibleBindingValue="true" readonly="true" 
@@ -7316,7 +7316,7 @@ the list.
       <Field id="EDS0090DiscreteIO3HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO3HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io3_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO3LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input3Label" visibleBindingValue="true" readonly="true" 
@@ -7327,7 +7327,7 @@ the list.
       <Field id="EDS0090DiscreteIO3LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input3Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO3LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io3_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO3PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input3Label" visibleBindingValue="true" readonly="true" 
@@ -7352,7 +7352,7 @@ the list.
       <Field id="EDS0090DiscreteIO4HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO4HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io4_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO4LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input4Label" visibleBindingValue="true" readonly="true" 
@@ -7363,7 +7363,7 @@ the list.
       <Field id="EDS0090DiscreteIO4LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input4Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO4LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io4_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO4PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input4Label" visibleBindingValue="true" readonly="true" 
@@ -7388,7 +7388,7 @@ the list.
       <Field id="EDS0090DiscreteIO5HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input5Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO5HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io5_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO5LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input5Label" visibleBindingValue="true" readonly="true" 
@@ -7399,7 +7399,7 @@ the list.
       <Field id="EDS0090DiscreteIO5LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input5Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO5LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io5_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO5PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input5Label" visibleBindingValue="true" readonly="true" 
@@ -7424,7 +7424,7 @@ the list.
       <Field id="EDS0090DiscreteIO6HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input6Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO6HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io6_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO6LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input6Label" visibleBindingValue="true" readonly="true" 
@@ -7435,7 +7435,7 @@ the list.
       <Field id="EDS0090DiscreteIO6LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input6Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO6LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io6_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO6PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input6Label" visibleBindingValue="true" readonly="true" 
@@ -7460,7 +7460,7 @@ the list.
       <Field id="EDS0090DiscreteIO7HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input7Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO7HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io7_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO7LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input7Label" visibleBindingValue="true" readonly="true" 
@@ -7471,7 +7471,7 @@ the list.
       <Field id="EDS0090DiscreteIO7LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input7Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO7LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io7_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO7PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input7Label" visibleBindingValue="true" readonly="true" 
@@ -7496,7 +7496,7 @@ the list.
       <Field id="EDS0090DiscreteIO8HighConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input8Label" visibleBindingValue="true" 
              tooltip="Clicking will clear the high conditional search state.">
         <Title>Clear High Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO8HighConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io8_high_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO8LowAlarmValue" type="textfield" defaultValue="" visibleBindingId="EDS0090Input8Label" visibleBindingValue="true" readonly="true" 
@@ -7507,7 +7507,7 @@ the list.
       <Field id="EDS0090DiscreteIO8LowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0090Input8Label" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clearDiscreteIO8LowConditionalSearchState</CallbackMethod>
+        <CallbackMethod>clear_discrete_io8_low_conditional_search_state</CallbackMethod>
       </Field>
         
       <Field id="EDS0090DiscreteIO8PulldownState" type="textfield" defaultValue="" visibleBindingId="EDS0090Input8Label" visibleBindingValue="true" readonly="true" 

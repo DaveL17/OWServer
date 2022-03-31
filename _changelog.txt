@@ -1,5 +1,11 @@
 OWServer Change Log
 
+v2022.0.1
+- Updates plugin for Indigo 2022.1 and Python 3.
+
+v1.0.12
+- Updates communication to use the requests library.
+
 v1.0.11
 - Logging refinements.
 

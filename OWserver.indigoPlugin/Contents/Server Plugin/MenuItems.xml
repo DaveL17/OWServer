@@ -17,7 +17,7 @@
     <!-- Refresh data for all sensors. -->
     <MenuItem id="refreshSensorsNow">
         <Name>Refresh All Sensors Now</Name>
-        <CallbackMethod>updateDeviceStates</CallbackMethod>
+        <CallbackMethod>updateDeviceStatesMenu</CallbackMethod>
     </MenuItem>
 
     <!-- Write data to select sensors. -->
@@ -27,9 +27,7 @@
         <ConfigUI>
 
             <Field id="instructions" type="label">
-                <Label>This facility allows you to write data to select sensor variables. Only variables designated as writable can be changed. These variables are designated in the
-details.xml file as Writable="True"
-                </Label>
+                <Label>This facility allows you to write data to select sensor variables. Only variables designated as writable can be changed. These variables are designated in the details.xml file as Writable='True'</Label>
             </Field>
 
             <Field id="writeToServer" type="menu">
@@ -68,17 +66,11 @@ details.xml file as Writable="True"
                 <List class="self" filter="" method="getServerList" dynamicReload="true"/>
             </Field>
 
-            <Field id="writeXMLToLog" type="checkbox" defaultValue="False" tooltip="Check this box to write the details.xml data to the log.">
+            <Field id="writeXMLToLog" type="checkbox"
+                   defaultValue="False" tooltip="Check this box to write the details.xml data to the log.">
                 <Label>Write XML to Log:</Label>
-                <List class="self" filter=""/>
             </Field>
 
         </ConfigUI>
-    </MenuItem>
-
-    <!-- Stop/Start debugging. -->
-    <MenuItem id="toggleDebug">
-        <Name>Toggle Debugging</Name>
-        <CallbackMethod>toggleDebugEnabled</CallbackMethod>
     </MenuItem>
 </MenuItems>

@@ -140,44 +140,8 @@
         <Description>Suppress log entries (will still log errors.)</Description>
     </Field>
 
-    <Field id="debugSpacer" type="label"/>
-
-    <Field id="space6" type="label" fontColor="black" alignText="right">
-        <Label>Debug Settings</Label>
-    </Field>
-
-    <Field id="simpleSeparator3" type="separator"/>
-
-    <Field id="displayDebugSettings" type="checkbox" fontColor="black">
-        <Label>Display Settings:</Label>
-        <Description/>
-    </Field>
-
-    <Field id="showDebugInfo" type="checkbox" fontColor="black" visibleBindingId="displayDebugSettings" visibleBindingValue="true">
-        <Label/>
-        <Description>Enable/Disable</Description>
-    </Field>
-
-    <Field id="showDebugLevel" type="menu" defaultValue="1" visibleBindingId="displayDebugSettings" visibleBindingValue="true"
-           tooltip="Controls the amount of debug information written to the log.">
-        <Label>Debug level:</Label>
-        <List>
-            <Option value="1">Low</Option>
-            <Option value="2">Medium</Option>
-            <Option value="3">High</Option>
-        </List>
-    </Field>
-
-    <Field id="space8" type="label" visibleBindingId="displayDebugSettings" visibleBindingValue="true" fontSize="small" alignWithControl="True">
-        <Label>Turn on debugging only when needed. Be careful when posting the output to the forums or other public places as it could expose sensitive information.</Label>
-    </Field>
-
-    <Field id="space9" type="label" visibleBindingId="displayDebugSettings" visibleBindingValue="true" fontSize="mini" alignWithControl="True">
-        <Label>Low - Minimal debugging.
-Medium - All debug logging except sensitive information.
-High - May contain sensitive information.
-        </Label>
-    </Field>
+    <!-- Debugging Template -->
+    <Template file="DLFramework/template_debugging.xml"/>
 
 </PluginConfig>
 
