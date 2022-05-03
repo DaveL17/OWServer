@@ -32,14 +32,10 @@ import xml.etree.ElementTree as eTree
 # Third-party modules
 try:
     import indigo
+#     import pydevd
     import requests
 except ImportError:
     pass
-
-# try:
-#     import pydevd
-# except ImportError:
-#     pass
 
 # My modules
 import DLFramework.DLFramework as Dave  # noqa
@@ -59,11 +55,19 @@ __version__   = '2022.0.1'
 # =============================================================================
 class Plugin(indigo.PluginBase):
     """
-    Title placeholder
+    Standard Indigo Plugin Class
 
-    Body placeholder
+    :param indigo.PluginBase:
     """
     def __init__(self, plugin_id, plugin_display_name, plugin_version, plugin_prefs):
+        """
+        Plugin initialization
+
+        :param str plugin_id:
+        :param str plugin_display_name:
+        :param str plugin_version:
+        :param indigo.Dict plugin_prefs:
+        """
         super().__init__(plugin_id, plugin_display_name, plugin_version, plugin_prefs)
 
         # ============================ Instance Attributes =============================
@@ -83,14 +87,26 @@ class Plugin(indigo.PluginBase):
 
         # =============================== Debug Logging ================================
         log_format = '%(asctime)s.%(msecs)03d\t%(levelname)-10s\t%(name)s.%(funcName)-28s %(msg)s'
-        self.debugLevel = int(self.pluginPrefs.get('showDebugLevel', "30"))
+        self.debug_level = int(self.pluginPrefs.get('showDebugLevel', "30"))
         self.plugin_file_handler.setFormatter(
             logging.Formatter(fmt=log_format, datefmt='%Y-%m-%d %H:%M:%S')
         )
-        self.indigo_log_handler.setLevel(self.debugLevel)
+        self.indigo_log_handler.setLevel(self.debug_level)
 
         if self.pluginPrefs['showDebugLevel'] not in (10, 20, 30, 40, 50):
             self.pluginPrefs['showDebugLevel'] = 30
+
+        # ============================= Remote Debugging ==============================
+        # try:
+        #     pydevd.settrace(
+        #         'localhost',
+        #         port=5678,
+        #         stdoutToServer=True,
+        #         stderrToServer=True,
+        #         suspend=False
+        #     )
+        # except:
+        #     pass
 
         self.plugin_is_initializing = False
 
@@ -108,37 +124,51 @@ class Plugin(indigo.PluginBase):
     # =============================================================================
     def closedDeviceConfigUi(self, values_dict, user_cancelled, type_id, dev_id):  # noqa
         """
-        Title Placeholder
+        Standard Indigo method called when device preferences dialog is closed.
 
         :param indigo.Dict values_dict:
-        :param Bool user_cancelled:
+        :param bool user_cancelled:
         :param str type_id:
         :param int dev_id:
         :return:
         """
         self.logger.debug('closedDeviceConfigUi() method called:')
-
-        if user_cancelled:
+        if not user_cancelled:
+            self.logger.debug("closedDeviceConfigUi()")
+        else:
             self.logger.debug("Device configuration cancelled.")
 
     # =============================================================================
-    def closedPrefsConfigUi(self, values_dict, user_cancelled):  # noqa
+    def closedPrefsConfigUi(self, values_dict=None, user_cancelled=None):  # noqa
         """
-        Title Placeholder
+        Standard Indigo method called when plugin preferences dialog is closed.
 
         :param indigo.Dict values_dict:
-        :param Bool user_cancelled:
+        :param bool user_cancelled:
         :return:
         """
-        self.logger.debug("Plugin config dialog window closed.")
+        if not user_cancelled:
+            # Ensure that self.pluginPrefs includes any recent changes.
+            for k in values_dict:
+                self.pluginPrefs[k] = values_dict[k]
 
-        if user_cancelled:
-            self.logger.debug("User prefs dialog cancelled.")
+            # Debug Logging
+            self.debug_level = int(values_dict.get('showDebugLevel', "30"))
+            self.indigo_log_handler.setLevel(self.debug_level)
+            indigo.server.log(
+                f"Debugging on (Level: {DEBUG_LABELS[self.debug_level]} ({self.debug_level})"
+            )
 
-            self.logger.debug("User prefs saved.")
-
-            # Finally, update all device states upon close
+            # Plugin-specific actions
+            # Update all device states upon close
             self.updateDeviceStates()
+
+            self.logger.debug("Plugin prefs saved.")
+
+        else:
+            self.logger.debug("Plugin prefs cancelled.")
+
+        return values_dict
 
     # =============================================================================
     def deviceStartComm(self, dev):  # noqa

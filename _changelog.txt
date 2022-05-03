@@ -2,6 +2,7 @@ OWServer Change Log
 
 v2022.0.1
 - Updates plugin for Indigo 2022.1 and Python 3.
+- Standardizes Indigo method implementation.
 
 v1.0.12
 - Updates communication to use the requests library.
@@ -27,8 +28,7 @@ v1.0.06
 
 v1.0.05
 - Updates plist link to wiki.
-- Updates plugin update checker to use curl to overcome outdated security of
-  Apple's Python install.
+- Updates plugin update checker to use curl to overcome outdated security of Apple's Python install.
 
 v1.0.04
 - Code consolidation using DLFramework.
@@ -38,9 +38,8 @@ v1.0.04
 v1.0.03
 - Stylistic changes to Indigo Plugin Update Checker module.
 - Improves code used to write sensor data to the Indigo Logs folder.
-- Standardizes plugin menu item styles. Menu items with an ellipsis (...)
-  denote that a dialog box will open. Menu items without an ellipsis denote
-  that the plugin will take immediate action.
+- Standardizes plugin menu item styles. Menu items with an ellipsis (...) denote that a dialog box will open. Menu
+  items without an ellipsis denote that the plugin will take immediate action.
 
 v1.0.02
 - Moves support URL to Github.
@@ -58,8 +57,7 @@ v0.8.3
 - Updates error trapping for future functionality.
 
 v0.8.2
-- Fixes bug that will cause new installations to fail when setting up
-  plugin configuration for the first time.
+- Fixes bug that will cause new installations to fail when setting up plugin configuration for the first time.
 
 v0.8.1
 - UI refinements.
@@ -76,24 +74,17 @@ v0.8.0
   Adds support for EDS0085 (Quad 0-10 Volt Input)
   Adds support for EDS0090 (Octal Discrete IO)
 - Adds config setting for sensors with/without optional relay.
-- Adds temperature adjustment field to allow for fine-tuning
-  sensor temperature values (value in °C.) For example, entering a
-  value of -1 will adjust the temperature reading by -1°C or by -1.8°F.
+- Adds temperature adjustment field to allow for fine-tuning sensor temperature values (value in °C.) For example,
+  entering a value of -1 will adjust the temperature reading by -1°C or by -1.8°F.
 - Adds Indigo Action item to update all sensor devices.
 - Adds Indigo Action item to send command to a 1-Wire device.
 - Adds Indigo Menu item to send command to a 1-Wire device.
-- Updates DS2408 to allow selection of switches 0-7 as the primary
-  sensor display value.
-- Implements Indigo custom device state icons for all switches,
-  relays, and LED states to reflect on or off.
-- Fixes bug where some devices did not properly track LED and Relay
-  states.
-- Moves server communication test from plugin configuration menu to
-  the Indigo plugin menu (reduces clicks to run the test) and allows
-  user to send XML output to the Indigo log (useful when trouble-
-  shooting problems.)
-- Reorders sensor list by sensor number rather than name for easier
-  identification.
+- Updates DS2408 to allow selection of switches 0-7 as the primary sensor display value.
+- Implements Indigo custom device state icons for all switches, relays, and LED states to reflect on or off.
+- Fixes bug where some devices did not properly track LED and Relay states.
+- Moves server communication test from plugin configuration menu to the Indigo plugin menu (reduces clicks to run the
+  test) and allows user to send XML output to the Indigo log (useful when trouble-shooting problems.)
+- Reorders sensor list by sensor number rather than name for easier identification.
 - Code enhancements:
     - Fixes some device state data types.
     - Simplifies configuration validation code.
@@ -103,8 +94,7 @@ v0.8.0
 
 v0.7.02
 - Refines logging of device update status for OW-Server-ENET (Rev. 1)
-- Refines device states to account for differences in OW-Server_ENET
-  (Rev 1 and Rev 2) servers.
+- Refines device states to account for differences in OW-Server_ENET (Rev 1 and Rev 2) servers.
 - Refines compliance with PEP8.
 
 v0.7.01
@@ -113,8 +103,7 @@ v0.7.01
 - Adds menu items to enable/disable all OWS devices.
 - Adds Indigo custom device icon enumeration
       (device list, Indigo Touch, etc.)
-- Adds configuration option to suppress results logging (still logs
-  errors.)
+- Adds configuration option to suppress results logging (still logs errors.)
 - Code Refinements:
     - Refines configuration dialogs.
     - Improves Unicode support.
@@ -124,13 +113,11 @@ v0.7.01
     - Improves debug logging implementation.
     - Minor improvement to built-in timer accuracy.
 - Fixes bug in display precision routine.
-- Fixes bug where new (unconfigured) devices are reported as being
-  offline.
+- Fixes bug where new (unconfigured) devices are reported as being offline.
 - Fixes bug in debug logging.
 
 v0.7.0
-- WARNING! This update may require users to delete and reassign all
-  existing sensor devices.
+- WARNING! This update may require users to delete and reassign all existing sensor devices.
 	- Adds a new device type to represent the OW server itself.
 	- Significant rewrite of device code including support for numerous
       new sensor types.
@@ -151,8 +138,7 @@ v0.6.93
 v0.6.92
 - Adds support for DS2450 Quad A/D Converter.
 - Consolidates parsing functions.
-- Fixes bug in "Test the IP Address" method within the plugin config
-  dialog.
+- Fixes bug in "Test the IP Address" method within the plugin config dialog.
 
 v0.6.91
 - Code refined to account for unicode characters where possible.
@@ -161,12 +147,10 @@ v0.6.9
 - Fixes bug in temperature conversion routine for metric installations.
 
 v0.6.8
-- Adds plugin menu items for instant version update checking and for
-  debug toggling.
+- Adds plugin menu items for instant version update checking and for debug toggling.
 
 v0.6.7
-- Fixes a problem with plugin package naming structure that can cause
-  problems in some installations. 
+- Fixes a problem with plugin package naming structure that can cause problems in some installations.
 
 v0.6.6
 - Includes additional sensor types.
@@ -199,24 +183,19 @@ v0.5.1
 
 v0.5.0
 - Addressed condition where no devices of type exist.
-- Addressed condition where there are more devices than sensors to
-  assign.
+- Addressed condition where there are more devices than sensors to assign.
 - Addressed condition where no plugin preferences file exists.
 - Assign default values to plugin prefs if pluginPrefs doesn’t exist.
 - Added placeholder to configUI for HA7Net.
 
 v0.4.0
-- Major rewrite of code writing sensor values to devices based on
-  romID.
-- Added preference for temperature display value precision to plugin
-  config.
-- Added placeholder for ‘Send Status Request’ callback
-  (actionControlCenter).
+- Major rewrite of code writing sensor values to devices based on romID.
+- Added preference for temperature display value precision to plugin config.
+- Added placeholder for ‘Send Status Request’ callback (actionControlCenter).
 
 v0.3.0
 - Temperature conversions moved to method.
-- Refined sensorArray to show only unassigned devices when adding
-  new sensors.
+- Refined sensorArray to show only unassigned devices when adding new sensors.
 
 v0.2.2
 - Add XML dump to config menu.
