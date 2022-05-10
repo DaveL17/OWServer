@@ -1,5 +1,8 @@
 OWServer Change Log
 
+v2022.0.2
+- Bumps version number.
+
 v2022.0.1
 - Updates plugin for Indigo 2022.1 and Python 3.
 - Standardizes Indigo method implementation.
