@@ -8,19 +8,11 @@ Plugin for Indigo Home Control Server:
     https://www.indigodomo.com
     https://www.edsproducts.com
 
-The OWServer Plugin loads XML data from one or more EDS 1-Wire servers, interprets the information,
-and makes it available for plugin-supported devices. The plugin supports the following server types:
-
-    OW-SERVER-ENET
-    OW-SERVER-WiFi
-    OW-SERVER-ENET2
-    OW-SERVER-WiFi-2G
-
-The plugin does _not_ support the HTML-based output of the HA7NET server.
+The OWServer Plugin loads XML data from one or more EDS 1-Wire servers, interprets the information, and makes it
+available for plugin-supported devices. The plugin supports the OW-SERVER-ENET, OW-SERVER-WiFi, OW-SERVER-ENET2, and
+OW-SERVER-WiFi-2G server types. The plugin does _not_ support the HTML-based output of the HA7NET server.
 """
 
-# =================================== TODOS ===================================
-# TODO -
 # ================================== IMPORTS ==================================
 # Built-in modules
 import datetime as dt
@@ -30,10 +22,10 @@ import socket
 import xml.etree.ElementTree as eTree
 
 # Third-party modules
+import requests  # noqa - included in the standard Indigo python install
 try:
     import indigo
 #     import pydevd
-    import requests
 except ImportError:
     pass
 
@@ -49,7 +41,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2022.0.1'
+__version__   = '2022.0.3'
 
 
 # =============================================================================
@@ -82,15 +74,11 @@ class Plugin(indigo.PluginBase):
 
         # ========================== Initialize DLFramework ===========================
         self.Fogbert = Dave.Fogbert(self)
-        # Log pluginEnvironment information when plugin is first started
-        self.Fogbert.pluginEnvironment()
 
         # =============================== Debug Logging ================================
-        log_format = '%(asctime)s.%(msecs)03d\t%(levelname)-10s\t%(name)s.%(funcName)-28s %(msg)s'
+        log_format = '%(asctime)s.%(msecs)03d\t%(levelname)-10s\t%(name)s.%(funcName)-28s %(message)s'
         self.debug_level = int(self.pluginPrefs.get('showDebugLevel', "30"))
-        self.plugin_file_handler.setFormatter(
-            logging.Formatter(fmt=log_format, datefmt='%Y-%m-%d %H:%M:%S')
-        )
+        self.plugin_file_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt='%Y-%m-%d %H:%M:%S'))
         self.indigo_log_handler.setLevel(self.debug_level)
 
         if self.pluginPrefs['showDebugLevel'] not in (10, 20, 30, 40, 50):
@@ -98,17 +86,18 @@ class Plugin(indigo.PluginBase):
 
         # ============================= Remote Debugging ==============================
         # try:
-        #     pydevd.settrace(
-        #         'localhost',
-        #         port=5678,
-        #         stdoutToServer=True,
-        #         stderrToServer=True,
-        #         suspend=False
-        #     )
+        #     pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
         # except:
         #     pass
 
         self.plugin_is_initializing = False
+
+    # ==============================================================================
+    def log_plugin_environment(self):
+        """
+        Log pluginEnvironment information when plugin is first started
+        """
+        self.Fogbert.pluginEnvironment()
 
     # ==============================================================================
     def __del__(self):
@@ -122,7 +111,7 @@ class Plugin(indigo.PluginBase):
     # =============================================================================
     # ============================== Indigo Methods ===============================
     # =============================================================================
-    def closedDeviceConfigUi(self, values_dict, user_cancelled, type_id, dev_id):  # noqa
+    def closedDeviceConfigUi(self, values_dict:indigo.Dict=None, user_cancelled:bool=False, type_id:str="", dev_id:int=0):  # noqa
         """
         Standard Indigo method called when device preferences dialog is closed.
 
@@ -139,7 +128,7 @@ class Plugin(indigo.PluginBase):
             self.logger.debug("Device configuration cancelled.")
 
     # =============================================================================
-    def closedPrefsConfigUi(self, values_dict=None, user_cancelled=None):  # noqa
+    def closedPrefsConfigUi(self, values_dict:indigo.Dict=None, user_cancelled:bool=None):  # noqa
         """
         Standard Indigo method called when plugin preferences dialog is closed.
 
@@ -155,9 +144,7 @@ class Plugin(indigo.PluginBase):
             # Debug Logging
             self.debug_level = int(values_dict.get('showDebugLevel', "30"))
             self.indigo_log_handler.setLevel(self.debug_level)
-            indigo.server.log(
-                f"Debugging on (Level: {DEBUG_LABELS[self.debug_level]} ({self.debug_level})"
-            )
+            indigo.server.log(f"Debugging on (Level: {DEBUG_LABELS[self.debug_level]} ({self.debug_level})")
 
             # Plugin-specific actions
             # Update all device states upon close
@@ -171,7 +158,7 @@ class Plugin(indigo.PluginBase):
         return values_dict
 
     # =============================================================================
-    def deviceStartComm(self, dev):  # noqa
+    def deviceStartComm(self, dev:indigo.Device):  # noqa
         """
         Title Placeholder
 
@@ -266,9 +253,7 @@ class Plugin(indigo.PluginBase):
             for server_ip in split_ip:
                 address_parts = server_ip.split(".")
                 if len(address_parts) != 4:
-                    error_msg_dict['OWServerIP'] = (
-                        "Please enter a valid IP address with four valid parts (0.0.0.0)."
-                    )
+                    error_msg_dict['OWServerIP'] = "Please enter a valid IP address with four valid parts (0.0.0.0)."
                     return False, values_dict, error_msg_dict
 
                 # Each part must be between the values of 0 and 255 (inclusive).
@@ -276,9 +261,7 @@ class Plugin(indigo.PluginBase):
                     try:
                         part = int(part)
                         if part < 0 or part > 255:
-                            error_msg_dict['OWServerIP'] = (
-                                "You have entered a value out of range (not 0-255)."
-                            )
+                            error_msg_dict['OWServerIP'] = ("You have entered a value out of range (not 0-255).")
                             return False, values_dict, error_msg_dict
                     except ValueError:
                         error_msg_dict['OWServerIP'] = (
@@ -295,19 +278,17 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        The sendToServer() method merely logs the url sent to the server for the purposes of
-        confirmation and a signal that the event took place. This is a temporary method which will
-        be removed if it's no longer needed.
+        The sendToServer() method merely logs the url sent to the server for the purposes of confirmation and a signal
+        that the event took place. This is a temporary method which will be removed if it's no longer needed.
 
         :param List val:
         """
-        # https:// is not supported by the EDS server.
-        write_url = (
-            f"http://{val[0]}/devices.htm?rom={val[1]}&variable={val[2]}&value={val[3]}"  # noqa
-        )
+        # The EDS server does not support https://.
+        write_url = f"http://{val[0]}/devices.htm?rom={val[1]}&variable={val[2]}&value={val[3]}"
 
         try:
-            reply = requests.get(write_url)
+            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
+            reply = requests.get(write_url, timeout=time_out)
 
             self.logger.debug(f"Write to server URL: {write_url}")
             self.logger.debug(f"Reply: {reply}")
@@ -320,8 +301,8 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        The sendToServerExternal() method is for scripters to be able to send individual commands
-        to devices through Indigo Python scripts. The syntax for the call is:
+        The sendToServerExternal() method is for scripters to be able to send individual commands to devices through
+        Indigo Python scripts. The syntax for the call is:
         =======================================================================
         pluginId = "com.fogbert.indigoplugin.OWServer"
         plugin = indigo.server.getPlugin(pluginId)
@@ -336,14 +317,15 @@ class Plugin(indigo.PluginBase):
 
         :param indigo.Dict val:
         """
-        server   = val.props.get('server')
-        rom_id   = val.props.get('romId')
-        variable = val.props.get('variable')
-        value    = val.props.get('value')
+        server    = val.props.get('server')
+        rom_id    = val.props.get('romId')
+        variable  = val.props.get('variable')
+        value     = val.props.get('value')
         write_url = f"https://{server}/devices.htm?rom={rom_id}&variable={variable}&value={value}"
 
         try:
-            reply = requests.get(write_url)
+            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
+            reply = requests.get(write_url, timeout=time_out)
             self.logger.debug(f"Write to server URL: {write_url}")
             self.logger.debug(f"Reply: {reply}")
 
@@ -369,11 +351,10 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        The customWriteToDevice() method is called when a user selects the "Write Value to 1-Wire
-        Device" item from the OWServer Plugin menu. Selecting this menu item causes a dialog to
-        open which asks the user to select the relevant server IP and ROM ID, and enter both the
-        variable to change and the value to write. There is limited error checking (obvious things)
-        but mostly relies on user entering valid information.
+        The customWriteToDevice() method is called when a user selects the "Write Value to 1-Wire Device" item from the
+        OWServer Plugin menu. Selecting this menu item causes a dialog to open which asks the user to select the
+        relevant server IP and ROM ID, and enter both the variable to change and the value to write. There is limited
+        error checking (obvious things) but mostly relies on user entering valid information.
 
         :param indigo.Dict values_dict:
         :param int type_id:
@@ -386,21 +367,17 @@ class Plugin(indigo.PluginBase):
         write_to_variable = values_dict['writeToVariable']  # "writeToVariable" - must be writeable
         write_to_value    = values_dict['writeToValue']     # "writeToValue" - must be decimal
 
-        # We can only write decimal values to 1-Wire devices.  So let's check. We won't change
-        # the value to something that will work but rather let the user know instead.
+        # We can only write decimal values to 1-Wire devices.  So let's check. We won't change the value to something
+        # that will work but rather let the user know instead.
         if write_to_variable == "":
-            error_msg_dict['writeToVariable'] = (
-                "You must specify a value to write to the 1-Wire device."
-            )
+            error_msg_dict['writeToVariable'] = "You must specify a value to write to the 1-Wire device."
             return False, values_dict, error_msg_dict
         elif " " in write_to_variable:
             error_msg_dict['writeToVariable'] = "Variable names cannot contain a space."
             return False, values_dict, error_msg_dict
 
         if write_to_value == "":
-            error_msg_dict['writeToValue'] = (
-                "You must specify a value to write to the 1-Wire device."
-            )
+            error_msg_dict['writeToValue'] = "You must specify a value to write to the 1-Wire device."
             return False, values_dict, error_msg_dict
 
         try:
@@ -419,7 +396,8 @@ class Plugin(indigo.PluginBase):
 
         # Send the URL to the server.
         try:
-            reply = requests.get(write_to_url)
+            time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
+            reply = requests.get(write_to_url, timeout=time_out)
             self.logger.info(f"{write_to_variable}: {write_to_value} written successfully.")
             self.logger.info(f"Reply: {reply}")
             return True
@@ -427,12 +405,12 @@ class Plugin(indigo.PluginBase):
         # TODO - include requests exception handlers?
         # What happens if we're unsuccessful.
         # except urllib2.HTTPError as error:
-        #     self.logger.exception()
+        #     self.logger.exception("General exception:")
         #     self.logger.critical("HTTP error writing server data.")
         #     error_msg_dict['writeToServer'] = f"{error.reason}"
         #     return False, values_dict, error_msg_dict
         except IOError as error:  # TODO: Check to see if these are IOErrors.
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning("Exception error getting server data.")
             # (no number, timed out)
             # (51, Network is unreachable) - OWServer has no LAN access
@@ -441,11 +419,10 @@ class Plugin(indigo.PluginBase):
             error_msg_dict['writeToServer'] = f"{error}"
             return False, values_dict, error_msg_dict
         except Exception as error:
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning(
-                "Misc. error downloading details.xml file. If the problem persists, please enable "
-                "debugging in the OWServer configuration dialog and check user forum for more "
-                "information."
+                "Misc. error downloading details.xml file. If the problem persists, please enable debugging in the "
+                "OWServer configuration dialog and check user forum for more information."
             )
             error_msg_dict['writeToServer'] = f"{error}"
             return False, values_dict, error_msg_dict
@@ -455,10 +432,10 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        dumpXML(self, values_dict): This method grabs a copy of the details.xml file from the
-        server at the specified IP address, parses it, and dumps a copy to a log file. The purpose
-        is for the user to be able to confirm that the 1-Wire server is online and that the plugin
-        can talk to it. Log file is written to the Indigo server logs folder.
+        dumpXML(self, values_dict): This method grabs a copy of the details.xml file from the server at the specified
+        IP address, parses it, and dumps a copy to a log file. The purpose is for the user to be able to confirm that
+        the 1-Wire server is online and that the plugin can talk to it. Log file is written to the Indigo server logs
+        folder.
 
         :param indigo.Dict values_dict:
         :param int type_id:
@@ -472,10 +449,7 @@ class Plugin(indigo.PluginBase):
             try:
                 ows_xml = self.get_details_xml(server_ip)
                 if values_dict['writeXMLToLog']:
-                    file_name = (
-                        f"{indigo.server.getLogsFolderPath()}/{dt.datetime.today().date()} "
-                        f"OWServer.txt"
-                    )
+                    file_name = f"{indigo.server.getLogsFolderPath()}/{dt.datetime.today().date()} OWServer.txt"
                     with open(file_name, "w", encoding='utf-8') as data:
                         data.write("OWServer details.xml Log\n")
                         data.write(f"Written at: {dt.datetime.today()}\n")
@@ -488,7 +462,7 @@ class Plugin(indigo.PluginBase):
                     indigo.server.log(f"OWServer IP: {server_ip} passed.")
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.warning("Can't dump XML to log. Check server connection.")
 
     # =============================================================================
@@ -496,36 +470,30 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        get_details_xml(): This method goes out to the 1-Wire server at the specified OWServerIP
-        address and pulls in a copy of the details.xml file. It doesn't process it any way.
+        get_details_xml(): This method goes out to the 1-Wire server at the specified OWServerIP address and pulls in a
+        copy of the details.xml file. It doesn't process it any way.
 
         :param str server_ip:
         """
         self.logger.debug("get_details_xml() method called.")
 
         try:
-            # https:// not supported by EDS server.
+            # The EDS server does not support https://.
             url      = f"http://{server_ip}/details.xml"  # noqa
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             response = requests.get(url, timeout=time_out)
             self.logger.debug("details.xml file retrieved successfully.")
             return response.text
 
-        # What happens if we're unsuccessful. No connection to Internet, no response from OWServer.
-        # Let's keep trying.
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.Timeout,
-            requests.exceptions.HTTPError
-        ):
+        # What happens if we're unsuccessful. No connection to Internet, no response from OWServer. Let's keep trying.
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError):
             self.logger.warning("Unable to make a successful connection to One Wire Server.")
 
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning(
-                "Misc. error downloading details.xml file. If the problem persists, please enable "
-                "debugging in the OWServer configuration dialog and check user forum for more "
-                "information."
+                "Misc. error downloading details.xml file. If the problem persists, please enable  debugging in the "
+                "OWServer configuration dialog and check user forum for more information."
             )
 
     # =============================================================================
@@ -533,12 +501,11 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        getSensorList(): This method constructs a list of 1-Wire sensors that have  been added to
-        all servers. It's called when the user opens up a device config dialog. If there are no
-        sensors left to assign (they have all been assigned to other devices) then the user is
-        sent a message 'No sensors to add.' This string is necessary to address conditions where
-        the method returns a noneType value instead of a list (Indigo throws an error when this
-        happens.)
+        getSensorList(): This method constructs a list of 1-Wire sensors that have  been added to all servers. It's
+        called when the user opens up a device config dialog. If there are no sensors left to assign (they have all
+        been assigned to other devices) then the user is sent a message 'No sensors to add.' This string is necessary
+        to address conditions where the method returns a noneType value instead of a list (Indigo throws an error when
+        this happens.)
 
         :param str fltr:
         :param str type_id:
@@ -562,16 +529,14 @@ class Plugin(indigo.PluginBase):
                 if self.pluginPrefs['showDebugInfo'] and self.pluginPrefs['showDebugLevel'] >= 3:
                     self.logger.debug(f"{ows_xml}")
 
-                # Build a list of ROM IDs for all 1-Wire sensors on the network. We start  by
-                # parsing out a list of all ROM IDs in the source details.xml file. The resulting
-                # list is called "sensorID_list"
+                # Build a list of ROM IDs for all 1-Wire sensors on the network. We start by parsing out a list of all
+                # ROM IDs in the source details.xml file. The resulting list is called "sensorID_list"
                 for child in root:
                     if "owd_" in child.tag:
                         rom_id = child.find(self.xmlns + 'ROMId')
                         sensor_id_list += [rom_id.text]
 
-                # If the list is empty, there are no ROM IDs in details.xml. Let's proceed with
-                # an empty list.
+                # If the list is empty, there are no ROM IDs in details.xml. Let's proceed with an empty list.
                 if sensor_id_list is None:
                     sensor_id_list = []
 
@@ -579,7 +544,7 @@ class Plugin(indigo.PluginBase):
                 sorted_sensor_list = sorted(sensor_id_list)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug("Error reading sensor data from servers.")
                 sorted_sensor_list = ["Error reading data from servers."]
 
@@ -590,13 +555,12 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        getServerList(): This method provides the callback for defining server devices. It obtains
-        its list of server IP addresses from one of two distinct procedures: (1) automatic server
-        detection, and (2) manual declaration of server IPs. Within the plugin configuration
-        dialog, the user either accepts automatic detection or else enters a comma delimited list
-        of addresses. Despite whichever procedure is used, getServerList() returns a list
-        (sorted_server_list) containing the list of IPs. This list is used to assign IP addresses
-        when the user creates OWServer devices.
+        getServerList(): This method provides the callback for defining server devices. It obtains its list of server
+        IP addresses from one of two distinct procedures: (1) automatic server detection, and (2) manual declaration of
+        server IPs. Within the plugin configuration dialog, the user either accepts automatic detection or else enters
+        a comma delimited list of addresses. Despite whichever procedure is used, getServerList() returns a list
+        (sorted_server_list) containing the list of IPs. This list is used to assign IP addresses when the user creates
+        OWServer devices.
 
         :param str fltr:
         :param str type_id:
@@ -614,26 +578,21 @@ class Plugin(indigo.PluginBase):
             return sorted_server_list
 
         else:
-            # We will ignore everything that responds to our UDP broadcast request unless it has
-            # one of the following in its return.
-            # FIXME - `server_list` is unused. Use it or lose it.
-            server_list = [
-                "OWServer_v2-Enet", "OWServer_v2G-WiFi", "OWServer-Enet", "OW_SERVER-Enet"
-            ]
-
+            # We will ignore everything that responds to our UDP broadcast request unless it has one of the following
+            # in its return.
             try:
                 socket.setdefaulttimeout(0.5)
                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
-                my_socket.sendto("D", ('<broadcast>', 30303))
+                my_socket.sendto("D".encode("utf-8"), ('<broadcast>', 30303))
 
                 while True:
                     response = my_socket.recv(2048)
                     if response.find(b'{') >= 0:
                         response = response[response.find(b'{'):response.find(b'}')+1]
 
-                        # This code removes a comma after the last field, which is sent in some
-                        # older versions of EDS products.
+                        # This code removes a comma after the last field, which is sent in some older versions of EDS
+                        # products.
                         comma_err = response.find(b',\r\n}')
                         if comma_err > 64:
                             response = response[:comma_err] + b'}'
@@ -651,7 +610,7 @@ class Plugin(indigo.PluginBase):
                 if err[0] == 51:
                     self.logger.warning("The network is unreachable.")
                 else:
-                    self.logger.exception()
+                    self.logger.exception("General exception")
                 return sorted(master_list)
 
     # =============================================================================
@@ -677,11 +636,10 @@ class Plugin(indigo.PluginBase):
         """
         Log a warning when a sensor has been offline
 
-        spot_dead_sensors(self): This method compares the time each plugin device was last updated
-        to the current Indigo time. If the difference exceeds a set interval (currently set to 60
-        seconds), then the sensor's onOffState is set to false and an error is thrown to the log.
-        This condition could be for a number of reasons including sensor fail, wiring fail, 1-Wire
-        network collisions, etc.
+        spot_dead_sensors(self): This method compares the time each plugin device was last updated to the current
+        Indigo time. If the difference exceeds a set interval (currently set to 60 seconds), then the sensor's
+        onOffState is set to false and an error is thrown to the log. This condition could be for a number of reasons
+        including sensor fail, wiring fail, 1-Wire network collisions, etc.
         """
         self.logger.debug("spot_dead_sensors() method called.")
 
@@ -689,25 +647,22 @@ class Plugin(indigo.PluginBase):
             if dev.enabled:
                 diff_time = indigo.server.getTime() - dev.lastChanged
                 pref_poll = int(self.pluginPrefs.get('configMenuPollInterval', 900))
-                dead_time = (
-                    dt.timedelta(seconds=pref_poll) +
-                    dt.timedelta(seconds=60)
-                )
+                dead_time = dt.timedelta(seconds=pref_poll) + dt.timedelta(seconds=60)
 
-                # If a sensor has been offline for more than the specified amount of time, throw a
-                # message to the log and mark it offline. Starting with 60 seconds.
+                # If a sensor has been offline for more than the specified amount of time, throw a message to the log
+                # and mark it offline. Starting with 60 seconds.
                 if diff_time <= dead_time:
                     pass
 
                 else:
                     self.logger.warning(
-                        f"{dev.name} hasn't been updated in {diff_time}. If this condition "
-                        f"persists, check it's connection."
+                        f"{dev.name} hasn't been updated in {diff_time}. If this condition persists, check it's "
+                        f"connection."
                     )
                     try:
                         dev.updateStateOnServer('onOffState', value=False, uiValue="")
                     except Exception:  # noqa
-                        self.logger.exception()
+                        self.logger.exception("General exception:")
                         self.logger.warning("Unable to spot dead sensors.")
 
     # =============================================================================
@@ -715,8 +670,8 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        humidex_convert(self): This method converts any humidex values used in the plugin based on
-        user preference: self.pluginPrefs['configMenuHumidexDec'].
+        humidex_convert(self): This method converts any humidex values used in the plugin based on user preference:
+        self.pluginPrefs['configMenuHumidexDec'].
 
         :param str ows_humidex:
         """
@@ -726,11 +681,11 @@ class Plugin(indigo.PluginBase):
             # Format the humidex value to the requested number of decimal places.
             format_humidex = f"%.{self.pluginPrefs.get('configMenuHumidexDec', '1')}f"
             ows_humidex = float(ows_humidex)
-            ows_humidex = (format_humidex % ows_humidex)
+            ows_humidex = format_humidex % ows_humidex
             return ows_humidex
 
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning("Error formatting humidex value. Returning value unchanged.")
             return ows_humidex
 
@@ -739,8 +694,8 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        humidity_convert(self): This method converts any humidity values used in the plugin based on
-        user preference: self.pluginPrefs['configMenuHumidityDec'].
+        humidity_convert(self): This method converts any humidity values used in the plugin based on user preference:
+        self.pluginPrefs['configMenuHumidityDec'].
 
         :param str ows_humidity:
         """
@@ -750,11 +705,11 @@ class Plugin(indigo.PluginBase):
             # Format the humidity value to the requested number of decimal places.
             format_humidity = f"%.{self.pluginPrefs.get('configMenuHumidityDec', '1')}f"
             ows_humidity    = float(ows_humidity)
-            ows_humidity    = (format_humidity % ows_humidity)
+            ows_humidity    = format_humidity % ows_humidity
             return ows_humidity
 
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning("Error formatting humidity value. Returning value unchanged.")
             return ows_humidity
 
@@ -763,8 +718,8 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        pressure_convert(self): This method converts any pressure values used in the plugin based on
-        user preference: self.pluginPrefs['configMenuPressureDec'].
+        pressure_convert(self): This method converts any pressure values used in the plugin based on user preference:
+        self.pluginPrefs['configMenuPressureDec'].
 
         :param float ows_pressure:
         """
@@ -774,11 +729,11 @@ class Plugin(indigo.PluginBase):
             # Format the pressure value to the requested number of decimal places.
             format_pressure = f"%.{self.pluginPrefs.get('configMenuPressureDec', '1')}f"
             ows_pressure = float(ows_pressure)
-            ows_pressure = (format_pressure % ows_pressure)
+            ows_pressure = format_pressure % ows_pressure
             return ows_pressure
 
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
             self.logger.warning("Error formatting pressure value. Returning value unchanged.")
             return ows_pressure
 
@@ -787,9 +742,9 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        temp_convert(self): This method converts any temperature values used in the plugin based on
-        user preference: self.pluginPrefs['configMenuDegreesDec']. This method returns a string
-        that is formatted based on user preferences.
+        temp_convert(self): This method converts any temperature values used in the plugin based on user preference:
+        self.pluginPrefs['configMenuDegreesDec']. This method returns a string that is formatted based on user
+        preferences.
 
         :param float ows_temp:
         """
@@ -800,11 +755,11 @@ class Plugin(indigo.PluginBase):
 
         if self.pluginPrefs.get('configMenuDegrees', 'F') == "C":
             ows_temp = float(ows_temp)
-            ows_temp = (format_temp % ows_temp)
+            ows_temp = format_temp % ows_temp
 
         elif self.pluginPrefs.get('configMenuDegrees', 'F') != "C":
             ows_temp = float(ows_temp) * 1.8000 + 32.00
-            ows_temp = (format_temp % ows_temp)
+            ows_temp = format_temp % ows_temp
 
         return ows_temp
 
@@ -813,9 +768,9 @@ class Plugin(indigo.PluginBase):
         """
         Title Placeholder
 
-        volts_convert(self): This method converts any voltages values used in the plugin based on
-        user preference: self.pluginPrefs['configMenuVoltsDec']. This method returns a string that
-        is formatted based on user preferences.
+        volts_convert(self): This method converts any voltages values used in the plugin based on user preference:
+        self.pluginPrefs['configMenuVoltsDec']. This method returns a string that is formatted based on user
+        preferences.
 
         :param str ows_volts:
         """
@@ -824,7 +779,7 @@ class Plugin(indigo.PluginBase):
         # Format the value to the requested number of decimal places.
         format_volts = f"%.{self.pluginPrefs.get('configMenuVoltsDec', '1')}f"
         ows_volts    = float(ows_volts)
-        ows_volts    = (format_volts % ows_volts)
+        ows_volts    = format_volts % ows_volts
         return ows_volts
 
     # =============================================================================
@@ -864,12 +819,11 @@ class Plugin(indigo.PluginBase):
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
                 dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
-                self.logger.exception()
+                self.logger.exception("General exception:")
 
             new_props = dev.pluginProps
             new_props['address'] = dev.states['owsMACAddress']
             dev.replacePluginPropsOnServer(new_props)
-
             self.number_of_servers += 1
 
             self.logger.debug("Success. Polling next server if appropriate.")
@@ -877,7 +831,7 @@ class Plugin(indigo.PluginBase):
 
         except Exception:  # noqa
             self.logger.critical("Server update failure. Check settings.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -909,10 +863,8 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
@@ -923,27 +875,17 @@ class Plugin(indigo.PluginBase):
                 input_value = self.temp_convert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']          = dev.states['owsRomID']
-            new_props['DS18B20UserByte1'] = ows_sensor.find(self.xmlns + 'UserByte1').text
-            new_props['DS18B20UserByte2'] = ows_sensor.find(self.xmlns + 'UserByte2').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            props = ['UserByte1', 'UserByte2']
+            self.populate_props(dev, props, ows_sensor, "DS18B20")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -975,10 +917,8 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
@@ -993,22 +933,12 @@ class Plugin(indigo.PluginBase):
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']          = dev.states['owsRomID']
-            new_props['DS18S20UserByte1'] = ows_sensor.find(self.xmlns + 'UserByte1').text
-            new_props['DS18S20UserByte2'] = ows_sensor.find(self.xmlns + 'UserByte2').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            props = ['UserByte1', 'UserByte2']
+            self.populate_props(dev, props, ows_sensor, "DS18S20")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1034,40 +964,38 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue2406'] == "I_A":  # Input Level A
-                    input_value = ows_sensor.find(self.xmlns + 'InputLevel_A').text
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2406'] == "I_B":  # Input Level B
-                    input_value = ows_sensor.find(self.xmlns + 'InputLevel_B').text
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                match dev.pluginProps['prefSensorValue2406']:
+                    case "I_A":  # Input Level A
+                        input_value = ows_sensor.find(self.xmlns + 'InputLevel_A').text
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_B":  # Input Level B
+                        input_value = ows_sensor.find(self.xmlns + 'InputLevel_B').text
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             new_props = dev.pluginProps
+            new_props['DS2406ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'ActivityLatchReset').text
             new_props['address'] = dev.states['owsRomID']
-            new_props['DS2406ActivityLatchReset'] = ows_sensor.find(self.xmlns +
-                                                                    'ActivityLatchReset').text
             dev.replacePluginPropsOnServer(new_props)
 
             self.number_of_sensors += 1
@@ -1078,7 +1006,7 @@ class Plugin(indigo.PluginBase):
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1104,117 +1032,89 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                # We need to parse the switch state out of the binary number stored in
-                # PIOOutputLatchState.
+                # We need to parse the switch state out of the binary number stored in PIOOutputLatchState.
                 latch_state     = float(dev.states['owsPIOOutputLatchState'])
                 latch_state_int = int(latch_state)
                 latch_state_bin = int(bin(latch_state_int)[2:])
                 latch_state_str = str(latch_state_bin)
                 latch_state_str = latch_state_str.zfill(8)
 
-                # These states don't exist in the details.xml file. We impute them from
-                # <PIOOutputLatchState>.
-                dev.updateStateOnServer('owsInput1', value=latch_state_str[0])
-                dev.updateStateOnServer('owsInput2', value=latch_state_str[1])
-                dev.updateStateOnServer('owsInput3', value=latch_state_str[2])
-                dev.updateStateOnServer('owsInput4', value=latch_state_str[3])
-                dev.updateStateOnServer('owsInput5', value=latch_state_str[4])
-                dev.updateStateOnServer('owsInput6', value=latch_state_str[5])
-                dev.updateStateOnServer('owsInput7', value=latch_state_str[6])
-                dev.updateStateOnServer('owsInput8', value=latch_state_str[7])
+                # These states don't exist in the details.xml file. We impute them from <PIOOutputLatchState>.
+                for _ in range(0, 8):
+                    dev.updateStateOnServer(f'owsInput{_}', value=latch_state_str[_])
 
-                if dev.pluginProps['prefSensorValue2408'] == "S_0":  # Switch 0
-                    input_value = latch_state_str[7]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_1":  # Switch 1
-                    input_value = latch_state_str[6]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_2":  # Switch 2
-                    input_value = latch_state_str[5]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_3":  # Switch 3
-                    input_value = latch_state_str[4]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_4":  # Switch 4
-                    input_value = latch_state_str[3]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_5":  # Switch 5
-                    input_value = latch_state_str[2]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_6":  # Switch 6
-                    input_value = latch_state_str[1]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue2408'] == "S_7":  # Switch 7
-                    input_value = latch_state_str[0]
-                    if input_value == "0":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                match dev.pluginProps['prefSensorValue2408']:
+                    case "S_0":  # Switch 0
+                        input_value = latch_state_str[7]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_1":  # Switch 1
+                        input_value = latch_state_str[6]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_2":  # Switch 2
+                        input_value = latch_state_str[5]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_3":  # Switch 3
+                        input_value = latch_state_str[4]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_4":  # Switch 4
+                        input_value = latch_state_str[3]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_5":  # Switch 5
+                        input_value = latch_state_str[2]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_6":  # Switch 6
+                        input_value = latch_state_str[1]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "S_7":  # Switch 7
+                        input_value = latch_state_str[0]
+                        if input_value == "0":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address'] = dev.states['owsRomID']
+            props = ['PIOActivityLatchState', 'PIOOutputLatchState', 'PowerOnResetLatch', 'RSTZconfiguration']
 
-            new_props['DS2408PIOActivityLatchState'] = (
-                ows_sensor.find(self.xmlns + 'PIOActivityLatchState').text
-            )
-            new_props['DS2408PIOOutputLatchState'] = (
-                ows_sensor.find(self.xmlns + 'PIOOutputLatchState').text
-            )
-            new_props['DS2408PowerOnResetLatch'] = (
-                ows_sensor.find(self.xmlns + 'PowerOnResetLatch').text
-            )
-            new_props['DS2408RSTZconfiguration'] = (
-                ows_sensor.find(self.xmlns + 'RSTZconfiguration').text
-            )
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "DS2408")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1240,10 +1140,8 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
@@ -1258,7 +1156,7 @@ class Plugin(indigo.PluginBase):
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
@@ -1267,7 +1165,6 @@ class Plugin(indigo.PluginBase):
             new_props = dev.pluginProps
             new_props['address'] = dev.states['owsRomID']
             dev.replacePluginPropsOnServer(new_props)
-
             self.number_of_sensors += 1
 
             dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
@@ -1277,7 +1174,7 @@ class Plugin(indigo.PluginBase):
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1309,10 +1206,8 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
@@ -1323,7 +1218,7 @@ class Plugin(indigo.PluginBase):
                 input_value = self.temp_convert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
@@ -1332,7 +1227,6 @@ class Plugin(indigo.PluginBase):
             new_props = dev.pluginProps
             new_props['address'] = dev.states['owsRomID']
             dev.replacePluginPropsOnServer(new_props)
-
             self.number_of_sensors += 1
 
             dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
@@ -1342,7 +1236,7 @@ class Plugin(indigo.PluginBase):
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1359,6 +1253,13 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateDS2450() method called.")
+        props = [
+            'ChannelAConversionRange', 'ChannelAConversionResolution', 'ChannelAOutputControl', 'ChannelAOutputEnable',
+            'ChannelBConversionRange', 'ChannelBConversionResolution', 'ChannelBOutputControl', 'ChannelBOutputEnable',
+            'ChannelCConversionRange', 'ChannelCConversionResolution', 'ChannelCOutputControl', 'ChannelCOutputEnable',
+            'ChannelDConversionRange', 'ChannelDConversionResolution', 'ChannelDOutputControl', 'ChannelDOutputEnable',
+            'PowerOnReset', 'VCCControl'
+        ]
 
         try:
             ds2450_state_dict = self.state_dict.ds2450_state_dict()
@@ -1368,65 +1269,37 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue2450'] == "C_A":  # Counter A
-                    input_value = ows_sensor.find(self.xmlns + 'ChannelAConversionValue').text
-                elif dev.pluginProps['prefSensorValue2450'] == "C_B":  # Counter B
-                    input_value = ows_sensor.find(self.xmlns + 'ChannelBConversionValue').text
-                elif dev.pluginProps['prefSensorValue2450'] == "C_C":  # Counter C
-                    input_value = ows_sensor.find(self.xmlns + 'ChannelCConversionValue').text
-                elif dev.pluginProps['prefSensorValue2450'] == "C_D":  # Counter D
-                    input_value = ows_sensor.find(self.xmlns + 'ChannelDConversionValue').text
+                match dev.pluginProps['prefSensorValue2450']:
+                    case "C_A":  # Counter A
+                        input_value = ows_sensor.find(self.xmlns + 'ChannelAConversionValue').text
+                    case "C_B":  # Counter B
+                        input_value = ows_sensor.find(self.xmlns + 'ChannelBConversionValue').text
+                    case "C_C":  # Counter C
+                        input_value = ows_sensor.find(self.xmlns + 'ChannelCConversionValue').text
+                    case "C_D":  # Counter D
+                        input_value = ows_sensor.find(self.xmlns + 'ChannelDConversionValue').text
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                            = dev.states['owsRomID']
-            new_props['DS2450ChannelAConversionRange']      = ows_sensor.find(self.xmlns + 'ChannelAConversionRange').text
-            new_props['DS2450ChannelAConversionResolution'] = ows_sensor.find(self.xmlns + 'ChannelAConversionResolution').text
-            new_props['DS2450ChannelAOutputControl']        = ows_sensor.find(self.xmlns + 'ChannelAOutputControl').text
-            new_props['DS2450ChannelAOutputEnable']         = ows_sensor.find(self.xmlns + 'ChannelAOutputEnable').text
-            new_props['DS2450ChannelBConversionRange']      = ows_sensor.find(self.xmlns + 'ChannelBConversionRange').text
-            new_props['DS2450ChannelBConversionResolution'] = ows_sensor.find(self.xmlns + 'ChannelBConversionResolution').text
-            new_props['DS2450ChannelBOutputControl']        = ows_sensor.find(self.xmlns + 'ChannelBOutputControl').text
-            new_props['DS2450ChannelBOutputEnable']         = ows_sensor.find(self.xmlns + 'ChannelBOutputEnable').text
-            new_props['DS2450ChannelCConversionRange']      = ows_sensor.find(self.xmlns + 'ChannelCConversionRange').text
-            new_props['DS2450ChannelCConversionResolution'] = ows_sensor.find(self.xmlns + 'ChannelCConversionResolution').text
-            new_props['DS2450ChannelCOutputControl']        = ows_sensor.find(self.xmlns + 'ChannelCOutputControl').text
-            new_props['DS2450ChannelCOutputEnable']         = ows_sensor.find(self.xmlns + 'ChannelCOutputEnable').text
-            new_props['DS2450ChannelDConversionRange']      = ows_sensor.find(self.xmlns + 'ChannelDConversionRange').text
-            new_props['DS2450ChannelDConversionResolution'] = ows_sensor.find(self.xmlns + 'ChannelDConversionResolution').text
-            new_props['DS2450ChannelDOutputControl']        = ows_sensor.find(self.xmlns + 'ChannelDOutputControl').text
-            new_props['DS2450ChannelDOutputEnable']         = ows_sensor.find(self.xmlns + 'ChannelDOutputEnable').text
-            new_props['DS2450PowerOnReset']                 = ows_sensor.find(self.xmlns + 'PowerOnReset').text
-            new_props['DS2450VCCControl']                   = ows_sensor.find(self.xmlns + 'VCCControl').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "DS2450")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1443,6 +1316,7 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0064() method called.")
+        props = ['LEDFunction', 'RelayFunction', 'TemperatureHighAlarmValue', 'TemperatureLowAlarmValue']
 
         try:
             eds0064_state_dict = self.state_dict.eds0064_state_dict()
@@ -1459,65 +1333,52 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0064'] == "C_1":  # Counter 1
-                    input_value = ows_sensor.find(self.xmlns + 'Counter1').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0064'] == "C_2":  # Counter 2
-                    input_value = ows_sensor.find(self.xmlns + 'Counter2').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0064'] == "LED":  # LED
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0064']:
+                    case "C_1":  # Counter 1
+                        input_value = ows_sensor.find(self.xmlns + 'Counter1').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0064'] == "Relay":  # Relay
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "C_2":  # Counter 2
+                        input_value = ows_sensor.find(self.xmlns + 'Counter2').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0064'] == "T":  # Temperature
-                    ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
-                    comp_val = dev.pluginProps.get('EDS0064TempComp', '0.0')
-                    input_value = float(ows_temp) + float(comp_val)
-                    input_value = self.temp_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
+                    case "LED":  # LED
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0064TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                          = dev.states['owsRomID']
-            new_props['EDS0064LEDFunction']               = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0064RelayFunction']             = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0064TemperatureHighAlarmValue'] = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0064TemperatureLowAlarmValue']  = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0064")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1534,6 +1395,11 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0065() method called.")
+        props = [
+            'DewPointHighAlarmValue', 'DewPointLowAlarmValue', 'HeatIndexHighAlarmValue', 'HeatIndexLowAlarmValue',
+            'HumidexHighAlarmValue', 'HumidexLowAlarmValue', 'HumidityHighAlarmValue', 'HumidityLowAlarmValue',
+            'LEDFunction', 'RelayFunction', 'TemperatureHighAlarmValue', 'TemperatureLowAlarmValue'
+        ]
 
         try:
             eds0065_state_dict = self.state_dict.eds0065_state_dict()
@@ -1550,89 +1416,68 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0065'] == "C_1":  # Counter 1
-                    input_value = ows_sensor.find(self.xmlns + 'Counter1').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "C_2":  # Counter 2
-                    input_value = ows_sensor.find(self.xmlns + 'Counter2').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "DP":  # Dew Point
-                    dew_point = ows_sensor.find(self.xmlns + 'DewPoint').text
-                    input_value = self.temp_convert(dew_point)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "Hu":  # Humidity
-                    humidity = ows_sensor.find(self.xmlns + 'Humidity').text
-                    input_value = self.humidity_convert(humidity)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "Hx":  # Humidex
-                    humidex = ows_sensor.find(self.xmlns + 'Humidex').text
-                    input_value = self.humidex_convert(humidex)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "HI":  # Heat Index
-                    heat_index = ows_sensor.find(self.xmlns + 'HeatIndex').text
-                    input_value = self.temp_convert(heat_index)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "LED":  # LED
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0065']:
+                    case "C_1":  # Counter 1
+                        input_value = ows_sensor.find(self.xmlns + 'Counter1').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "Relay":  # Relay
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "C_2":  # Counter 2
+                        input_value = ows_sensor.find(self.xmlns + 'Counter2').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0065'] == "T":  # Temperature
-                    ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
-                    comp_val = dev.pluginProps.get('EDS0065TempComp', '0.0')
-                    input_value = float(ows_temp) + float(comp_val)
-                    input_value = self.temp_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
+                    case "DP":  # Dew Point
+                        dew_point = ows_sensor.find(self.xmlns + 'DewPoint').text
+                        input_value = self.temp_convert(dew_point)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Hu":  # Humidity
+                        humidity = ows_sensor.find(self.xmlns + 'Humidity').text
+                        input_value = self.humidity_convert(humidity)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Hx":  # Humidex
+                        humidex = ows_sensor.find(self.xmlns + 'Humidex').text
+                        input_value = self.humidex_convert(humidex)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "HI":  # Heat Index
+                        heat_index = ows_sensor.find(self.xmlns + 'HeatIndex').text
+                        input_value = self.temp_convert(heat_index)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0065TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address'] = dev.states['owsRomID']
-            new_props['EDS0065DewPointHighAlarmValue']    = ows_sensor.find(self.xmlns + 'DewPointHighAlarmValue').text
-            new_props['EDS0065DewPointLowAlarmValue']     = ows_sensor.find(self.xmlns + 'DewPointLowAlarmValue').text
-            new_props['EDS0065HeatIndexHighAlarmValue']   = ows_sensor.find(self.xmlns + 'HeatIndexHighAlarmValue').text
-            new_props['EDS0065HeatIndexLowAlarmValue']    = ows_sensor.find(self.xmlns + 'HeatIndexLowAlarmValue').text
-            new_props['EDS0065HumidexHighAlarmValue']     = ows_sensor.find(self.xmlns + 'HumidexHighAlarmValue').text
-            new_props['EDS0065HumidexLowAlarmValue']      = ows_sensor.find(self.xmlns + 'HumidexLowAlarmValue').text
-            new_props['EDS0065HumidityHighAlarmValue']    = ows_sensor.find(self.xmlns + 'HumidityHighAlarmValue').text
-            new_props['EDS0065HumidityLowAlarmValue']     = ows_sensor.find(self.xmlns + 'HumidityLowAlarmValue').text
-            new_props['EDS0065LEDFunction']               = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0065RelayFunction']             = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0065TemperatureHighAlarmValue'] = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0065TemperatureLowAlarmValue']  = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0065")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1649,6 +1494,11 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0066() method called.")
+        props = [
+            'BarometricPressureHgHighAlarmValue', 'BarometricPressureHgLowAlarmValue',
+            'BarometricPressureMbHighAlarmValue', 'BarometricPressureMbLowAlarmValue', 'LEDFunction', 'RelayFunction',
+            'TemperatureHighAlarmValue', 'TemperatureLowAlarmValue'
+        ]
 
         try:
             eds0066_state_dict = self.state_dict.eds0066_state_dict()
@@ -1665,77 +1515,60 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0066'] == "C_1":  # Counter 1
-                    input_value = ows_sensor.find(self.xmlns + 'Counter1').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0066'] == "C_2":  # Counter 2
-                    input_value = ows_sensor.find(self.xmlns + 'Counter2').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0066'] == "BPH":  # Barometric Pressure (Mb)
-                    bph = ows_sensor.find(self.xmlns + 'BarometricPressureHg').text
-                    input_value = self.pressure_convert(bph)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
-                elif dev.pluginProps['prefSensorValue0066'] == "BPM":  # Barometric Pressure (Hg)
-                    bpm = ows_sensor.find(self.xmlns + 'BarometricPressureMb').text
-                    input_value = self.pressure_convert(bpm)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0066'] == "LED":  # LED
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0066']:
+                    case "C_1":  # Counter 1
+                        input_value = ows_sensor.find(self.xmlns + 'Counter1').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0066'] == "Relay":  # Relay
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "C_2":  # Counter 2
+                        input_value = ows_sensor.find(self.xmlns + 'Counter2').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0066'] == "T":  # Temperature
-                    ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
-                    comp_val = dev.pluginProps.get('EDS0066TempComp', '0.0')
-                    input_value = float(ows_temp) + float(comp_val)
-                    input_value = self.temp_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
+                    case "BPH":  # Barometric Pressure (Mb)
+                        bph = ows_sensor.find(self.xmlns + 'BarometricPressureHg').text
+                        input_value = self.pressure_convert(bph)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
+                    case "BPM":  # Barometric Pressure (Hg)
+                        bpm = ows_sensor.find(self.xmlns + 'BarometricPressureMb').text
+                        input_value = self.pressure_convert(bpm)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0066TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                                   = dev.states['owsRomID']
-            new_props['EDS0066BarometricPressureHgHighAlarmValue'] = ows_sensor.find(self.xmlns + 'BarometricPressureHgHighAlarmValue').text
-            new_props['EDS0066BarometricPressureHgLowAlarmValue']  = ows_sensor.find(self.xmlns + 'BarometricPressureHgLowAlarmValue').text
-            new_props['EDS0066BarometricPressureMbHighAlarmValue'] = ows_sensor.find(self.xmlns + 'BarometricPressureMbHighAlarmValue').text
-            new_props['EDS0066BarometricPressureMbLowAlarmValue']  = ows_sensor.find(self.xmlns + 'BarometricPressureMbLowAlarmValue').text
-            new_props['EDS0066LEDFunction']                        = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0066RelayFunction']                      = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0066TemperatureHighAlarmValue']          = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0066TemperatureLowAlarmValue']           = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0066")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1752,6 +1585,10 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0067() method called.")
+        props = [
+            'LEDFunction', 'LightHighAlarmValue', 'LightLowAlarmValue', 'RelayFunction', 'TemperatureHighAlarmValue',
+            'TemperatureLowAlarmValue'
+        ]
 
         try:
             eds0067_state_dict = self.state_dict.eds0067_state_dict()
@@ -1768,70 +1605,55 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0067'] == "C_1":  # Counter 1
-                    input_value = ows_sensor.find(self.xmlns + 'Counter1').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0067'] == "C_2":  # Counter 2
-                    input_value = ows_sensor.find(self.xmlns + 'Counter2').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0067'] == "IL":  # Illumination
-                    input_value = ows_sensor.find(self.xmlns + 'Light').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
-                elif dev.pluginProps['prefSensorValue0067'] == "LED":  # LED
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0067']:
+                    case "C_1":  # Counter 1
+                        input_value = ows_sensor.find(self.xmlns + 'Counter1').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0067'] == "Relay":  # Relay
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "C_2":  # Counter 2
+                        input_value = ows_sensor.find(self.xmlns + 'Counter2').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0067'] == "T":  # Temperature
-                    ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
-                    comp_val = dev.pluginProps.get('EDS0067TempComp', '0.0')
-                    input_value = float(ows_temp) + float(comp_val)
-                    input_value = self.temp_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
+                    case "IL":  # Illumination
+                        input_value = ows_sensor.find(self.xmlns + 'Light').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
+                    case "LED":  # LED
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0067TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                          = dev.states['owsRomID']
-            new_props['EDS0067LEDFunction']               = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0067LightHighAlarmValue']       = ows_sensor.find(self.xmlns + 'LightHighAlarmValue').text
-            new_props['EDS0067LightLowAlarmValue']        = ows_sensor.find(self.xmlns + 'LightLowAlarmValue').text
-            new_props['EDS0067RelayFunction']             = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0067TemperatureHighAlarmValue'] = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0067TemperatureLowAlarmValue']  = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0067")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1849,6 +1671,22 @@ class Plugin(indigo.PluginBase):
         """
         self.logger.debug("updateEDS0068() method called.")
         local = {}
+        props = [
+            'BarometricPressureHgHighAlarmValue', 'BarometricPressureHgHighConditionalSearchState',
+            'BarometricPressureHgLowAlarmValue', 'BarometricPressureHgLowConditionalSearchState',
+            'BarometricPressureMbHighAlarmValue', 'BarometricPressureMbHighConditionalSearchState',
+            'BarometricPressureMbLowAlarmValue', 'BarometricPressureMbLowConditionalSearchState',
+            'DewPointHighAlarmValue', 'DewPointHighConditionalSearchState', 'DewPointLowAlarmValue',
+            'DewPointLowConditionalSearchState', 'HeatIndexHighAlarmValue', 'HeatIndexHighConditionalSearchState',
+            'HeatIndexLowAlarmValue', 'HeatIndexLowConditionalSearchState', 'HumidexHighAlarmValue',
+            'HumidexHighConditionalSearchState', 'HumidexLowAlarmValue', 'HumidexLowConditionalSearchState',
+            'HumidityHighAlarmValue', 'HumidityHighConditionalSearchState', 'HumidityLowAlarmValue',
+            'HumidityLowConditionalSearchState', 'LEDFunction', 'LightHighAlarmValue',
+            'LightHighConditionalSearchState', 'LightLowAlarmValue', 'LightLowConditionalSearchState',
+            'RelayFunction', 'TemperatureHighAlarmValue', 'TemperatureHighConditionalSearchState',
+            'TemperatureLowAlarmValue', 'TemperatureLowConditionalSearchState'
+        ]
+
         try:
             local['eds0068_state_dict'] = self.state_dict.eds0068_state_dict()
 
@@ -1863,124 +1701,79 @@ class Plugin(indigo.PluginBase):
                     else:
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0068'] == "BH":  # Barometric pressure HG
-                    ows_baro_hg = float(ows_sensor.find(self.xmlns + 'BarometricPressureHg').text)
-                    local['input_value'] = self.pressure_convert(ows_baro_hg)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "BM":  # Barometric pressure MB
-                    ows_baro_mb = float(ows_sensor.find(self.xmlns + 'BarometricPressureMb').text)
-                    local['input_value'] = self.pressure_convert(ows_baro_mb)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "C_1":  # Counter 1
-                    local['input_value'] = ows_sensor.find(self.xmlns + 'Counter1').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "C_2":  # Counter 2
-                    local['input_value'] = ows_sensor.find(self.xmlns + 'Counter2').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "DP":  # Dewpoint
-                    dewpoint = ows_sensor.find(self.xmlns + 'DewPoint').text
-                    local['input_value'] = self.temp_convert(dewpoint)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "HI":  # Heat Index
-                    heat_index = ows_sensor.find(self.xmlns + 'HeatIndex').text
-                    local['input_value'] = self.temp_convert(heat_index)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "HX":  # Humidex
-                    ows_humidex = ows_sensor.find(self.xmlns + 'Humidex').text
-                    local['input_value'] = self.humidex_convert(ows_humidex)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "HY":  # Humidity
-                    ows_humidity = ows_sensor.find(self.xmlns + 'Humidity').text
-                    local['input_value'] = self.humidity_convert(ows_humidity)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "IL":  # Illumination
-                    local['input_value'] = ows_sensor.find(self.xmlns + 'Light').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
-                elif dev.pluginProps['prefSensorValue0068'] == "LED":  # LED
-                    local['input_value'] = ows_sensor.find(self.xmlns + 'LED').text
-                    if local['input_value'] == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0068']:
+                    case "BH":  # Barometric pressure HG
+                        ows_baro_hg = float(ows_sensor.find(self.xmlns + 'BarometricPressureHg').text)
+                        local['input_value'] = self.pressure_convert(ows_baro_hg)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "Relay":  # Relay
-                    local['input_value'] = ows_sensor.find(self.xmlns + 'Relay').text
-                    if local['input_value'] == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "BM":  # Barometric pressure MB
+                        ows_baro_mb = float(ows_sensor.find(self.xmlns + 'BarometricPressureMb').text)
+                        local['input_value'] = self.pressure_convert(ows_baro_mb)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0068'] == "T":  # Temperature
-                    local['ows_temp'] = float(ows_sensor.find(self.xmlns + 'Temperature').text)
-                    comp_val = float(dev.pluginProps.get('EDS0068TempComp', '0.0'))
-                    local['input_value'] = local['ows_temp'] + comp_val
-                    local['input_value'] = self.temp_convert(float(local['input_value']))
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
+                    case "C_1":  # Counter 1
+                        local['input_value'] = ows_sensor.find(self.xmlns + 'Counter1').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "C_2":  # Counter 2
+                        local['input_value'] = ows_sensor.find(self.xmlns + 'Counter2').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "DP":  # Dewpoint
+                        dewpoint = ows_sensor.find(self.xmlns + 'DewPoint').text
+                        local['input_value'] = self.temp_convert(dewpoint)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "HI":  # Heat Index
+                        heat_index = ows_sensor.find(self.xmlns + 'HeatIndex').text
+                        local['input_value'] = self.temp_convert(heat_index)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "HX":  # Humidex
+                        ows_humidex = ows_sensor.find(self.xmlns + 'Humidex').text
+                        local['input_value'] = self.humidex_convert(ows_humidex)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "HY":  # Humidity
+                        ows_humidity = ows_sensor.find(self.xmlns + 'Humidity').text
+                        local['input_value'] = self.humidity_convert(ows_humidity)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "IL":  # Illumination
+                        local['input_value'] = ows_sensor.find(self.xmlns + 'Light').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
+                    case "LED":  # LED
+                        local['input_value'] = ows_sensor.find(self.xmlns + 'LED').text
+                        if local['input_value'] == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay
+                        local['input_value'] = ows_sensor.find(self.xmlns + 'Relay').text
+                        if local['input_value'] == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        local['ows_temp'] = float(ows_sensor.find(self.xmlns + 'Temperature').text)
+                        comp_val = float(dev.pluginProps.get('EDS0068TempComp', '0.0'))
+                        local['input_value'] = local['ows_temp'] + comp_val
+                        local['input_value'] = self.temp_convert(float(local['input_value']))
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=local['input_value'], uiValue=local['input_value'])
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            # This code ensures that the device's props are up-to-date and in line with what they
-            # are on the server.
-            new_props = dev.pluginProps
-            new_props['address']                                       = dev.states['owsRomID']
-            new_props['EDS0068barometricHgHighAlarmValue']             = ows_sensor.find(self.xmlns + 'BarometricPressureHgHighAlarmValue').text
-            new_props['EDS0068barometricHgHighConditionalSearchState'] = ows_sensor.find(self.xmlns + 'BarometricPressureHgHighConditionalSearchState').text
-            new_props['EDS0068barometricHgLowAlarmValue']              = ows_sensor.find(self.xmlns + 'BarometricPressureHgLowAlarmValue').text
-            new_props['EDS0068barometricHgLowConditionalSearchState']  = ows_sensor.find(self.xmlns + 'BarometricPressureHgLowConditionalSearchState').text
-            new_props['EDS0068barometricMbHighAlarmValue']             = ows_sensor.find(self.xmlns + 'BarometricPressureMbHighAlarmValue').text
-            new_props['EDS0068barometricMbHighConditionalSearchState'] = ows_sensor.find(self.xmlns + 'BarometricPressureMbHighConditionalSearchState').text
-            new_props['EDS0068barometricMbLowAlarmValue']              = ows_sensor.find(self.xmlns + 'BarometricPressureMbLowAlarmValue').text
-            new_props['EDS0068barometricMbLowConditionalSearchState']  = ows_sensor.find(self.xmlns + 'BarometricPressureMbLowConditionalSearchState').text
-            new_props['EDS0068dewpointHighAlarmValue']                 = ows_sensor.find(self.xmlns + 'DewPointHighAlarmValue').text
-            new_props['EDS0068dewpointHighConditionalSearchState']     = ows_sensor.find(self.xmlns + 'DewPointHighConditionalSearchState').text
-            new_props['EDS0068dewpointLowAlarmValue']                  = ows_sensor.find(self.xmlns + 'DewPointLowAlarmValue').text
-            new_props['EDS0068dewpointLowConditionalSearchState']      = ows_sensor.find(self.xmlns + 'DewPointLowConditionalSearchState').text
-            new_props['EDS0068heatIndexHighAlarmValue']                = ows_sensor.find(self.xmlns + 'HeatIndexHighAlarmValue').text
-            new_props['EDS0068heatIndexHighConditionalSearchState']    = ows_sensor.find(self.xmlns + 'HeatIndexHighConditionalSearchState').text
-            new_props['EDS0068heatIndexLowAlarmValue']                 = ows_sensor.find(self.xmlns + 'HeatIndexLowAlarmValue').text
-            new_props['EDS0068heatIndexLowConditionalSearchState']     = ows_sensor.find(self.xmlns + 'HeatIndexLowConditionalSearchState').text
-            new_props['EDS0068humidexHighAlarmValue']                  = ows_sensor.find(self.xmlns + 'HumidexHighAlarmValue').text
-            new_props['EDS0068humidexHighConditionalSearchState']      = ows_sensor.find(self.xmlns + 'HumidexHighConditionalSearchState').text
-            new_props['EDS0068humidexLowAlarmValue']                   = ows_sensor.find(self.xmlns + 'HumidexLowAlarmValue').text
-            new_props['EDS0068humidexLowConditionalSearchState']       = ows_sensor.find(self.xmlns + 'HumidexLowConditionalSearchState').text
-            new_props['EDS0068humidityHighAlarmValue']                 = ows_sensor.find(self.xmlns + 'HumidityHighAlarmValue').text
-            new_props['EDS0068humidityHighConditionalSearchState']     = ows_sensor.find(self.xmlns + 'HumidityHighConditionalSearchState').text
-            new_props['EDS0068humidityLowAlarmValue']                  = ows_sensor.find(self.xmlns + 'HumidityLowAlarmValue').text
-            new_props['EDS0068humidityLowConditionalSearchState']      = ows_sensor.find(self.xmlns + 'HumidityLowConditionalSearchState').text
-            new_props['EDS0068ledFunction']                            = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0068lightHighAlarmValue']                    = ows_sensor.find(self.xmlns + 'LightHighAlarmValue').text
-            new_props['EDS0068lightHighConditionalSearchState']        = ows_sensor.find(self.xmlns + 'LightHighConditionalSearchState').text
-            new_props['EDS0068lightLowAlarmValue']                     = ows_sensor.find(self.xmlns + 'LightLowAlarmValue').text
-            new_props['EDS0068lightLowConditionalSearchState']         = ows_sensor.find(self.xmlns + 'LightLowConditionalSearchState').text
-            new_props['EDS0068relayFunction']                          = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0068temperatureHighAlarmValue']              = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0068temperatureHighConditionalSearchState']  = ows_sensor.find(self.xmlns + 'TemperatureHighConditionalSearchState').text
-            new_props['EDS0068temperatureLowAlarmValue']               = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            new_props['EDS0068temperatureLowConditionalSearchState']   = ows_sensor.find(self.xmlns + 'TemperatureLowConditionalSearchState').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0068")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -1997,6 +1790,7 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0070() method called.")
+        props = ['LEDFunction', 'RelayFunction', 'VibrationHighAlarmValue', 'VibrationLowAlarmValue']
 
         try:
             eds0070_state_dict = self.state_dict.eds0070_state_dict()
@@ -2006,59 +1800,46 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0070'] == "C_1":  # Counter
-                    input_value = ows_sensor.find(self.xmlns + 'Counter').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0070'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0070']:
+                    case "C_1":  # Counter
+                        input_value = ows_sensor.find(self.xmlns + 'Counter').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0070'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "V":  # Vibration
+                        input_value = ows_sensor.find(self.xmlns + 'VibrationInstant').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0070'] == "V":  # Vibration
-                    input_value = ows_sensor.find(self.xmlns + 'VibrationInstant').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                        = dev.states['owsRomID']
-            new_props['EDS0070LEDFunction']             = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0070RelayFunction']           = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0070VibrationHighAlarmValue'] = ows_sensor.find(self.xmlns + 'VibrationHighAlarmValue').text
-            new_props['EDS0070VibrationLowAlarmValue']  = ows_sensor.find(self.xmlns + 'VibrationLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0070")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2075,6 +1856,10 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0071() method called.")
+        props = [
+            'CalibrationKey', 'LEDFunction', 'RelayFunction', 'RTDReadDelay', 'RTDResistanceHighAlarmValue',
+            'RTDResistanceLowAlarmValue', 'TemperatureHighAlarmValue', 'TemperatureLowAlarmValue'
+        ]
 
         try:
             eds0071_state_dict = self.state_dict.eds0071_state_dict()
@@ -2084,67 +1869,50 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0071'] == "C_1":  # Counter
-                    input_value = ows_sensor.find(self.xmlns + 'Counter').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0071'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0071']:
+                    case "C_1":  # Counter
+                        input_value = ows_sensor.find(self.xmlns + 'Counter').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0071'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "RTD":  # RTD
+                        conversion_value = ows_sensor.find(self.xmlns + 'RTDOhms').text
+                        input_value = self.volts_convert(conversion_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0071'] == "RTD":  # RTD
-                    conversion_value = ows_sensor.find(self.xmlns + 'RTDOhms').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0071'] == "T":  # Temperature
-                    input_value = ows_sensor.find(self.xmlns + 'Temperature').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "T":  # Temperature
+                        input_value = ows_sensor.find(self.xmlns + 'Temperature').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                            = dev.states['owsRomID']
-            new_props['EDS0071CalibrationKey']              = ows_sensor.find(self.xmlns + 'CalibrationKey').text
-            new_props['EDS0071LEDFunction']                 = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0071RelayFunction']               = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0071RTDReadDelay']                = ows_sensor.find(self.xmlns + 'RTDReadDelay').text
-            new_props['EDS0071RTDResistanceHighAlarmValue'] = ows_sensor.find(self.xmlns + 'RTDResistanceHighAlarmValue').text
-            new_props['EDS0071RTDResistanceLowAlarmValue']  = ows_sensor.find(self.xmlns + 'RTDResistanceLowAlarmValue').text
-            new_props['EDS0071TemperatureHighAlarmValue']   = ows_sensor.find(self.xmlns + 'TemperatureHighAlarmValue').text
-            new_props['EDS0071TemperatureLowAlarmValue']    = ows_sensor.find(self.xmlns + 'TemperatureLowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0071")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2161,6 +1929,14 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0080() method called.")
+        props = [
+            'LEDFunction', 'RelayFunction', 'RelayFunction', 'v4to20mAInput1HighAlarmValue',
+            'v4to20mAInput1LowAlarmValue', 'v4to20mAInput2HighAlarmValue', 'v4to20mAInput2LowAlarmValue',
+            'v4to20mAInput3HighAlarmValue', 'v4to20mAInput3LowAlarmValue', 'v4to20mAInput4HighAlarmValue',
+            'v4to20mAInput4LowAlarmValue', 'v4to20mAInput5HighAlarmValue', 'v4to20mAInput5LowAlarmValue',
+            'v4to20mAInput6HighAlarmValue', 'v4to20mAInput6LowAlarmValue', 'v4to20mAInput7HighAlarmValue',
+            'v4to20mAInput7LowAlarmValue', 'v4to20mAInput8HighAlarmValue', 'v4to20mAInput8LowAlarmValue'
+        ]
 
         try:
             eds0080_state_dict = self.state_dict.eds0080_state_dict()
@@ -2170,101 +1946,74 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0080'] == "I_1":  # Input 1
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput1Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_2":  # Input 2
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput2Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_3":  # Input 3
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput3Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_4":  # Input 4
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput4Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_5":  # Input 5
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput5Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_6":  # Input 6
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput6Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_7":  # Input 7
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput7Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "I_8":  # Input 8
-                    conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput8Instant').text
-                    input_value = self.volts_convert(conversion_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0080']:
+                    case "I_1":  # Input 1
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput1Instant').text
+                        input_value = self.volts_convert(conversion_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "I_2":  # Input 2
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput2Instant').text
+                        input_value = self.volts_convert(conversion_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0080'] == "C_1":  # Counter 1
-                    conversion_value = ows_sensor.find(self.xmlns + 'Counter').text
+                    case "I_3":  # Input 3
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput3Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_4":  # Input 4
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput4Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_5":  # Input 5
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput5Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_6":  # Input 6
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput6Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_7":  # Input 7
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput7Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_8":  # Input 8
+                        conversion_value = ows_sensor.find(self.xmlns + 'v4to20mAInput8Instant').text
+                        input_value = self.volts_convert(conversion_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "C_1":  # Counter 1
+                        conversion_value = ows_sensor.find(self.xmlns + 'Counter').text
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                              = dev.states['owsRomID']
-            new_props['EDS0080LEDFunction']                  = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0080RelayFunction']                = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0080v4to20mAInput1HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput1HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput1LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput1LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput2HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput2HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput2LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput2LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput3HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput3HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput3LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput3LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput4HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput4HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput4LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput4LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput5HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput5HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput5LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput5LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput6HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput6HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput6LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput6LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput7HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput7HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput7LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput7LowAlarmValue').text
-            new_props['EDS0080v4to20mAInput8HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput8HighAlarmValue').text
-            new_props['EDS0080v4to20mAInput8LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput8LowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0080")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2281,6 +2030,14 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0082() method called.")
+        props = [
+            'LEDFunction', 'RelayFunction', 'v0to10VoltInput1HighAlarmValue', 'v0to10VoltInput1LowAlarmValue',
+            'v0to10VoltInput2HighAlarmValue', 'v0to10VoltInput2LowAlarmValue', 'v0to10VoltInput3HighAlarmValue',
+            'v0to10VoltInput3LowAlarmValue', 'v0to10VoltInput4HighAlarmValue', 'v0to10VoltInput4LowAlarmValue',
+            'v0to10VoltInput5HighAlarmValue', 'v0to10VoltInput5LowAlarmValue', 'v0to10VoltInput6HighAlarmValue',
+            'v0to10VoltInput6LowAlarmValue', 'v0to10VoltInput7HighAlarmValue', 'v0to10VoltInput7LowAlarmValue',
+            'v0to10VoltInput8HighAlarmValue', 'v0to10VoltInput8LowAlarmValue'
+        ]
 
         try:
             eds0082_state_dict = self.state_dict.eds0082_state_dict()
@@ -2290,99 +2047,72 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0082'] == "I_1":  # Input 1 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput1Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_2":  # Input 2 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput2Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_3":  # Input 3 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput3Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_4":  # Input 4 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput4Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_5":  # Input 5 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput5Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_6":  # Input 6 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput6Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_7":  # Input 7 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput7Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "I_8":  # Input 8 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput8Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0082']:
+                    case "I_1":  # Input 1 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput1Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0082'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "I_2":  # Input 2 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput2Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_3":  # Input 3 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput3Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_4":  # Input 4 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput4Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_5":  # Input 5 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput5Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_6":  # Input 6 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput6Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_7":  # Input 7 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput7Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_8":  # Input 8 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput8Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                               = dev.states['owsRomID']
-            new_props['EDS0082LEDFunction']                    = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0082RelayFunction']                  = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0082v0to10VoltInput1HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput1HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput1LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput1LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput2HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput2HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput2LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput2LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput3HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput3HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput3LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput3LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput4HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput4HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput4LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput4LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput5HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput5HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput5LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput5LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput6HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput6HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput6LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput6LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput7HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput7HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput7LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput7LowAlarmValue').text
-            new_props['EDS0082v0to10VoltInput8HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput8HighAlarmValue').text
-            new_props['EDS0082v0to10VoltInput8LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput8LowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0082")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2399,6 +2129,11 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0083() method called.")
+        props = [
+            'LEDFunction', 'RelayFunction', 'v4to20mAInput1HighAlarmValue', 'v4to20mAInput1LowAlarmValue',
+            'v4to20mAInput2HighAlarmValue', 'v4to20mAInput2LowAlarmValue', 'v4to20mAInput3HighAlarmValue',
+            'v4to20mAInput3LowAlarmValue', 'v4to20mAInput4HighAlarmValue', 'v4to20mAInput4LowAlarmValue'
+        ]
 
         try:
             eds0083_state_dict = self.state_dict.eds0083_state_dict()
@@ -2408,75 +2143,56 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0083'] == "I_1":  # Input 1 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput1Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0083'] == "I_2":  # Input 2 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput2Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0083'] == "I_3":  # Input 3 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput3Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0083'] == "I_4":  # Input 4 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput4Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0083'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0083']:
+                    case "I_1":  # Input 1 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput1Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0083'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "I_2":  # Input 2 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput2Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_3":  # Input 3 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput3Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_4":  # Input 4 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v4to20mAInput4Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                             = dev.states['owsRomID']
-            new_props['EDS0083LEDFunction']                  = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0083RelayFunction']                = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0083v4to20mAInput1HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput1HighAlarmValue').text
-            new_props['EDS0083v4to20mAInput1LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput1LowAlarmValue').text
-            new_props['EDS0083v4to20mAInput2HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput2HighAlarmValue').text
-            new_props['EDS0083v4to20mAInput2LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput2LowAlarmValue').text
-            new_props['EDS0083v4to20mAInput3HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput3HighAlarmValue').text
-            new_props['EDS0083v4to20mAInput3LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput3LowAlarmValue').text
-            new_props['EDS0083v4to20mAInput4HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v4to20mAInput4HighAlarmValue').text
-            new_props['EDS0083v4to20mAInput4LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v4to20mAInput4LowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0083")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2493,6 +2209,11 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0085() method called.")
+        props = [
+            'LEDFunction', 'RelayFunction', 'v0to10VoltInput1HighAlarmValue', 'v0to10VoltInput1LowAlarmValue',
+            'v0to10VoltInput2HighAlarmValue', 'v0to10VoltInput2LowAlarmValue', 'v0to10VoltInput3HighAlarmValue',
+            'v0to10VoltInput3LowAlarmValue', 'v0to10VoltInput4HighAlarmValue', 'v0to10VoltInput4LowAlarmValue'
+        ]
 
         try:
             eds0085_state_dict = self.state_dict.eds0085_state_dict()
@@ -2502,75 +2223,56 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0085'] == "I_1":  # Input 1 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput1Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0085'] == "I_2":  # Input 2 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput2Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0085'] == "I_3":  # Input 3 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput3Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0085'] == "I_4":  # Input 4 Instant
-                    input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput4Instant').text
-                    input_value = self.volts_convert(input_value)
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0085'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0085']:
+                    case "I_1":  # Input 1 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput1Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0085'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "I_2":  # Input 2 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput2Instant').text
+                        input_value = self.volts_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_3":  # Input 3 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput3Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_4":  # Input 4 Instant
+                        input_value = ows_sensor.find(self.xmlns + 'v0to10VoltInput4Instant').text
+                        input_value = self.volts_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address']                               = dev.states['owsRomID']
-            new_props['EDS0085LEDFunction']                    = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0085RelayFunction']                  = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            new_props['EDS0085v0to10VoltInput1HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput1HighAlarmValue').text
-            new_props['EDS0085v0to10VoltInput1LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput1LowAlarmValue').text
-            new_props['EDS0085v0to10VoltInput2HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput2HighAlarmValue').text
-            new_props['EDS0085v0to10VoltInput2LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput2LowAlarmValue').text
-            new_props['EDS0085v0to10VoltInput3HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput3HighAlarmValue').text
-            new_props['EDS0085v0to10VoltInput3LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput3LowAlarmValue').text
-            new_props['EDS0085v0to10VoltInput4HighAlarmValue'] = ows_sensor.find(self.xmlns + 'v0to10VoltInput4HighAlarmValue').text
-            new_props['EDS0085v0to10VoltInput4LowAlarmValue']  = ows_sensor.find(self.xmlns + 'v0to10VoltInput4LowAlarmValue').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0085")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
@@ -2587,6 +2289,23 @@ class Plugin(indigo.PluginBase):
         :param str server_ip:
         """
         self.logger.debug("updateEDS0090() method called.")
+        props = [
+            'DiscreteIO1ActivityLatchReset', 'DiscreteIO1HighAlarmValue', 'DiscreteIO1LowAlarmValue',
+            'DiscreteIO1OutputState', 'DiscreteIO1PulldownState', 'DiscreteIO1PulseCounterReset',
+            'DiscreteIO2ActivityLatchReset', 'DiscreteIO2HighAlarmValue', 'DiscreteIO2LowAlarmValue',
+            'DiscreteIO2OutputState', 'DiscreteIO2PulldownState', 'DiscreteIO2PulseCounterReset',
+            'DiscreteIO3ActivityLatchReset', 'DiscreteIO3HighAlarmValue', 'DiscreteIO3LowAlarmValue',
+            'DiscreteIO3OutputState', 'DiscreteIO3PulldownState', 'DiscreteIO3PulldownState',
+            'DiscreteIO4ActivityLatchReset', 'DiscreteIO4HighAlarmValue', 'DiscreteIO4LowAlarmValue',
+            'DiscreteIO4OutputState', 'DiscreteIO4PulldownState', 'DiscreteIO5ActivityLatchReset',
+            'DiscreteIO5HighAlarmValue', 'DiscreteIO5LowAlarmValue', 'DiscreteIO5OutputState',
+            'DiscreteIO5PulldownState', 'DiscreteIO6ActivityLatchReset', 'DiscreteIO6HighAlarmValue',
+            'DiscreteIO6LowAlarmValue', 'DiscreteIO6OutputState', 'DiscreteIO6PulldownState',
+            'DiscreteIO7ActivityLatchReset', 'DiscreteIO7HighAlarmValue', 'DiscreteIO7LowAlarmValue',
+            'DiscreteIO7OutputState', 'DiscreteIO7PulldownState', 'DiscreteIO8ActivityLatchReset',
+            'DiscreteIO8HighAlarmValue', 'DiscreteIO8LowAlarmValue', 'DiscreteIO8OutputState',
+            'DiscreteIO8PulldownState', 'LEDFunction', 'RelayFunction'
+        ]
 
         try:
             eds0090_state_dict = self.state_dict.eds0090_state_dict()
@@ -2596,129 +2315,86 @@ class Plugin(indigo.PluginBase):
                 try:
                     dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
-                    self.logger.exception()
-                    self.logger.debug(
-                        f"Unable to update device state on server. Device: {dev.name}"
-                    )
+                    self.logger.exception("General exception:")
+                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
                     dev.updateStateOnServer(key, value="Unsupported")
 
             # The user can select which of the following values become the main sensorValue.
             try:
-                if dev.pluginProps['prefSensorValue0090'] == "C_1":  # Counter 1
-                    input_value = ows_sensor.find(self.xmlns + 'Counter').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_1":  # Input 1 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO1InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_2":  # Input 2 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO2InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_3":  # Input 3 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO3InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_4":  # Input 4 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO4InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_5":  # Input 5 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO5InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_6":  # Input 6 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO6InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_7":  # Input 7 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO7InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "I_8":  # Input 8 State
-                    input_value = ows_sensor.find(self.xmlns + 'DiscreteIO8InputState').text
-                    dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "LED":  # LED State
-                    input_value = ows_sensor.find(self.xmlns + 'LED').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                match dev.pluginProps['prefSensorValue0090']:
+                    case "C_1":  # Counter 1
+                        input_value = ows_sensor.find(self.xmlns + 'Counter').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                elif dev.pluginProps['prefSensorValue0090'] == "Relay":  # Relay State
-                    input_value = ows_sensor.find(self.xmlns + 'Relay').text
-                    if input_value == "1":
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
-                    else:
+                    case "I_1":  # Input 1 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO1InputState').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_2":  # Input 2 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO2InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_3":  # Input 3 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO3InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_4":  # Input 4 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO4InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_5":  # Input 5 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO5InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_6":  # Input 6 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO6InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_7":  # Input 7 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO7InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "I_8":  # Input 8 State
+                        input_value = ows_sensor.find(self.xmlns + 'DiscreteIO8InputState').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "LED":  # LED State
+                        input_value = ows_sensor.find(self.xmlns + 'LED').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                    case "Relay":  # Relay State
+                        input_value = ows_sensor.find(self.xmlns + 'Relay').text
+                        if input_value == "1":
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOn)
+                        else:
+                            dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
             except Exception:  # noqa
-                self.logger.exception()
+                self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
-            new_props = dev.pluginProps
-            new_props['address'] = dev.states['owsRomID']
-            new_props['EDS0090DiscreteIO1ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO1ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO1HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO1HighAlarmValue').text
-            new_props['EDS0090DiscreteIO1LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO1LowAlarmValue').text
-            new_props['EDS0090DiscreteIO1OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO1OutputState').text
-            new_props['EDS0090DiscreteIO1PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO1PulldownState').text
-            new_props['EDS0090DiscreteIO1PulseCounterReset']  = ows_sensor.find(self.xmlns + 'DiscreteIO1PulseCounterReset').text
-            new_props['EDS0090DiscreteIO2ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO2ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO2HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO2HighAlarmValue').text
-            new_props['EDS0090DiscreteIO2LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO2LowAlarmValue').text
-            new_props['EDS0090DiscreteIO2OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO2OutputState').text
-            new_props['EDS0090DiscreteIO2PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO2PulldownState').text
-            new_props['EDS0090DiscreteIO2PulseCounterReset']  = ows_sensor.find(self.xmlns + 'DiscreteIO2PulseCounterReset').text
-            new_props['EDS0090DiscreteIO3ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO3ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO3HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO3HighAlarmValue').text
-            new_props['EDS0090DiscreteIO3LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO3LowAlarmValue').text
-            new_props['EDS0090DiscreteIO3OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO3OutputState').text
-            new_props['EDS0090DiscreteIO3PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO3PulldownState').text
-            new_props['EDS0090DiscreteIO4ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO4ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO4HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO4HighAlarmValue').text
-            new_props['EDS0090DiscreteIO4LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO4LowAlarmValue').text
-            new_props['EDS0090DiscreteIO4OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO4OutputState').text
-            new_props['EDS0090DiscreteIO4PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO4PulldownState').text
-            new_props['EDS0090DiscreteIO5ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO5ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO5HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO5HighAlarmValue').text
-            new_props['EDS0090DiscreteIO5LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO5LowAlarmValue').text
-            new_props['EDS0090DiscreteIO5OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO5OutputState').text
-            new_props['EDS0090DiscreteIO5PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO5PulldownState').text
-            new_props['EDS0090DiscreteIO6ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO6ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO6HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO6HighAlarmValue').text
-            new_props['EDS0090DiscreteIO6LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO6LowAlarmValue').text
-            new_props['EDS0090DiscreteIO6OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO6OutputState').text
-            new_props['EDS0090DiscreteIO6PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO6PulldownState').text
-            new_props['EDS0090DiscreteIO7ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO7ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO7HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO7HighAlarmValue').text
-            new_props['EDS0090DiscreteIO7LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO7LowAlarmValue').text
-            new_props['EDS0090DiscreteIO7OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO7OutputState').text
-            new_props['EDS0090DiscreteIO7PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO7PulldownState').text
-            new_props['EDS0090DiscreteIO8ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'DiscreteIO8ActivityLatchReset').text
-            new_props['EDS0090DiscreteIO8HighAlarmValue']     = ows_sensor.find(self.xmlns + 'DiscreteIO8HighAlarmValue').text
-            new_props['EDS0090DiscreteIO8LowAlarmValue']      = ows_sensor.find(self.xmlns + 'DiscreteIO8LowAlarmValue').text
-            new_props['EDS0090DiscreteIO8OutputState']        = ows_sensor.find(self.xmlns + 'DiscreteIO8OutputState').text
-            new_props['EDS0090DiscreteIO8PulldownState']      = ows_sensor.find(self.xmlns + 'DiscreteIO8PulldownState').text
-            new_props['EDS0090LEDFunction']                   = ows_sensor.find(self.xmlns + 'LEDFunction').text
-            new_props['EDS0090RelayFunction']                 = ows_sensor.find(self.xmlns + 'RelayFunction').text
-            dev.replacePluginPropsOnServer(new_props)
-
-            self.number_of_sensors += 1
-
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
-            self.logger.debug("Success. Polling next sensor if appropriate.")
-            return True
+            self.populate_props(dev, props, ows_sensor, "EDS0090")
 
         except Exception:  # noqa
             self.logger.critical("Sensor update failure. Check connection.")
-            self.logger.exception()
+            self.logger.exception("General exception:")
             dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
             return False
 
+    def populate_props(self, dev, props, ows_sensor, sensor_num):
+        new_props = dev.pluginProps
+        for prop in props:
+            new_props[f'{sensor_num}{prop}'] = ows_sensor.find(self.xmlns + prop).text
+        new_props['address'] = dev.states['owsRomID']
+        self.number_of_sensors += 1
+        dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
+        self.logger.debug("Success. Polling next sensor if appropriate.")
+        return True
+
     # =============================================================================
     # =========== Server and Sensor Device Config Dialog Button Methods ===========
     # =============================================================================
-    # While we are always sending a "0" as the setting value, this may not always
-    # be the case. So we keep them separate for this reason.
+    # While we are always sending a "0" as the setting value, this may not always be the case. So we keep them separate
+    # for this reason.
     def clearAlarms(self, values_dict, type_id, target_id, fltr="indigo.sensor"):  # noqa
         """
         Title Placeholder
@@ -2732,16 +2408,9 @@ class Plugin(indigo.PluginBase):
         :return:
         """
 
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "clearAlarms",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "clearAlarms", "0")
         self.sendToServer(parm_list)
 
-    # TODO: All these callbacks can be combined down to one for each type using the
-    #       filter payload value. See Matplotlib Stock Bar as an example.
     # =============================================================================
     def clear_barometric_pressure_hg_high_conditional_search_state(
             self, values_dict, type_id, target_id, fltr="indigo.sensor"  # noqa
@@ -2757,12 +2426,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "BarometricPressureHgHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "BarometricPressureHgHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2780,12 +2444,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "BarometricPressureHgLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "BarometricPressureHgLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2803,12 +2462,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "BarometricPressureMbHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "BarometricPressureMbHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2826,12 +2480,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "BarometricPressureMbLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "BarometricPressureMbLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2849,12 +2498,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DewpointHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DewpointHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2872,12 +2516,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DewpointLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DewpointLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2895,12 +2534,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO1HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2918,12 +2552,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO1LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2941,12 +2570,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO2HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2964,12 +2588,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO2LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2987,12 +2606,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO3HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3010,12 +2624,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO3LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3033,12 +2642,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO4HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3056,12 +2660,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO4LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3079,12 +2678,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO5HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3102,12 +2696,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO5LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3125,12 +2714,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO6HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3148,12 +2732,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO6LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3171,12 +2750,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO7HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3194,12 +2768,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO7LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3217,12 +2786,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO8HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3240,12 +2804,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "DiscreteIO8LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DiscreteIO8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3263,12 +2822,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HeatIndexHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HeatIndexHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3286,12 +2840,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HeatIndexLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HeatIndexLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3309,12 +2858,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HumidexHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HumidexHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3332,12 +2876,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HumidexLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HumidexLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3355,12 +2894,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HumidityHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HumidityHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3378,12 +2912,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "HumidityLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "HumidityLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3401,12 +2930,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput1HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3424,12 +2948,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput1LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3447,12 +2966,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput2HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3470,12 +2984,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput2LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3493,12 +3002,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput3HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3516,12 +3020,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput3LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3539,12 +3038,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput4HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3562,12 +3056,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput4LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3585,12 +3074,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput5HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3608,12 +3092,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput5LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3631,12 +3110,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput6HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3654,12 +3128,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput6LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3677,12 +3146,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput7HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3700,12 +3164,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput7LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3723,12 +3182,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput8HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3746,12 +3200,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v0to10VoltInput8LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v0to10VoltInput8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3769,12 +3218,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput1HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput1HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3792,12 +3236,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput1LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput1LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3815,12 +3254,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput2HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput2HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3838,12 +3272,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput2LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput2LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3861,12 +3290,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput3HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput3HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3884,12 +3308,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput3LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput3LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3907,12 +3326,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput4HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput4HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3930,12 +3344,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput4LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput4LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3953,12 +3362,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput5HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput5HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3976,12 +3380,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput5LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput5LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3999,12 +3398,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput6HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput6HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4022,12 +3416,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput6LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput6LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4045,12 +3434,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput7HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput7HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4068,12 +3452,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput7LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput7LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4091,12 +3470,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput8HighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput8HighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4114,12 +3488,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "v4to20mAInput8LowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "v4to20mAInput8LowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4137,12 +3506,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "LightHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "LightHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4160,12 +3524,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "LightLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "LightLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4183,12 +3542,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "RTDResistanceHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "RTDResistanceHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4206,12 +3560,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "RTDResistanceLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "RTDResistanceLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4229,12 +3578,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "RTDFaultConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "RTDFaultConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4252,12 +3596,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "TemperatureHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "TemperatureHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4275,12 +3614,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "TemperatureLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "TemperatureLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4298,12 +3632,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "VibrationHighConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "VibrationHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4321,12 +3650,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (
-            values_dict['serverList'],
-            values_dict['romID'],
-            "VibrationLowConditionalSearchState",
-            "0"
-        )
+        parm_list = (values_dict['serverList'], values_dict['romID'], "VibrationLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -4344,14 +3668,15 @@ class Plugin(indigo.PluginBase):
         """
         new_var = ""
         try:
-            if indigo.devices[target_id].states['owsLED'] == "1":
-                new_var = "0"
-            elif indigo.devices[target_id].states['owsLED'] == "0":
-                new_var = "1"
-            else:
-                self.logger.critical("Error toggling sensor LED.")
+            match indigo.devices[target_id].states['owsLED']:
+                case "1":
+                    new_var = "0"
+                case "0":
+                    new_var = "1"
+                case _:
+                    self.logger.critical("Error toggling sensor LED.")
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
 
         parm_list = (values_dict['serverList'], values_dict['romID'], "LEDState", new_var)
         self.sendToServer(parm_list)
@@ -4371,14 +3696,15 @@ class Plugin(indigo.PluginBase):
         """
         new_var = ""
         try:
-            if indigo.devices[target_id].states['owsRelay'] == "1":
-                new_var = "0"
-            elif indigo.devices[target_id].states['owsRelay'] == "0":
-                new_var = "1"
-            else:
-                self.logger.critical("Error toggling sensor relay.")
+            match indigo.devices[target_id].states['owsRelay']:
+                case "1":
+                    new_var = "0"
+                case "0":
+                    new_var = "1"
+                case _:
+                    self.logger.critical("Error toggling sensor relay.")
         except Exception:  # noqa
-            self.logger.exception()
+            self.logger.exception("General exception:")
 
         parm_list = (values_dict['serverList'], values_dict['romID'], "RelayState", new_var)
         self.sendToServer(parm_list)
@@ -4436,16 +3762,13 @@ class Plugin(indigo.PluginBase):
                 for dev in indigo.devices.itervalues("self"):
                     if not dev:
                         # There are no devices of type OWServer, so go to sleep.
-                        self.logger.debug(
-                            "There aren't any servers or sensors to assign yet. Sleeping."
-                        )
+                        self.logger.debug("There aren't any servers or sensors to assign yet. Sleeping.")
                         self.sleep(pref_poll)
 
                     elif not dev.configured:
                         # A device has been created, but hasn't been fully configured.
                         self.logger.warning(
-                            "A device has been created, but is not fully  configured. Sleeping "
-                            "while you finish."
+                            "A device has been created, but is not fully  configured. Sleeping while you finish."
                         )
                         self.sleep(pref_poll)
 
@@ -4549,8 +3872,7 @@ class Plugin(indigo.PluginBase):
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0067(dev, owsSensor, server_ip)
 
-                            elif dev.deviceTypeId == \
-                                    'owsTemperatureHumidityBarometricPressureLight':
+                            elif dev.deviceTypeId == 'owsTemperatureHumidityBarometricPressureLight':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0068'):
                                     self.logger.debug("Parsing EDS0068 devices.")
                                     rom_id = owsSensor.find(self.xmlns + 'ROMId').text
@@ -4616,11 +3938,10 @@ class Plugin(indigo.PluginBase):
 
                         except Exception:  # noqa
                             self.logger.critical("Error in server parsing routine.")
-                            self.logger.exception()
+                            self.logger.exception("General exception:")
 
             except Exception:  # noqa
-                # There has been a problem reaching the server. "Turn off" all sensors until next
-                # successful poll.
+                # There has been a problem reaching the server. "Turn off" all sensors until next successful poll.
                 _ = [
                     dev.updateStateOnServer('onOffState', value=False)
                     for dev in indigo.devices.itervalues("self")
