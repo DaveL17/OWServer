@@ -1,0 +1,6 @@
+<Template>
+    <Field id="serverList" type="menu">
+        <Label>Server IP:</Label>
+        <List class="self" filter="" method="getServerList" dynamicReload="true"/>
+    </Field>
+</Template>

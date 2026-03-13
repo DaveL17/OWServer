@@ -1,0 +1,5 @@
+<Template>
+    <Field id="SupportsSensorValue" type="checkbox" hidden="true" defaultValue="false">
+        <Label>Show sensor value state:</Label>
+    </Field>
+</Template>

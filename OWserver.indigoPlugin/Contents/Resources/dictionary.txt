@@ -5,11 +5,9 @@ Key:
 
 Read URL: http://IP-ADDRESS/details.xml
 Write URL: http://IP-ADDRESS/devices.htm?rom=ROM-ID-NUMBER&variable=VARIABLE-NAME&value=VALUE-TO-WRITE
-    - ROM — the ROM ID of the device to modify, alpha characters must be
-      upper case
-    - VARIABLE — the name of the variable to modify. The name is the same
-      as the XML field name, only XML fields with attributes of
-      ‘Writable=”True”’ may be written, (e.g., <Us- erByte....)
+    - ROM — the ROM ID of the device to modify, alpha characters must be upper case
+    - VARIABLE — the name of the variable to modify. The name is the same as the XML field name, only XML fields with
+      attributes of ‘Writable=”True”’ may be written, (e.g., <Us- erByte....)
     - VALUE — the new decimal value to write to the 1-Wire device
 
 Activity Latch A
@@ -22,10 +20,21 @@ Activity Latch B
 <ActivityLatch_B> - ['owsActivityLatch_B']
     DS2406
 
+Activity Latch 1
+#################
+<ActivityLatch1>
+    EDS2040
+
 Activity Latch Reset
 #################
 <ActivityLatchReset> - ['owsActivityLatchReset']
     DS2406 [W]
+    EDS2040 [W]
+
+Address
+#################
+<Address>
+    EDS2040
 
 Barometric Pressure (Hg) - Inches of mercury
 #################
@@ -114,6 +123,26 @@ Barometric Pressure Low Conditional Search State
 <BarometricPressureMbLowConditionalSearchState> - ['owsBarometricPressureMbLowConditionalSearchState']
     EDS0066 [W]
     EDS0068 [W]
+
+Battery
+#################
+<Battery>
+    EDS2040
+
+Buffer State
+#################
+<BufferState>
+    EDS2040
+
+Buffer Head Pointer
+#################
+<BufferHeadPointer>
+    EDS2040
+
+Buffer Tail Pointer
+#################
+<BufferTailPointer>
+    EDS2040
 
 Calibration Key
 #################
@@ -205,6 +234,15 @@ individually selected alarm bits.
     EDS0085 [W]
     EDS0090 [W]
 
+Connection Counter
+#################
+<ConnectionCounter>
+    EDS2040
+
+ControllerRSSI
+#################
+    EDS2040
+
 Conversion Counter
 #################
 <ConversionCounter> - ['owsConversionCounter']
@@ -280,6 +318,11 @@ Device Name
     OWSERVER-ENET
     OWSERVER-ENET2
     OWServer_v2G-WiFi
+
+Device RSSI
+#################
+<DeviceRSSI>
+    EDS2040
 
 Devices Connected
 #################
@@ -510,6 +553,17 @@ Discrete IO Pulse Counter Reset
 <DiscreteIO2PulseCounterReset> - ['owsDiscreteIO2PulseCounterReset']
     EDS0090
 
+
+EUI
+#################
+<EUI> - []
+    EDS2040
+
+Factory Reset
+#################
+<FactoryReset>
+    EDS2040 [W]
+
 Family
 #################
 <Family> - ['owsFamily']
@@ -525,17 +579,15 @@ Family
 
 Flip Flop A
 #################
-Setting a channel flip-flop to 0 will make the associated PIO-transistor
-conducting or on; setting the flip-flop to 1 will switch the transistor
-off, which is identical to the power-on default.
+Setting a channel flip-flop to 0 will make the associated PIO-transistor conducting or on; setting the flip-flop to 1
+will switch the transistor off, which is identical to the power-on default.
 <FlipFlop_A> - ['owsFlipFlop_A']
     DS2406 [W]
 
 Flip Flop B
 #################
-Setting a channel flip-flop to 0 will make the associated PIO-transistor
-conducting or on; setting the flip-flop to 1 will switch the transistor
-off, which is identical to the power-on default.
+Setting a channel flip-flop to 0 will make the associated PIO-transistor conducting or on; setting the flip-flop to 1
+will switch the transistor off, which is identical to the power-on default.
 <FlipFlop_B> - ['owsFlipFlop_B']
     DS2406 [W]
 
@@ -562,6 +614,7 @@ Signal health of the sensor (0 - 7), higher numbers better.
     EDS0083
     EDS0085
     EDS0090
+    EDS2040
 
 Heat Index - Degrees centigrade
 #################
@@ -665,6 +718,7 @@ The devices don't seem to report usable humidity values.
 	DS2438
     EDS0065
     EDS0068
+    EDS2040
 
 Humidity High Alarm State
 #################
@@ -714,6 +768,16 @@ Input Level B
 <InputLevel_B> - ['owsInputLevel_B']
     DS2406
 
+Input 1
+#################
+<Input1>
+    EDS2040
+
+InputSend
+#################
+<InputSend>
+    EDS2040 [W]
+
 LED
 #################
 The state of the LED is stored in non-volatile memory and is restored
@@ -754,7 +818,7 @@ LED Function
 
 LED State
 #################
-Write to this variable to control the LED. This is what the state of the 
+Write to this variable to control the LED. This is what the state of the
 LED should be.
 0: off
 1: on
@@ -815,13 +879,16 @@ Light Low Conditional Search State
     EDS0067 [W]
     EDS0068 [W]
 
+Linked
+#################
+<Linked>
+    EDS2040 [W]
+
 Loop Time
 #################
-The time, in seconds, it takes for the server to cycle through polling
-all of the devices and receive a response. As more devices are added,
-each individual device gets read less frequently since only a single
-device can be read at a time. This value is useful for determining how
-frequently each sensor gets read.
+The time, in seconds, it takes for the server to cycle through polling all the devices and receive a response. As more
+devices are added, each individual device gets read less frequently since only a single device can be read at a time.
+This value is useful for determining how frequently each sensor gets read.
 <LoopTime> - ['owsLoopTime']
     OWSERVER-ENET
     OWSERVER-ENET2
@@ -833,6 +900,21 @@ MAC Address
     OWSERVER-ENET
     OWSERVER-ENET2
     OWServer_v2G-WiFi
+
+Message Attempts
+#################
+<MessageAttempts>
+    EDS2040
+
+Message Packet Retries
+#################
+<MessagePacketRetries>
+    EDS2040
+
+Message Failures
+#################
+MessageFailures
+    EDS2040
 
 Name
 #################
@@ -857,11 +939,71 @@ Name
     EDS0083     ("Quad 4-20 Milliamp Input")
     EDS0085     ("Quad 0-10 Volt Input")
     EDS0090     ("Octal Discrete IO")
+    EDS2040     ("Temperature, Humidity, Discrete Input, and External Probe Support with High Power Radio)
 
 Number Of Channels
 #################
 <NumberOfChannels> - ['owsNumberOfChannels']
     DS2406
+OW1Value
+#################
+<OW1Value>
+    EDS2040
+
+OW2Value
+#################
+<OW2Value>
+    EDS2040
+
+OW3Value
+#################
+<OW3Value>
+    EDS2040
+
+OW1Health
+#################
+<OW1Health>
+    EDS2040
+
+OW2Health
+#################
+<OW2Health>
+    EDS2040
+
+OW3Health
+#################
+<OW3Health>
+    EDS2040
+
+OW1DataType
+#################
+<OW1DataType>
+    EDS2040
+
+OW2DataType
+#################
+<OW2DataType>
+    EDS2040
+
+OW3DataType
+#################
+<OW3DataType>
+    EDS2040
+
+OW1ROMID
+#################
+<OW1ROMID>
+    EDS2040
+
+OW2ROMID
+#################
+<OW2ROMID>
+    EDS2040
+
+OW3ROMID
+#################
+<OW3ROMID>
+    EDS2040
 
 PIO Activity Latch State
 #################
@@ -899,13 +1041,13 @@ Primary Value
     EDS0083
     EDS0085
     EDS0090
+    EDS2040
 
 Poll Count
 #################
-The number of times the server has cycled through polling all of the
-connected devices.
+The number of times the server has cycled through polling all the connected devices.
 <PollCount>  - ['owsPollCount']
-    OWSERVER-ENET 
+    OWSERVER-ENET
     OWSERVER-ENET2
     OWServer_v2G-WiFi
 
@@ -948,10 +1090,14 @@ Raw Data
     EDS0085
     EDS0090
 
+ReadCounter
+#################
+<ReadCounter>
+    EDS2040
+
 Relay
 #################
-The relay is latching; its state￼remains the same, even when power is
-removed.
+The relay is latching; its state￼remains the same, even when power is removed.
 0: Off
 1: On
 <Relay> - ['owsRelay'] - BOOLEAN
@@ -1002,6 +1148,16 @@ Relay State
     EDS0082 [W]
     EDS0085 [W]
     EDS0090 [W]
+
+Repeater
+#################
+<Repeater>
+    EDS2040
+
+Reset Message Counters
+#################
+<ResetMessageCounters>
+    EDS2040 [W]
 
 Resolution
 #################
@@ -1091,10 +1247,15 @@ RTD Ohms - Ohms
 <RTDOhms> - ['owsRTDOhms']
     EDS0071
 
+SensorReadPeriod
+#################
+<SensorReadPeriod>
+    EDS2040 [W]
+
 Temperature - Degrees centigrade
 #################
 <Temperature> - ['owsTemperature']
-	DS18B20 
+	DS18B20
 	DS18S20
     DS2438
     EDS0064
@@ -1103,6 +1264,7 @@ Temperature - Degrees centigrade
     EDS0067
     EDS0068
     EDS0071
+    EDS2040
 
 Temperature High Alarm State
 #################
@@ -1166,6 +1328,11 @@ Temperature Low Conditional Search State
     EDS0068 [W]
     EDS0071 [W]
 
+Timestamp
+#################
+<Timestamp>
+    EDS2040
+
 User Byte 1
 #################
 <UserByte1> - ['owsSensorUserByte1']
@@ -1179,6 +1346,10 @@ User Byte 2
 Two bit storage register.
     DS18B20 [W]
 	DS18S20 [W]
+
+Username
+#################
+    EDS2040 [W]
 
 0 to 10 Volt Input High Alarm State (1-4) (1-8) - Volts
 #################
@@ -1452,6 +1623,7 @@ Version
     EDS0082
     EDS0085
     EDS0090
+    EDS2040
 
 Vibration High Alarm State - (units?)
 #################
@@ -1524,6 +1696,21 @@ The voltage of the power supply
 <VoltagePower> - ['owsVoltagePower']
     OWSERVER-ENET2
     OWServer_v2G-WiFi
+
+WritesFailed
+#################
+<WritesFailed>
+    EDS2040
+
+WritesPending
+#################
+<WritesPending>
+    EDS2040
+
+WritesSucceeded
+#################
+<WritesSucceeded>
+    EDS2040
 
 HA7Net:
 #################

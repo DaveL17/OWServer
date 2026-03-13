@@ -1,0 +1,5 @@
+<Template>
+    <Field id="SupportsOnState" type="checkbox" hidden="true" defaultValue="true">
+        <Label>Show ON/OFF state:</Label>
+    </Field>
+</Template>

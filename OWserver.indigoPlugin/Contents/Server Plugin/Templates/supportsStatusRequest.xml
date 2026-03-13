@@ -1,0 +1,5 @@
+<Template>
+    <Field id="SupportsStatusRequest" type="checkbox" hidden="true" defaultValue="true">
+        <Label>Enable status request / refresh button:</Label>
+    </Field>
+</Template>

@@ -1,0 +1,5 @@
+<Template>
+    <Field id="AllowOnStateChange" type="checkbox" hidden="true" defaultValue="false">
+        <Label>Enable controls to override on/off state</Label>
+    </Field>
+</Template>

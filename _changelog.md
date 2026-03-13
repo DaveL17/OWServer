@@ -1,3 +1,5 @@
+### v2025.1.0
+- Stability and performance improvements.
 
 ### v2022.0.4
 - Adds foundation for API `3.1`.
@@ -51,7 +53,7 @@
   items without an ellipsis denote that the plugin will take immediate action.
 
 ### v1.0.02
-- Moves support URL to Github.
+- Moves support URL to GitHub.
 - Minor UI refinements.
 - Fixes bug in plugin configuration dialog validation.
 - Fixes bug in device configuration dialog validation.
@@ -93,7 +95,7 @@
 - Implements Indigo custom device state icons for all switches, relays, and LED states to reflect on or off.
 - Fixes bug where some devices did not properly track LED and Relay states.
 - Moves server communication test from plugin configuration menu to the Indigo plugin menu (reduces clicks to run the
-  test) and allows user to send XML output to the Indigo log (useful when trouble-shooting problems.)
+  test) and allows user to send XML output to the Indigo log (useful when troubleshooting problems.)
 - Reorders sensor list by sensor number rather than name for easier identification.
 - Code enhancements:
   - Fixes some device state data types.
@@ -121,7 +123,7 @@
   - Improves debug logging implementation.
   - Minor improvement to built-in timer accuracy.
 - Fixes bug in display precision routine.
-- Fixes bug where new (unconfigured) devices are reported as being offline.
+- Fixes bug where new (un-configured) devices are reported as being offline.
 - Fixes bug in debug logging.
 
 ### v0.7.0

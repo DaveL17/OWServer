@@ -23,11 +23,7 @@ import xml.etree.ElementTree as eTree
 
 # Third-party modules
 import requests  # noqa - included in the standard Indigo python install
-try:
-    import indigo
-#     import pydevd
-except ImportError:
-    pass
+import indigo  # noqa
 
 # My modules
 import DLFramework.DLFramework as Dave  # noqa
@@ -76,19 +72,12 @@ class Plugin(indigo.PluginBase):
         self.Fogbert = Dave.Fogbert(self)
 
         # =============================== Debug Logging ================================
-        log_format = '%(asctime)s.%(msecs)03d\t%(levelname)-10s\t%(name)s.%(funcName)-28s %(message)s'
         self.debug_level = int(self.pluginPrefs.get('showDebugLevel', "30"))
-        self.plugin_file_handler.setFormatter(logging.Formatter(fmt=log_format, datefmt='%Y-%m-%d %H:%M:%S'))
+        self.plugin_file_handler.setFormatter(logging.Formatter(fmt=Dave.LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S'))
         self.indigo_log_handler.setLevel(self.debug_level)
 
         if self.pluginPrefs['showDebugLevel'] not in (10, 20, 30, 40, 50):
             self.pluginPrefs['showDebugLevel'] = 30
-
-        # ============================= Remote Debugging ==============================
-        # try:
-        #     pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True, suspend=False)
-        # except:
-        #     pass
 
         self.plugin_is_initializing = False
 
@@ -165,7 +154,7 @@ class Plugin(indigo.PluginBase):
         :param indigo.Device dev:
         :return:
         """
-        self.logger.debug(f"Starting OWServer device: {dev.name}")
+        self.logger.debug("Starting OWServer device: %s", dev.name)
         dev.stateListOrDisplayStateIdChanged()
         dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
 
@@ -177,7 +166,7 @@ class Plugin(indigo.PluginBase):
         :param indigo.Device dev:
         :return:
         """
-        self.logger.debug(f"Stopping OWServer device: {dev.name}")
+        self.logger.debug("Stopping OWServer device: %s", dev.name)
         dev.updateStateOnServer('onOffState', value=False, uiValue=" ")
         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
@@ -261,7 +250,7 @@ class Plugin(indigo.PluginBase):
                     try:
                         part = int(part)
                         if part < 0 or part > 255:
-                            error_msg_dict['OWServerIP'] = ("You have entered a value out of range (not 0-255).")
+                            error_msg_dict['OWServerIP'] = "You have entered a value out of range (not 0-255)."
                             return False, values_dict, error_msg_dict
                     except ValueError:
                         error_msg_dict['OWServerIP'] = (
@@ -284,14 +273,14 @@ class Plugin(indigo.PluginBase):
         :param List val:
         """
         # The EDS server does not support https://.
-        write_url = f"http://{val[0]}/devices.htm?rom={val[1]}&variable={val[2]}&value={val[3]}"
+        write_url = f"http://{val[0]}/devices.htm?rom={val[1]}&variable={val[2]}&value={val[3]}"  # noqa
 
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = requests.get(write_url, timeout=time_out)
 
-            self.logger.debug(f"Write to server URL: {write_url}")
-            self.logger.debug(f"Reply: {reply}")
+            self.logger.debug("Write to server URL: %s", write_url)
+            self.logger.debug("Reply: %s", reply)
 
         except Exception:  # noqa
             self.logger.exception("sendToServer()")
@@ -326,8 +315,8 @@ class Plugin(indigo.PluginBase):
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = requests.get(write_url, timeout=time_out)
-            self.logger.debug(f"Write to server URL: {write_url}")
-            self.logger.debug(f"Reply: {reply}")
+            self.logger.debug("Write to server URL: %s", write_url)
+            self.logger.debug("Reply: %s", reply)
 
         except Exception:  # noqa  # oqa
             self.logger.exception("sendToServerAction()")
@@ -392,14 +381,14 @@ class Plugin(indigo.PluginBase):
             f"&value={write_to_value}"
         )
 
-        self.logger.debug(f"URL constructed to post data to device: {write_to_url}")
+        self.logger.debug("URL constructed to post data to device: %s", write_to_url)
 
         # Send the URL to the server.
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = requests.get(write_to_url, timeout=time_out)
-            self.logger.info(f"{write_to_variable}: {write_to_value} written successfully.")
-            self.logger.info(f"Reply: {reply}")
+            self.logger.info("%s: %s written successfully.", write_to_variable, write_to_value)
+            self.logger.info("Reply: %s", reply)
             return True
 
         # TODO - include requests exception handlers?
@@ -457,9 +446,9 @@ class Plugin(indigo.PluginBase):
                         data.write(str(ows_xml))
 
                 if not ows_xml:
-                    self.logger.critical(f"OWServer IP: {server_ip} failed.")
+                    self.logger.critical("OWServer IP: %s failed.", server_ip)
                 else:
-                    indigo.server.log(f"OWServer IP: {server_ip} passed.")
+                    indigo.server.log("OWServer IP: %s passed.", server_ip)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -526,15 +515,24 @@ class Plugin(indigo.PluginBase):
                 ows_xml = self.get_details_xml(IP)
                 root = eTree.fromstring(ows_xml)
 
+                ns = root.tag[root.tag.find("{")+1:root.tag.find("}")]
+                self.xmlns = f"{{{ns}}}"
+
                 if self.pluginPrefs['showDebugInfo'] and self.pluginPrefs['showDebugLevel'] >= 3:
-                    self.logger.debug(f"{ows_xml}")
+                    self.logger.debug("%s", ows_xml)
 
                 # Build a list of ROM IDs for all 1-Wire sensors on the network. We start by parsing out a list of all
                 # ROM IDs in the source details.xml file. The resulting list is called "sensorID_list"
                 for child in root:
                     if "owd_" in child.tag:
                         rom_id = child.find(self.xmlns + 'ROMId')
-                        sensor_id_list += [rom_id.text]
+                        try:
+                            sensor_id_list += [rom_id.text]
+                        except AttributeError:
+                            # Meshnet devices don't have ROMId values, so we pass on those here.
+                            pass
+
+                        # TODO: need to add the meshnet device(s)
 
                 # If the list is empty, there are no ROM IDs in details.xml. Let's proceed with an empty list.
                 if sensor_id_list is None:
@@ -656,8 +654,8 @@ class Plugin(indigo.PluginBase):
 
                 else:
                     self.logger.warning(
-                        f"{dev.name} hasn't been updated in {diff_time}. If this condition persists, check it's "
-                        f"connection."
+                        "%s hasn't been updated in %s. If this condition persists, check it's connection.",
+                        dev.name, diff_time
                     )
                     try:
                         dev.updateStateOnServer('onOffState', value=False, uiValue="")
@@ -807,6 +805,7 @@ class Plugin(indigo.PluginBase):
                     dev.updateStateOnServer(key, value="Unsupported")
 
             try:
+                self.logger.debug("%s", self.xmlns)
                 devices_connected = root.find(self.xmlns + 'DevicesConnected').text
                 if devices_connected == "1":
                     input_value = f"{devices_connected} sensor"
@@ -865,7 +864,7 @@ class Plugin(indigo.PluginBase):
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                    self.logger.debug(f"Key: {key} : Value: Unsupported")
+                    self.logger.debug("Key: %s : Value: Unsupported", key)
                     dev.updateStateOnServer(key, value="Unsupported")
 
             try:
@@ -876,7 +875,7 @@ class Plugin(indigo.PluginBase):
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
             except Exception:  # noqa
                 self.logger.exception("General exception:")
-                self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
+                self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -918,8 +917,8 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
-                    self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                    self.logger.debug(f"Key: {key} : Value: Unsupported")
+                    self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
+                    self.logger.debug("Key: %s : Value: Unsupported", key)
                     dev.updateStateOnServer(key, value="Unsupported")
 
             try:
@@ -929,7 +928,7 @@ class Plugin(indigo.PluginBase):
                 input_value = self.temp_convert(input_value)
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
             except Exception:  # noqa
-                self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
+                self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
                 dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
@@ -3758,6 +3757,14 @@ class Plugin(indigo.PluginBase):
                     raise Exception
 
                 root = eTree.fromstring(ows_xml)
+
+                # Extract the namespace of the current xml payload. The value can vary depending on the server
+                # hardware architecture used. For example,
+                #   'http://www.embeddeddatasystems.com/schema/owserver'
+                #   'http://www.embeddeddatasystems.com/schema/wirelesscontroller'
+                # This way, we know it's the right namespace for the current xml payload.
+                ns = root.tag[root.tag.find("{")+1:root.tag.find("}")]
+                self.xmlns = f"{{{ns}}}"
 
                 for dev in indigo.devices.itervalues("self"):
                     if not dev:

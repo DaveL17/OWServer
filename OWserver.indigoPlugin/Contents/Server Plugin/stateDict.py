@@ -16,7 +16,7 @@ except ImportError:
     pass
 
 
-class OWServer():
+class OWServer:
     """
     Title Placeholder
 
@@ -214,35 +214,35 @@ class OWServer():
         """
 
         ds2450_state_dict = {
-        'owsChannel': 'Channel',
-        'owsChannelAConversionRange': 'ChannelAConversionRange',
-        'owsChannelAConversionResolution': 'ChannelAConversionResolution',
-        'owsChannelAConversionValue': 'ChannelAConversionValue',
-        'owsChannelAOutputControl': 'ChannelAOutputControl',
-        'owsChannelAOutputEnable': 'ChannelAOutputEnable',
-        'owsChannelBConversionRange': 'ChannelBConversionRange',
-        'owsChannelBConversionResolution': 'ChannelBConversionResolution',
-        'owsChannelBConversionValue': 'ChannelBConversionValue',
-        'owsChannelBOutputControl': 'ChannelBOutputControl',
-        'owsChannelBOutputEnable': 'ChannelBOutputEnable',
-        'owsChannelCConversionRange': 'ChannelCConversionRange',
-        'owsChannelCConversionResolution': 'ChannelCConversionResolution',
-        'owsChannelCConversionValue': 'ChannelCConversionValue',
-        'owsChannelCOutputControl': 'ChannelCOutputControl',
-        'owsChannelCOutputEnable': 'ChannelCOutputEnable',
-        'owsChannelDConversionRange': 'ChannelDConversionRange',
-        'owsChannelDConversionResolution': 'ChannelDConversionResolution',
-        'owsChannelDConversionValue': 'ChannelDConversionValue',
-        'owsChannelDOutputControl': 'ChannelDOutputControl',
-        'owsChannelDOutputEnable': 'ChannelDOutputEnable',
-        'owsFamily': 'Family',
-        'owsHealth': 'Health',
-        'owsPrimaryValue': 'PrimaryValue',
-        'owsPowerOnReset': 'PowerOnReset',
-        'owsRawData': 'RawData',
-        'owsRomID': 'ROMId',
-        'owsType': 'Name',
-        'owsVCCControl': 'VCCControl',
+            'owsChannel': 'Channel',
+            'owsChannelAConversionRange': 'ChannelAConversionRange',
+            'owsChannelAConversionResolution': 'ChannelAConversionResolution',
+            'owsChannelAConversionValue': 'ChannelAConversionValue',
+            'owsChannelAOutputControl': 'ChannelAOutputControl',
+            'owsChannelAOutputEnable': 'ChannelAOutputEnable',
+            'owsChannelBConversionRange': 'ChannelBConversionRange',
+            'owsChannelBConversionResolution': 'ChannelBConversionResolution',
+            'owsChannelBConversionValue': 'ChannelBConversionValue',
+            'owsChannelBOutputControl': 'ChannelBOutputControl',
+            'owsChannelBOutputEnable': 'ChannelBOutputEnable',
+            'owsChannelCConversionRange': 'ChannelCConversionRange',
+            'owsChannelCConversionResolution': 'ChannelCConversionResolution',
+            'owsChannelCConversionValue': 'ChannelCConversionValue',
+            'owsChannelCOutputControl': 'ChannelCOutputControl',
+            'owsChannelCOutputEnable': 'ChannelCOutputEnable',
+            'owsChannelDConversionRange': 'ChannelDConversionRange',
+            'owsChannelDConversionResolution': 'ChannelDConversionResolution',
+            'owsChannelDConversionValue': 'ChannelDConversionValue',
+            'owsChannelDOutputControl': 'ChannelDOutputControl',
+            'owsChannelDOutputEnable': 'ChannelDOutputEnable',
+            'owsFamily': 'Family',
+            'owsHealth': 'Health',
+            'owsPrimaryValue': 'PrimaryValue',
+            'owsPowerOnReset': 'PowerOnReset',
+            'owsRawData': 'RawData',
+            'owsRomID': 'ROMId',
+            'owsType': 'Name',
+            'owsVCCControl': 'VCCControl',
         }
 
         return ds2450_state_dict
