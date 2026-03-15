@@ -1,5 +1,8 @@
 ### v2025.1.0
 - Stability and performance improvements.
+- Standardized project `.gitignore` file.
+- Removes unused variables from `tests/.env` file.
+- Removes empty plugin directories.
 
 ### v2022.0.4
 - Adds foundation for API `3.1`.
