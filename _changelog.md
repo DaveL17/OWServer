@@ -77,7 +77,7 @@
 - UI refinements.
 
 ### v0.8.0
-- Adds support for 
+- Adds support for
   - EDS0064 (Temperature Sensor with Counter)
   - EDS0065 (Temperature and Humidity Sensor)
   - EDS0066 (Temperature and Barometric Pressure Sensor)
