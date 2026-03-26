@@ -141,7 +141,7 @@
     </Field>
 
     <!-- Debugging Template -->
-    <Template file="DLFramework/template_debugging.xml"/>
+    <Template id="debug_template" file="DLFramework/template_debugging.xml"/>
 
 </PluginConfig>
 
