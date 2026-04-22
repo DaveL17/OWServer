@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2022.0.3'
+__version__   = '2025.2.0'
 
 
 # =============================================================================
@@ -76,7 +76,7 @@ class Plugin(indigo.PluginBase):
         self.plugin_file_handler.setFormatter(logging.Formatter(fmt=Dave.LOG_FORMAT, datefmt='%Y-%m-%d %H:%M:%S'))
         self.indigo_log_handler.setLevel(self.debug_level)
 
-        if self.pluginPrefs['showDebugLevel'] not in (10, 20, 30, 40, 50):
+        if int(self.pluginPrefs['showDebugLevel']) not in (10, 20, 30, 40, 50):
             self.pluginPrefs['showDebugLevel'] = 30
 
         self.plugin_is_initializing = False
@@ -310,7 +310,7 @@ class Plugin(indigo.PluginBase):
         rom_id    = val.props.get('romId')
         variable  = val.props.get('variable')
         value     = val.props.get('value')
-        write_url = f"https://{server}/devices.htm?rom={rom_id}&variable={variable}&value={value}"
+        write_url = f"http://{server}/devices.htm?rom={rom_id}&variable={variable}&value={value}"
 
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
@@ -377,7 +377,7 @@ class Plugin(indigo.PluginBase):
 
         # All tests passed, so construct the URL to send to the server.
         write_to_url = (
-            f"https://{write_to_server}/devices.htm?rom={write_to_rom}&variable={write_to_variable}"
+            f"http://{write_to_server}/devices.htm?rom={write_to_rom}&variable={write_to_variable}"
             f"&value={write_to_value}"
         )
 
@@ -448,7 +448,7 @@ class Plugin(indigo.PluginBase):
                 if not ows_xml:
                     self.logger.critical("OWServer IP: %s failed.", server_ip)
                 else:
-                    indigo.server.log("OWServer IP: %s passed.", server_ip)
+                    indigo.server.log(f"OWServer IP: {server_ip} passed.")
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -535,7 +535,7 @@ class Plugin(indigo.PluginBase):
                         # TODO: need to add the meshnet device(s)
 
                 # If the list is empty, there are no ROM IDs in details.xml. Let's proceed with an empty list.
-                if sensor_id_list is None:
+                if not sensor_id_list:
                     sensor_id_list = []
 
                 # Sort the list (to make it easy to find the ROM ID needed), and return the list.
@@ -1998,7 +1998,8 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
                     case "C_1":  # Counter 1
-                        conversion_value = ows_sensor.find(self.xmlns + 'Counter').text
+                        input_value = ows_sensor.find(self.xmlns + 'Counter').text
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
@@ -2384,6 +2385,7 @@ class Plugin(indigo.PluginBase):
         for prop in props:
             new_props[f'{sensor_num}{prop}'] = ows_sensor.find(self.xmlns + prop).text
         new_props['address'] = dev.states['owsRomID']
+        dev.replacePluginPropsOnServer(new_props)
         self.number_of_sensors += 1
         dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
         self.logger.debug("Success. Polling next sensor if appropriate.")
@@ -3768,16 +3770,14 @@ class Plugin(indigo.PluginBase):
 
                 for dev in indigo.devices.itervalues("self"):
                     if not dev:
-                        # There are no devices of type OWServer, so go to sleep.
-                        self.logger.debug("There aren't any servers or sensors to assign yet. Sleeping.")
-                        self.sleep(pref_poll)
+                        # There are no devices of type OWServer, so skip.
+                        self.logger.debug("There aren't any servers or sensors to assign yet. Skipping.")
 
                     elif not dev.configured:
                         # A device has been created, but hasn't been fully configured.
                         self.logger.warning(
-                            "A device has been created, but is not fully  configured. Sleeping while you finish."
+                            "A device has been created, but is not fully configured. Skipping."
                         )
-                        self.sleep(pref_poll)
 
                     elif not dev.enabled:
                         # A device has been disabled. Skip it.

@@ -1,3 +1,12 @@
+### v2025.2.0
+- Fixes `sendToServerAction()` and `customWriteToDevice()` using `https://` (EDS hardware requires `http://`).
+- Fixes dead `None` check in `getSensorList()` (list is never `None`; changed to `not sensor_id_list`).
+- Fixes `dumpXML()` passing a `%s` format string to `indigo.server.log()`, which does not support format substitution.
+- Fixes `__init__()` comparing string pref value against integers when validating debug level, causing it to reset on every startup.
+- Fixes `updateEDS0080()` `case "C_1"` reading counter into an unused variable instead of `input_value`.
+- Fixes `populate_props()` never calling `replacePluginPropsOnServer()`, silently discarding all writable prop updates.
+- Fixes `updateDeviceStates()` calling `self.sleep()` inside the device loop for unconfigured devices, blocking all remaining devices from updating.
+
 ### v2025.1.0
 - Stability and performance improvements.
 - Standardized project `.gitignore` file.
