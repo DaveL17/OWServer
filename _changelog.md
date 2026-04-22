@@ -6,6 +6,7 @@
 - Fixes `updateEDS0080()` `case "C_1"` reading counter into an unused variable instead of `input_value`.
 - Fixes `populate_props()` never calling `replacePluginPropsOnServer()`, silently discarding all writable prop updates.
 - Fixes `updateDeviceStates()` calling `self.sleep()` inside the device loop for unconfigured devices, blocking all remaining devices from updating.
+- Converts `DLFramework` files from static copies to symlinks (shared development library).
 
 ### v2025.1.0
 - Stability and performance improvements.
