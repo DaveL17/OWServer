@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2025.2.0'
+__version__   = '2025.2.1'
 
 
 # =============================================================================
@@ -133,7 +133,7 @@ class Plugin(indigo.PluginBase):
             # Debug Logging
             self.debug_level = int(values_dict.get('showDebugLevel', "30"))
             self.indigo_log_handler.setLevel(self.debug_level)
-            indigo.server.log(f"Debugging on (Level: {DEBUG_LABELS[self.debug_level]} ({self.debug_level})")
+            indigo.server.log(f"Debugging on (Level: {DEBUG_LABELS[self.debug_level]} ({self.debug_level}))")
 
             # Plugin-specific actions
             # Update all device states upon close
@@ -185,11 +185,11 @@ class Plugin(indigo.PluginBase):
             while True:
                 self.spot_dead_sensors()
                 self.updateDeviceStates()
-                sleep_time = int(self.pluginPrefs.get('configMenuPollInterval', 900))
-                self.sleep(sleep_time-5)
+                sleep_time = max(5, int(self.pluginPrefs.get('configMenuPollInterval', 900)))
+                self.sleep(sleep_time - 5)
 
         except self.StopThread:
-            self.logger.debug("Fatal error. Stopping OWServer thread.")
+            self.logger.debug("OWServer thread stopped.")
 
     # =============================================================================
     def shutdown(self):
@@ -437,17 +437,16 @@ class Plugin(indigo.PluginBase):
         for server_ip in split_ip:
             try:
                 ows_xml = self.get_details_xml(server_ip)
-                if values_dict['writeXMLToLog']:
-                    file_name = f"{indigo.server.getLogsFolderPath()}/{dt.datetime.today().date()} OWServer.txt"
-                    with open(file_name, "w", encoding='utf-8') as data:
-                        data.write("OWServer details.xml Log\n")
-                        data.write(f"Written at: {dt.datetime.today()}\n")
-                        data.write("=" * 72 + "\n")
-                        data.write(str(ows_xml))
-
                 if not ows_xml:
                     self.logger.critical("OWServer IP: %s failed.", server_ip)
                 else:
+                    if values_dict['writeXMLToLog']:
+                        file_name = f"{indigo.server.getLogsFolderPath()}/{dt.datetime.today().date()} OWServer.txt"
+                        with open(file_name, "w", encoding='utf-8') as data:
+                            data.write("OWServer details.xml Log\n")
+                            data.write(f"Written at: {dt.datetime.today()}\n")
+                            data.write("=" * 72 + "\n")
+                            data.write(str(ows_xml))
                     indigo.server.log(f"OWServer IP: {server_ip} passed.")
 
             except Exception:  # noqa
@@ -504,7 +503,7 @@ class Plugin(indigo.PluginBase):
         self.logger.debug("getSensorList() method called.")
         self.logger.debug("Generating list of 1-Wire sensors...")
 
-        server_list        = self.pluginPrefs.get('OWServerIP', None)
+        server_list        = self.pluginPrefs.get('OWServerIP', '')
         clean_server_list  = server_list.replace(' ', '').split(',')
         sorted_server_list = sorted(clean_server_list)
         sorted_sensor_list = []
@@ -518,7 +517,7 @@ class Plugin(indigo.PluginBase):
                 ns = root.tag[root.tag.find("{")+1:root.tag.find("}")]
                 self.xmlns = f"{{{ns}}}"
 
-                if self.pluginPrefs['showDebugInfo'] and self.pluginPrefs['showDebugLevel'] >= 3:
+                if self.pluginPrefs['showDebugInfo'] and int(self.pluginPrefs['showDebugLevel']) >= 3:
                     self.logger.debug("%s", ows_xml)
 
                 # Build a list of ROM IDs for all 1-Wire sensors on the network. We start by parsing out a list of all
@@ -570,7 +569,7 @@ class Plugin(indigo.PluginBase):
         my_socket = None
 
         if not self.pluginPrefs.get('autoDetectServers', True):
-            server_list        = self.pluginPrefs.get('OWServerIP', None)
+            server_list        = self.pluginPrefs.get('OWServerIP', '')
             clean_server_list  = server_list.replace(" ", "").split(",")
             sorted_server_list = sorted(clean_server_list)
             return sorted_server_list
@@ -579,6 +578,7 @@ class Plugin(indigo.PluginBase):
             # We will ignore everything that responds to our UDP broadcast request unless it has one of the following
             # in its return.
             try:
+                prior_timeout = socket.getdefaulttimeout()
                 socket.setdefaulttimeout(0.5)
                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -610,6 +610,9 @@ class Plugin(indigo.PluginBase):
                 else:
                     self.logger.exception("General exception")
                 return sorted(master_list)
+
+            finally:
+                socket.setdefaulttimeout(prior_timeout)
 
     # =============================================================================
     def killAllComms(self):  # noqa
@@ -1046,8 +1049,9 @@ class Plugin(indigo.PluginBase):
                 latch_state_str = latch_state_str.zfill(8)
 
                 # These states don't exist in the details.xml file. We impute them from <PIOOutputLatchState>.
+                # latch_state_str[0] is the MSB; bit N (input N) lives at index 7-N.
                 for _ in range(0, 8):
-                    dev.updateStateOnServer(f'owsInput{_}', value=latch_state_str[_])
+                    dev.updateStateOnServer(f'owsInput{_}', value=latch_state_str[7 - _])
 
                 match dev.pluginProps['prefSensorValue2408']:
                     case "S_0":  # Switch 0
@@ -1866,7 +1870,14 @@ class Plugin(indigo.PluginBase):
 
             for key, value in eds0071_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    if key == "owsTemperature":
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0071TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateOnServer(key, value=input_value)
+                    else:
+                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1896,8 +1907,11 @@ class Plugin(indigo.PluginBase):
                         input_value = self.volts_convert(conversion_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
                     case "T":  # Temperature
-                        input_value = ows_sensor.find(self.xmlns + 'Temperature').text
-                        dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+                        ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
+                        comp_val = dev.pluginProps.get('EDS0071TempComp', '0.0')
+                        input_value = float(ows_temp) + float(comp_val)
+                        input_value = self.temp_convert(input_value)
+                        dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
 
@@ -2383,7 +2397,8 @@ class Plugin(indigo.PluginBase):
     def populate_props(self, dev, props, ows_sensor, sensor_num):
         new_props = dev.pluginProps
         for prop in props:
-            new_props[f'{sensor_num}{prop}'] = ows_sensor.find(self.xmlns + prop).text
+            element = ows_sensor.find(self.xmlns + prop)
+            new_props[f'{sensor_num}{prop}'] = element.text if element is not None else "Unsupported"
         new_props['address'] = dev.states['owsRomID']
         dev.replacePluginPropsOnServer(new_props)
         self.number_of_sensors += 1
@@ -3667,7 +3682,6 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        new_var = ""
         try:
             match indigo.devices[target_id].states['owsLED']:
                 case "1":
@@ -3676,11 +3690,11 @@ class Plugin(indigo.PluginBase):
                     new_var = "1"
                 case _:
                     self.logger.critical("Error toggling sensor LED.")
+                    return
+            parm_list = (values_dict['serverList'], values_dict['romID'], "LEDState", new_var)
+            self.sendToServer(parm_list)
         except Exception:  # noqa
             self.logger.exception("General exception:")
-
-        parm_list = (values_dict['serverList'], values_dict['romID'], "LEDState", new_var)
-        self.sendToServer(parm_list)
 
     # =============================================================================
     def toggle_relay(self, values_dict, type_id, target_id, fltr="indigo.sensor"):  # noqa
@@ -3695,7 +3709,6 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        new_var = ""
         try:
             match indigo.devices[target_id].states['owsRelay']:
                 case "1":
@@ -3704,11 +3717,11 @@ class Plugin(indigo.PluginBase):
                     new_var = "1"
                 case _:
                     self.logger.critical("Error toggling sensor relay.")
+                    return
+            parm_list = (values_dict['serverList'], values_dict['romID'], "RelayState", new_var)
+            self.sendToServer(parm_list)
         except Exception:  # noqa
             self.logger.exception("General exception:")
-
-        parm_list = (values_dict['serverList'], values_dict['romID'], "RelayState", new_var)
-        self.sendToServer(parm_list)
 
     # =============================================================================
     def updateDeviceStatesAction(self, values_dict):  # noqa
@@ -3739,7 +3752,7 @@ class Plugin(indigo.PluginBase):
         """
         self.logger.debug("updateDeviceStates() method called.")
 
-        addr = self.pluginPrefs['OWServerIP']
+        addr = self.pluginPrefs.get('OWServerIP', '')
         split_ip = addr.replace(" ", "").split(",")
         self.number_of_sensors = 0
         self.number_of_servers = 0
@@ -3948,10 +3961,11 @@ class Plugin(indigo.PluginBase):
                             self.logger.exception("General exception:")
 
             except Exception:  # noqa
-                # There has been a problem reaching the server. "Turn off" all sensors until next successful poll.
+                # There has been a problem reaching the server. "Turn off" sensors for this server only.
                 _ = [
                     dev.updateStateOnServer('onOffState', value=False)
                     for dev in indigo.devices.itervalues("self")
+                    if dev.pluginProps.get('serverList') == server_ip
                 ]
                 self.logger.warning("Error parsing sensor states.")
                 self.logger.warning(f"Trying again in {pref_poll} seconds.")

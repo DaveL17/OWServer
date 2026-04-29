@@ -1,11 +1,41 @@
-### v2025.2.0
+### v2025.2.1
+- Fixes `dumpXML()` writing an empty log file when the server is unreachable; `None` check now precedes the file 
+  `open()` call.
+- Fixes `getSensorList()` and `getServerList()` crashing with `AttributeError` when `OWServerIP` pref is absent 
+  (changed default from `None` to `''`).
+- Fixes `toggle_led()` and `toggle_relay()` sending an empty value to hardware when reading device state raises an 
+  exception.
+- Fixes `updateDeviceStates()` disabling devices on all servers when one server fails; only devices belonging to the 
+  failing server are now turned off.
+- Fixes `updateDS2408()` bit-index mismatch where `owsInput{N}` states used MSB-first indexing but `sensorValue` `S_N` 
+  cases used LSB-first, causing them to reflect different physical inputs.
+- Fixes `populate_props()` raising `AttributeError` when an expected XML element is absent; missing elements now stored 
+  as `"Unsupported"`.
+- Fixes `runConcurrentThread()` logging "Fatal error" on normal graceful shutdown (`StopThread`).
+- Fixes `updateEDS0071()` `"T"` sensorValue case bypassing `temp_convert()` and the temperature compensation offset,
+  causing raw °C to be displayed regardless of user preferences.
+- Fixes `getServerList()` permanently overwriting the global socket timeout; previous timeout is now saved and restored
+  via `finally`.
+- Fixes `getSensorList()` raising `TypeError` when debug logging is enabled due to comparing a string pref value against
+  an integer.
+- Fixes unbalanced parentheses in the `closedPrefsConfigUi()` debug-level log message.
+- Fixes `runConcurrentThread()` passing zero or a negative value to `self.sleep()` when the poll interval is 5 seconds
+  or less.
+- Fixes `updateEDS0071()` state loop storing raw °C in the `owsTemperature` state regardless of unit preference or
+  compensation offset; now applies `temp_convert()` consistently with all other temperature-capable sensors.
+- Fixes `updateDeviceStates()` using bare key access for `OWServerIP` pref, raising `KeyError` and crashing the polling
+  loop if the pref is absent.
+
+- ### v2025.2.0
 - Fixes `sendToServerAction()` and `customWriteToDevice()` using `https://` (EDS hardware requires `http://`).
 - Fixes dead `None` check in `getSensorList()` (list is never `None`; changed to `not sensor_id_list`).
 - Fixes `dumpXML()` passing a `%s` format string to `indigo.server.log()`, which does not support format substitution.
-- Fixes `__init__()` comparing string pref value against integers when validating debug level, causing it to reset on every startup.
+- Fixes `__init__()` comparing string pref value against integers when validating debug level, causing it to reset on 
+  every startup.
 - Fixes `updateEDS0080()` `case "C_1"` reading counter into an unused variable instead of `input_value`.
 - Fixes `populate_props()` never calling `replacePluginPropsOnServer()`, silently discarding all writable prop updates.
-- Fixes `updateDeviceStates()` calling `self.sleep()` inside the device loop for unconfigured devices, blocking all remaining devices from updating.
+- Fixes `updateDeviceStates()` calling `self.sleep()` inside the device loop for unconfigured devices, blocking all 
+  remaining devices from updating.
 - Converts `DLFramework` files from static copies to symlinks (shared development library).
 
 ### v2025.1.0
