@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2025.2.1'
+__version__   = '2025.2.3'
 
 
 # =============================================================================
@@ -186,7 +186,7 @@ class Plugin(indigo.PluginBase):
                 self.spot_dead_sensors()
                 self.updateDeviceStates()
                 sleep_time = max(5, int(self.pluginPrefs.get('configMenuPollInterval', 900)))
-                self.sleep(sleep_time - 5)
+                self.sleep(max(5, sleep_time - 5))
 
         except self.StopThread:
             self.logger.debug("OWServer thread stopped.")
@@ -318,7 +318,7 @@ class Plugin(indigo.PluginBase):
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
 
-        except Exception:  # noqa  # oqa
+        except Exception:  # noqa
             self.logger.exception("sendToServerAction()")
 
     # =============================================================================
@@ -371,7 +371,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             float(write_to_value)
-        except Exception:  # noqa  # noqa
+        except Exception:  # noqa
             error_msg_dict['writeToValue'] = "Only decimal values can be written to 1-Wire devices."
             return False, values_dict, error_msg_dict
 
@@ -480,7 +480,7 @@ class Plugin(indigo.PluginBase):
         except Exception:  # noqa
             self.logger.exception("General exception:")
             self.logger.warning(
-                "Misc. error downloading details.xml file. If the problem persists, please enable  debugging in the "
+                "Misc. error downloading details.xml file. If the problem persists, please enable debugging in the "
                 "OWServer configuration dialog and check user forum for more information."
             )
 
@@ -517,7 +517,7 @@ class Plugin(indigo.PluginBase):
                 ns = root.tag[root.tag.find("{")+1:root.tag.find("}")]
                 self.xmlns = f"{{{ns}}}"
 
-                if self.pluginPrefs['showDebugInfo'] and int(self.pluginPrefs['showDebugLevel']) >= 3:
+                if self.pluginPrefs['showDebugInfo'] and int(self.pluginPrefs['showDebugLevel']) <= 10:
                     self.logger.debug("%s", ows_xml)
 
                 # Build a list of ROM IDs for all 1-Wire sensors on the network. We start by parsing out a list of all
@@ -1152,7 +1152,7 @@ class Plugin(indigo.PluginBase):
             try:
                 if dev.pluginProps['prefSensorValue2423'] == "C_A":  # Counter A
                     input_value = ows_sensor.find(self.xmlns + 'Counter_A').text
-                if dev.pluginProps['prefSensorValue2423'] == "C_B":  # Counter B
+                elif dev.pluginProps['prefSensorValue2423'] == "C_B":  # Counter B
                     input_value = ows_sensor.find(self.xmlns + 'Counter_B').text
 
                 dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
@@ -1943,7 +1943,7 @@ class Plugin(indigo.PluginBase):
         """
         self.logger.debug("updateEDS0080() method called.")
         props = [
-            'LEDFunction', 'RelayFunction', 'RelayFunction', 'v4to20mAInput1HighAlarmValue',
+            'LEDFunction', 'RelayFunction', 'v4to20mAInput1HighAlarmValue',
             'v4to20mAInput1LowAlarmValue', 'v4to20mAInput2HighAlarmValue', 'v4to20mAInput2LowAlarmValue',
             'v4to20mAInput3HighAlarmValue', 'v4to20mAInput3LowAlarmValue', 'v4to20mAInput4HighAlarmValue',
             'v4to20mAInput4LowAlarmValue', 'v4to20mAInput5HighAlarmValue', 'v4to20mAInput5LowAlarmValue',
@@ -2309,7 +2309,7 @@ class Plugin(indigo.PluginBase):
             'DiscreteIO2ActivityLatchReset', 'DiscreteIO2HighAlarmValue', 'DiscreteIO2LowAlarmValue',
             'DiscreteIO2OutputState', 'DiscreteIO2PulldownState', 'DiscreteIO2PulseCounterReset',
             'DiscreteIO3ActivityLatchReset', 'DiscreteIO3HighAlarmValue', 'DiscreteIO3LowAlarmValue',
-            'DiscreteIO3OutputState', 'DiscreteIO3PulldownState', 'DiscreteIO3PulldownState',
+            'DiscreteIO3OutputState', 'DiscreteIO3PulldownState',
             'DiscreteIO4ActivityLatchReset', 'DiscreteIO4HighAlarmValue', 'DiscreteIO4LowAlarmValue',
             'DiscreteIO4OutputState', 'DiscreteIO4PulldownState', 'DiscreteIO5ActivityLatchReset',
             'DiscreteIO5HighAlarmValue', 'DiscreteIO5LowAlarmValue', 'DiscreteIO5OutputState',

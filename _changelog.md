@@ -1,3 +1,20 @@
+### v2025.2.3
+- Fixes wiki typos.
+- Reflows wiki text lines exceeding 120 characters across `configuration.md`, `devices.md`, `installation.md`,
+  `scripting.md`, and `tutorials.md`.
+
+### v2025.2.2
+- Fixes `updateEDS0080()` duplicate `'RelayFunction'` entry in props list causing the prop to be written twice per poll
+  cycle.
+- Fixes `updateEDS0090()` duplicate `'DiscreteIO3PulldownState'` entry in props list causing the prop to be written
+  twice per poll cycle.
+- Fixes `updateDS2423()` using two separate `if` statements instead of `if`/`elif` to select the counter value,
+  leaving a redundant second check that could never change behavior but obscures intent.
+- Fixes `getSensorList()` debug guard comparing the debug level against `3` (valid levels are 10–50), making the
+  guard always true when `showDebugInfo` is set; now correctly checks `<= 10`.
+- Fixes `runConcurrentThread()` still able to pass `0` to `self.sleep()` when the configured poll interval equals
+  exactly `5` seconds; enforces a minimum sleep of `5` seconds.
+
 ### v2025.2.1
 - Fixes `dumpXML()` writing an empty log file when the server is unreachable; `None` check now precedes the file 
   `open()` call.
@@ -51,7 +68,7 @@
 - Adds `_to_do_list.md` and changes changelog to markdown.
 - Moves plugin environment logging to plugin menu item (log only on request).
 
-### v2022.0.2
+### v2022.0.2 [released]
 - Bumps version number.
 
 ### v2022.0.1
