@@ -1,3 +1,7 @@
+### v2025.2.4
+- Migrates HTTP client from `requests` to `httpx`.
+- Linting changes.
+
 ### v2025.2.3
 - Fixes wiki typos.
 - Reflows wiki text lines exceeding 120 characters across `configuration.md`, `devices.md`, `installation.md`,
@@ -43,7 +47,7 @@
 - Fixes `updateDeviceStates()` using bare key access for `OWServerIP` pref, raising `KeyError` and crashing the polling
   loop if the pref is absent.
 
-- ### v2025.2.0
+### v2025.2.0
 - Fixes `sendToServerAction()` and `customWriteToDevice()` using `https://` (EDS hardware requires `http://`).
 - Fixes dead `None` check in `getSensorList()` (list is never `None`; changed to `not sensor_id_list`).
 - Fixes `dumpXML()` passing a `%s` format string to `indigo.server.log()`, which does not support format substitution.
@@ -65,7 +69,7 @@
 - Adds foundation for API `3.1`.
 
 ### v2022.0.3
-- Adds `_to_do_list.md` and changes changelog to markdown.
+- Adds `_to_do_list.md` and changes changelog to Markdown.
 - Moves plugin environment logging to plugin menu item (log only on request).
 
 ### v2022.0.2 [released]
@@ -211,7 +215,7 @@
 - Fixes bug in "Test the IP Address" method within the plugin config dialog.
 
 ### v0.6.91
-- Code refined to account for unicode characters where possible.
+- Code refined to account for Unicode characters where possible.
 
 ### v0.6.9
 - Fixes bug in temperature conversion routine for metric installations.

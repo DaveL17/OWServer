@@ -22,13 +22,13 @@ import socket
 import xml.etree.ElementTree as eTree
 
 # Third-party modules
-import requests  # noqa - included in the standard Indigo python install
+import httpx  # noqa - included in the standard Indigo python install
 import indigo  # noqa
 
 # My modules
 import DLFramework.DLFramework as Dave  # noqa
 import stateDict  # noqa
-from constants import *  # noqa  pylint: disable=wildcard-import
+from constants import DEBUG_LABELS  # noqa
 from plugin_defaults import kDefaultPluginPrefs  # noqa  pylint: disable=unused-import
 
 # =================================== HEADER ==================================
@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2025.2.3'
+__version__   = '2025.2.4'
 
 
 # =============================================================================
@@ -277,7 +277,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            reply = requests.get(write_url, timeout=time_out)
+            reply = httpx.get(write_url, timeout=time_out)
 
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
@@ -314,7 +314,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            reply = requests.get(write_url, timeout=time_out)
+            reply = httpx.get(write_url, timeout=time_out)
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
 
@@ -386,14 +386,13 @@ class Plugin(indigo.PluginBase):
         # Send the URL to the server.
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            reply = requests.get(write_to_url, timeout=time_out)
+            reply = httpx.get(write_to_url, timeout=time_out)
             self.logger.info("%s: %s written successfully.", write_to_variable, write_to_value)
             self.logger.info("Reply: %s", reply)
             return True
 
-        # TODO - include requests exception handlers?
         # What happens if we're unsuccessful.
-        # except urllib2.HTTPError as error:
+        # except httpx.HTTPStatusError as error:
         #     self.logger.exception("General exception:")
         #     self.logger.critical("HTTP error writing server data.")
         #     error_msg_dict['writeToServer'] = f"{error.reason}"
@@ -469,12 +468,12 @@ class Plugin(indigo.PluginBase):
             # The EDS server does not support https://.
             url      = f"http://{server_ip}/details.xml"  # noqa
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
-            response = requests.get(url, timeout=time_out)
+            response = httpx.get(url, timeout=time_out)
             self.logger.debug("details.xml file retrieved successfully.")
             return response.text
 
         # What happens if we're unsuccessful. No connection to Internet, no response from OWServer. Let's keep trying.
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout, requests.exceptions.HTTPError):
+        except (httpx.ConnectError, httpx.TimeoutException, httpx.HTTPStatusError):
             self.logger.warning("Unable to make a successful connection to One Wire Server.")
 
         except Exception:  # noqa
@@ -555,7 +554,7 @@ class Plugin(indigo.PluginBase):
         getServerList(): This method provides the callback for defining server devices. It obtains its list of server
         IP addresses from one of two distinct procedures: (1) automatic server detection, and (2) manual declaration of
         server IPs. Within the plugin configuration dialog, the user either accepts automatic detection or else enters
-        a comma delimited list of addresses. Despite whichever procedure is used, getServerList() returns a list
+        a comma-delimited list of addresses. Despite whichever procedure is used, getServerList() returns a list
         (sorted_server_list) containing the list of IPs. This list is used to assign IP addresses when the user creates
         OWServer devices.
 
@@ -577,8 +576,8 @@ class Plugin(indigo.PluginBase):
         else:
             # We will ignore everything that responds to our UDP broadcast request unless it has one of the following
             # in its return.
+            prior_timeout = socket.getdefaulttimeout()
             try:
-                prior_timeout = socket.getdefaulttimeout()
                 socket.setdefaulttimeout(0.5)
                 my_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
                 my_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, True)
@@ -3683,6 +3682,7 @@ class Plugin(indigo.PluginBase):
         :return:
         """
         try:
+            new_var = ""
             match indigo.devices[target_id].states['owsLED']:
                 case "1":
                     new_var = "0"
@@ -3710,6 +3710,7 @@ class Plugin(indigo.PluginBase):
         :return:
         """
         try:
+            new_var = ""
             match indigo.devices[target_id].states['owsRelay']:
                 case "1":
                     new_var = "0"
@@ -3773,11 +3774,11 @@ class Plugin(indigo.PluginBase):
 
                 root = eTree.fromstring(ows_xml)
 
-                # Extract the namespace of the current xml payload. The value can vary depending on the server
+                # Extract the namespace of the current XML payload. The value can vary depending on the server
                 # hardware architecture used. For example,
                 #   'http://www.embeddeddatasystems.com/schema/owserver'
                 #   'http://www.embeddeddatasystems.com/schema/wirelesscontroller'
-                # This way, we know it's the right namespace for the current xml payload.
+                # This way, we know it's the right namespace for the current XML payload.
                 ns = root.tag[root.tag.find("{")+1:root.tag.find("}")]
                 self.xmlns = f"{{{ns}}}"
 
