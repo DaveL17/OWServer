@@ -1,3 +1,6 @@
+### v2025.2.5
+- Bump version number.
+
 ### v2025.2.4
 - Migrates HTTP client from `requests` to `httpx`.
 - Linting changes.
