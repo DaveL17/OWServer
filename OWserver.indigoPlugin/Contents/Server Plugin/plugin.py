@@ -604,6 +604,8 @@ class Plugin(indigo.PluginBase):
                 return sorted(master_list)
 
             except Exception as e:
+                if my_socket:
+                    my_socket.close()
                 err = e.args
                 if err[0] == 51:
                     self.logger.warning("The network is unreachable.")
@@ -1567,11 +1569,11 @@ class Plugin(indigo.PluginBase):
                     case "C_2":  # Counter 2
                         input_value = ows_sensor.find(self.xmlns + 'Counter2').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
-                    case "BPH":  # Barometric Pressure (Mb)
+                    case "BPH":  # Barometric Pressure (Hg)
                         bph = ows_sensor.find(self.xmlns + 'BarometricPressureHg').text
                         input_value = self.pressure_convert(bph)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.LightSensor)
-                    case "BPM":  # Barometric Pressure (Hg)
+                    case "BPM":  # Barometric Pressure (Mb)
                         bpm = ows_sensor.find(self.xmlns + 'BarometricPressureMb').text
                         input_value = self.pressure_convert(bpm)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
@@ -3834,7 +3836,7 @@ class Plugin(indigo.PluginBase):
                 ows_xml = self.get_details_xml(server_ip)
 
                 if not ows_xml:
-                    raise Exception
+                    continue
 
                 root = eTree.fromstring(ows_xml)
 
@@ -3847,15 +3849,9 @@ class Plugin(indigo.PluginBase):
                 self.xmlns = f"{{{ns}}}"
 
                 for dev in indigo.devices.itervalues("self"):
-                    if not dev:
-                        # There are no devices of type OWServer, so skip.
-                        self.logger.debug("There aren't any servers or sensors to assign yet. Skipping.")
-
-                    elif not dev.configured:
+                    if not dev.configured:
                         # A device has been created, but hasn't been fully configured.
-                        self.logger.warning(
-                            "A device has been created, but is not fully configured. Skipping."
-                        )
+                        self.logger.warning("A device has been created, but is not fully configured. Skipping.")
 
                     elif not dev.enabled:
                         # A device has been disabled. Skip it.

@@ -2,6 +2,12 @@
 - Fixes excessive change notifications sent to Indigo per poll cycle; all device state updates are now batched into a
   single `updateStatesOnServer()` call per device, eliminating the flood of `subscribeToChanges()` events previously
   triggered by per-state `updateStateOnServer()` calls.
+- Fixes `getServerList()` socket not being closed when a non-timeout exception is raised during server discovery.
+- Fixes `updateDeviceStates()` raising a bare `Exception` on failed XML fetch, causing a misleading second "Error
+  parsing sensor states" log entry after the connection failure was already reported; the failed server is now skipped
+  with `continue`.
+- Fixes dead-code `if not dev:` guard in `updateDeviceStates()` that could never be true inside an `itervalues` loop.
+- Fixes swapped comments on `"BPH"` and `"BPM"` cases in `updateEDS0066()` (labels were transposed; code was correct).
 - Adds more tests
 - Updates wiki.
 
