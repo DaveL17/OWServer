@@ -1,4 +1,9 @@
-### v2025.2.5
+### v2025.2.6
+- Fixes excessive change notifications sent to Indigo per poll cycle; all device state updates are now batched into a
+  single `updateStatesOnServer()` call per device, eliminating the flood of `subscribeToChanges()` events previously
+  triggered by per-state `updateStateOnServer()` calls.
+
+### v2025.2.5 [released]
 - Bump version number.
 
 ### v2025.2.4
