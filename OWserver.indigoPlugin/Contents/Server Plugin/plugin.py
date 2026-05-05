@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2025.2.5'
+__version__   = '2025.2.6'
 
 
 # =============================================================================
@@ -799,12 +799,15 @@ class Plugin(indigo.PluginBase):
 
         try:
             server_state_dict = self.state_dict.server_state_dict()
+            state_list = []
 
             for key, value in server_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=root.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': root.find(self.xmlns + value).text})
                 except AttributeError:
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
+
+            dev.updateStatesOnServer(state_list)
 
             try:
                 self.logger.debug("%s", self.xmlns)
@@ -852,6 +855,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             ds18b20_state_dict = self.state_dict.ds18b20_state_dict()
+            state_list = []
 
             for key, value in ds18b20_state_dict.items():
                 try:
@@ -860,26 +864,29 @@ class Plugin(indigo.PluginBase):
                         comp_val    = dev.pluginProps.get('DS18B20TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug("Key: %s : Value: Unsupported", key)
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             try:
                 ows_temp    = ows_sensor.find(self.xmlns + 'Temperature').text
                 comp_val    = dev.pluginProps.get('DS18B20TempComp', '0.0')
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.temp_convert(input_value)
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             props = ['UserByte1', 'UserByte2']
             self.populate_props(dev, props, ows_sensor, "DS18B20")
@@ -906,6 +913,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             ds18s20_state_dict = self.state_dict.ds18s20_state_dict()
+            state_list = []
 
             for key, value in ds18s20_state_dict.items():
                 try:
@@ -914,25 +922,28 @@ class Plugin(indigo.PluginBase):
                         comp_val    = dev.pluginProps.get('DS18S20TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
                     self.logger.debug("Key: %s : Value: Unsupported", key)
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             try:
                 ows_temp    = ows_sensor.find(self.xmlns + 'Temperature').text
                 comp_val    = dev.pluginProps.get('DS18S20TempComp', '0.0')
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.temp_convert(input_value)
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
             except Exception:  # noqa
                 self.logger.debug("Unable to update device state on server. Device: %s", dev.name)
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             props = ['UserByte1', 'UserByte2']
             self.populate_props(dev, props, ows_sensor, "DS18S20")
@@ -960,15 +971,16 @@ class Plugin(indigo.PluginBase):
         try:
             ds2406_state_dict = self.state_dict.ds2406_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in ds2406_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -986,13 +998,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             new_props = dev.pluginProps
             new_props['DS2406ActivityLatchReset'] = ows_sensor.find(self.xmlns + 'ActivityLatchReset').text
@@ -1001,7 +1016,6 @@ class Plugin(indigo.PluginBase):
 
             self.number_of_sensors += 1
 
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
             self.logger.debug("Success. Polling next sensor if appropriate.")
             return True
 
@@ -1028,15 +1042,16 @@ class Plugin(indigo.PluginBase):
         try:
             ds2408_state_dict = self.state_dict.ds2408_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in ds2408_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1050,7 +1065,7 @@ class Plugin(indigo.PluginBase):
                 # These states don't exist in the details.xml file. We impute them from <PIOOutputLatchState>.
                 # latch_state_str[0] is the MSB; bit N (input N) lives at index 7-N.
                 for _ in range(0, 8):
-                    dev.updateStateOnServer(f'owsInput{_}', value=latch_state_str[7 - _])
+                    state_list.append({'key': f'owsInput{_}', 'value': latch_state_str[7 - _]})
 
                 match dev.pluginProps['prefSensorValue2408']:
                     case "S_0":  # Switch 0
@@ -1102,13 +1117,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             props = ['PIOActivityLatchState', 'PIOOutputLatchState', 'PowerOnResetLatch', 'RSTZconfiguration']
 
@@ -1137,15 +1155,16 @@ class Plugin(indigo.PluginBase):
         try:
             ds2423_state_dict = self.state_dict.ds2423_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in ds2423_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1154,14 +1173,17 @@ class Plugin(indigo.PluginBase):
                 elif dev.pluginProps['prefSensorValue2423'] == "C_B":  # Counter B
                     input_value = ows_sensor.find(self.xmlns + 'Counter_B').text
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             # The DS2423 does not have any writable parameters.
             new_props = dev.pluginProps
@@ -1169,7 +1191,6 @@ class Plugin(indigo.PluginBase):
             dev.replacePluginPropsOnServer(new_props)
             self.number_of_sensors += 1
 
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
             self.logger.debug("Success. Polling next sensor if appropriate.")
             return True
@@ -1196,6 +1217,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             ds2438_state_dict = self.state_dict.ds2438_state_dict()
+            state_list = []
 
             for key, value in ds2438_state_dict.items():
                 try:
@@ -1204,26 +1226,29 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('DS2438TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             try:
                 ows_temp = ows_sensor.find(self.xmlns + 'Temperature').text
                 comp_val = dev.pluginProps.get('DS2438TempComp', '0.0')
                 input_value = float(ows_temp) + float(comp_val)
                 input_value = self.temp_convert(input_value)
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             # The DS2438 does not have any writable parameters.
             new_props = dev.pluginProps
@@ -1232,7 +1257,6 @@ class Plugin(indigo.PluginBase):
             self.number_of_sensors += 1
 
             dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
-            dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
             self.logger.debug("Success. Polling next sensor if appropriate.")
             return True
 
@@ -1266,15 +1290,16 @@ class Plugin(indigo.PluginBase):
         try:
             ds2450_state_dict = self.state_dict.ds2450_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in ds2450_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1288,14 +1313,17 @@ class Plugin(indigo.PluginBase):
                     case "C_D":  # Counter D
                         input_value = ows_sensor.find(self.xmlns + 'ChannelDConversionValue').text
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
 
             self.populate_props(dev, props, ows_sensor, "DS2450")
 
@@ -1323,6 +1351,7 @@ class Plugin(indigo.PluginBase):
         try:
             eds0064_state_dict = self.state_dict.eds0064_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0064_state_dict.items():
                 try:
@@ -1331,14 +1360,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('EDS0064TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1368,14 +1397,16 @@ class Plugin(indigo.PluginBase):
                         input_value = self.temp_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0064")
 
         except Exception:  # noqa
@@ -1406,6 +1437,7 @@ class Plugin(indigo.PluginBase):
         try:
             eds0065_state_dict = self.state_dict.eds0065_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0065_state_dict.items():
                 try:
@@ -1414,14 +1446,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('EDS0065TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1467,14 +1499,16 @@ class Plugin(indigo.PluginBase):
                         input_value = self.temp_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0065")
 
         except Exception:  # noqa
@@ -1505,6 +1539,7 @@ class Plugin(indigo.PluginBase):
         try:
             eds0066_state_dict = self.state_dict.eds0066_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0066_state_dict.items():
                 try:
@@ -1513,14 +1548,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('EDS0066TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1558,14 +1593,16 @@ class Plugin(indigo.PluginBase):
                         input_value = self.temp_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0066")
 
         except Exception:  # noqa
@@ -1595,6 +1632,7 @@ class Plugin(indigo.PluginBase):
         try:
             eds0067_state_dict = self.state_dict.eds0067_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0067_state_dict.items():
                 try:
@@ -1603,14 +1641,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('EDS0067TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1643,14 +1681,16 @@ class Plugin(indigo.PluginBase):
                         input_value = self.temp_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0067")
 
         except Exception:  # noqa
@@ -1691,6 +1731,7 @@ class Plugin(indigo.PluginBase):
 
         try:
             local['eds0068_state_dict'] = self.state_dict.eds0068_state_dict()
+            state_list = []
 
             for key, value in local['eds0068_state_dict'].items():
                 try:
@@ -1699,14 +1740,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = float(dev.pluginProps.get('EDS0068TempComp', 0.0))
                         local['input_value'] = local['ows_temp'] + comp_val
                         local['input_value'] = self.temp_convert(float(local['input_value']))
-                        dev.updateStateOnServer(key, value=local['input_value'])
+                        state_list.append({'key': key, 'value': local['input_value']})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1763,14 +1804,16 @@ class Plugin(indigo.PluginBase):
                         local['input_value'] = self.temp_convert(float(local['input_value']))
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=local['input_value'], uiValue=local['input_value'])
+                state_list.append({'key': 'sensorValue', 'value': local['input_value'], 'uiValue': local['input_value']})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0068")
 
         except Exception:  # noqa
@@ -1797,15 +1840,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0070_state_dict = self.state_dict.eds0070_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0070_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1829,14 +1873,16 @@ class Plugin(indigo.PluginBase):
                         input_value = ows_sensor.find(self.xmlns + 'VibrationInstant').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0070")
 
         except Exception:  # noqa
@@ -1866,6 +1912,7 @@ class Plugin(indigo.PluginBase):
         try:
             eds0071_state_dict = self.state_dict.eds0071_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0071_state_dict.items():
                 try:
@@ -1874,14 +1921,14 @@ class Plugin(indigo.PluginBase):
                         comp_val = dev.pluginProps.get('EDS0071TempComp', '0.0')
                         input_value = float(ows_temp) + float(comp_val)
                         input_value = self.temp_convert(input_value)
-                        dev.updateStateOnServer(key, value=input_value)
+                        state_list.append({'key': key, 'value': input_value})
                     else:
-                        dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                        state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -1912,14 +1959,16 @@ class Plugin(indigo.PluginBase):
                         input_value = self.temp_convert(input_value)
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0071")
 
         except Exception:  # noqa
@@ -1953,15 +2002,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0080_state_dict = self.state_dict.eds0080_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0080_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -2014,14 +2064,16 @@ class Plugin(indigo.PluginBase):
                         input_value = ows_sensor.find(self.xmlns + 'Counter').text
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0080")
 
         except Exception:  # noqa
@@ -2055,15 +2107,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0082_state_dict = self.state_dict.eds0082_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0082_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -2113,14 +2166,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0082")
 
         except Exception:  # noqa
@@ -2151,15 +2206,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0083_state_dict = self.state_dict.eds0083_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0083_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -2193,14 +2249,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0083")
 
         except Exception:  # noqa
@@ -2231,15 +2289,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0085_state_dict = self.state_dict.eds0085_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0085_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -2273,14 +2332,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0085")
 
         except Exception:  # noqa
@@ -2323,15 +2384,16 @@ class Plugin(indigo.PluginBase):
         try:
             eds0090_state_dict = self.state_dict.eds0090_state_dict()
             input_value = None
+            state_list = []
 
             for key, value in eds0090_state_dict.items():
                 try:
-                    dev.updateStateOnServer(key, value=ows_sensor.find(self.xmlns + value).text)
+                    state_list.append({'key': key, 'value': ows_sensor.find(self.xmlns + value).text})
                 except Exception:  # noqa
                     self.logger.exception("General exception:")
                     self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
                     self.logger.debug(f"Key: {key} : Value: Unsupported")
-                    dev.updateStateOnServer(key, value="Unsupported")
+                    state_list.append({'key': key, 'value': "Unsupported"})
 
             # The user can select which of the following values become the main sensorValue.
             try:
@@ -2376,14 +2438,16 @@ class Plugin(indigo.PluginBase):
                         else:
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
-                dev.updateStateOnServer('sensorValue', value=input_value, uiValue=input_value)
+                state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
-                dev.updateStateOnServer('sensorValue', value="Unsupported", uiValue="Unsupported")
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
+            state_list.append({'key': 'onOffState', 'value': True, 'uiValue': " "})
+            dev.updateStatesOnServer(state_list)
             self.populate_props(dev, props, ows_sensor, "EDS0090")
 
         except Exception:  # noqa
@@ -2401,7 +2465,6 @@ class Plugin(indigo.PluginBase):
         new_props['address'] = dev.states['owsRomID']
         dev.replacePluginPropsOnServer(new_props)
         self.number_of_sensors += 1
-        dev.updateStateOnServer('onOffState', value=True, uiValue=" ")
         self.logger.debug("Success. Polling next sensor if appropriate.")
         return True
 
