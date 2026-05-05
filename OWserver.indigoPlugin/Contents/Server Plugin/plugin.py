@@ -310,11 +310,12 @@ class Plugin(indigo.PluginBase):
         rom_id    = val.props.get('romId')
         variable  = val.props.get('variable')
         value     = val.props.get('value')
-        write_url = f"http://{server}/devices.htm?rom={rom_id}&variable={variable}&value={value}"
+        write_url = f"http://{server}/devices.htm?rom={rom_id}&variable={variable}&value={value}"  # noqa
 
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = httpx.get(write_url, timeout=time_out)
+            self.logger.info(f"Updated [{rom_id}] {variable} to {value}.")
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
 
