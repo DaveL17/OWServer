@@ -1,4 +1,13 @@
-### v2025.2.6
+### v2025.2.7
+- Fixes `updateDeviceStates()`'s comm-failure handler discarding the underlying exception and logging an ambiguous
+  "Error parsing sensor states." message with no indication of which configured server failed; now splits
+  `ElementTree.ParseError` (a truncated/corrupted response, e.g. a server losing power mid-transfer) from other
+  exceptions, tags both with `server_ip`, and retains `str(e)` in the Warning-level log line, with a debug-level
+  traceback for the non-`ParseError` case.
+- Fixes `get_details_xml()`'s two exception handlers not identifying which configured server the failure was about;
+  both now include `server_ip` and `str(e)`.
+
+### v2025.2.6 [released]
 - Fixes excessive change notifications sent to Indigo per poll cycle; all device state updates are now batched into a
   single `updateStatesOnServer()` call per device, eliminating the flood of `subscribeToChanges()` events previously
   triggered by per-state `updateStateOnServer()` calls.
