@@ -474,14 +474,14 @@ class Plugin(indigo.PluginBase):
             return response.text
 
         # What happens if we're unsuccessful. No connection to Internet, no response from OWServer. Let's keep trying.
-        except (httpx.ConnectError, httpx.TimeoutException, httpx.HTTPStatusError):
-            self.logger.warning("Unable to make a successful connection to One Wire Server.")
+        except (httpx.ConnectError, httpx.TimeoutException, httpx.HTTPStatusError) as e:
+            self.logger.warning(f"[{server_ip}] Unable to make a successful connection to One Wire Server: {e}")
 
-        except Exception:  # noqa
+        except Exception as e:  # noqa
             self.logger.exception("General exception:")
             self.logger.warning(
-                "Misc. error downloading details.xml file. If the problem persists, please enable debugging in the "
-                "OWServer configuration dialog and check user forum for more information."
+                f"[{server_ip}] Misc. error downloading details.xml file ({e}). If the problem persists, please "
+                f"enable debugging in the OWServer configuration dialog and check user forum for more information."
             )
 
     # =============================================================================
@@ -4021,15 +4021,31 @@ class Plugin(indigo.PluginBase):
                             self.logger.critical("Error in server parsing routine.")
                             self.logger.exception("General exception:")
 
-            except Exception:  # noqa
+            except eTree.ParseError as e:
+                # Received a response, but it wasn't parseable XML -- most plausibly a
+                # partial/corrupted read from a server that dropped mid-transfer.
+                # "Turn off" sensors for this server only.
+                _ = [
+                    dev.updateStateOnServer('onOffState', value=False)
+                    for dev in indigo.devices.itervalues("self")
+                    if dev.pluginProps.get('serverList') == server_ip
+                ]
+                self.logger.warning(
+                    f"[{server_ip}] Received a response but couldn't parse it as XML ({e}). Likely a "
+                    f"partial/corrupted read -- server may have dropped mid-response."
+                )
+                self.logger.warning(f"Trying again in {pref_poll} seconds.")
+
+            except Exception as e:  # noqa
                 # There has been a problem reaching the server. "Turn off" sensors for this server only.
                 _ = [
                     dev.updateStateOnServer('onOffState', value=False)
                     for dev in indigo.devices.itervalues("self")
                     if dev.pluginProps.get('serverList') == server_ip
                 ]
-                self.logger.warning("Error parsing sensor states.")
+                self.logger.warning(f"[{server_ip}] Error parsing sensor states: {e}")
                 self.logger.warning(f"Trying again in {pref_poll} seconds.")
+                self.logger.debug("Traceback:", exc_info=True)
 
         self.logger.debug("  No more sensors to poll.")
 
