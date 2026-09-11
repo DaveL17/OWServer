@@ -478,7 +478,7 @@ class Plugin(indigo.PluginBase):
             self.logger.warning(f"[{server_ip}] Unable to make a successful connection to One Wire Server: {e}")
 
         except Exception as e:  # noqa
-            self.logger.exception("General exception:")
+            self.logger.debug("General exception:", exc_info=True)
             self.logger.warning(
                 f"[{server_ip}] Misc. error downloading details.xml file ({e}). If the problem persists, please "
                 f"enable debugging in the OWServer configuration dialog and check user forum for more information."
