@@ -1,3 +1,9 @@
+### v2025.2.8
+- Fixes `get_details_xml()`'s generic exception handler logging the connection error three times (a full traceback
+  via `logger.exception()`, duplicating the underlying `httpcore`/`httpx` exception text, followed by the Warning-level
+  message repeating it again); the traceback is now only emitted at debug level, matching the message's own "enable
+  debugging" guidance.
+
 ### v2025.2.7
 - Fixes `updateDeviceStates()`'s comm-failure handler discarding the underlying exception and logging an ambiguous
   "Error parsing sensor states." message with no indication of which configured server failed; now splits
