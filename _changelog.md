@@ -1,3 +1,22 @@
+### v2025.2.9
+- Fixes EDS0065 "Clear Low Conditional Search State" buttons for Dewpoint and Humidity calling the
+  `_high_` callback instead of `_low_`, so the low alarm state could never be cleared.
+- Fixes `spot_dead_sensors()` using `dev.lastChanged` to detect offline devices; a sensor with an
+  unchanging value was flagged dead despite polling successfully. Now tracked via
+  `self.device_last_poll`, set in `updateDeviceStates()`.
+- Fixes `kDefaultPluginPrefs['showDebugLevel']` default of `"1"`, not a valid debug level; corrected
+  to `"30"`.
+- Fixes 16 `updateXXXX` sensor methods swallowing a `KeyError` on `prefSensorValueNNNN` into a
+  generic `logger.exception()` every poll cycle; now caught separately with an actionable warning.
+- Simplifies `updateDS2408()`'s `owsPIOOutputLatchState` parsing, removing a no-op binary/decimal
+  round-trip. No behavior change.
+- Fixes `sendToServer()`, `sendToServerAction()`, `customWriteToDevice()`, and `get_details_xml()`
+  never checking the HTTP response status, so a rejected write or failed read was logged as
+  successful; all four now call `.raise_for_status()` and handle `httpx.HTTPStatusError`.
+- Fixes `clear_dewpoint_high/low_conditional_search_state()` sending `Dewpoint...` (lowercase p) to
+  the hardware instead of `DewPoint...`, inconsistent with every other write-side variable name.
+
+
 ### v2025.2.8
 - Fixes `get_details_xml()`'s generic exception handler logging the connection error three times (a full traceback
   via `logger.exception()`, duplicating the underlying `httpcore`/`httpx` exception text, followed by the Warning-level

@@ -1565,7 +1565,7 @@ show up in the list.
       <Field id="EDS0065DewpointLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065DewpointLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_dewpoint_high_conditional_search_state</CallbackMethod>
+        <CallbackMethod>clear_dewpoint_low_conditional_search_state</CallbackMethod>
       </Field>
 
       <Field id="EDS0065HeatIndexLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">
@@ -1643,7 +1643,7 @@ show up in the list.
       <Field id="EDS0065HumidityLowConditionalSearchState" type="button" defaultValue="" visibleBindingId="EDS0065HumidityLabel" visibleBindingValue="true"
              tooltip="Clicking will clear the low conditional search state.">
         <Title>Clear Low Conditional Search State</Title>
-        <CallbackMethod>clear_humidity_high_conditional_search_state</CallbackMethod>
+        <CallbackMethod>clear_humidity_low_conditional_search_state</CallbackMethod>
       </Field>
 
       <Field id="EDS0065TemperatureLabel" type="checkbox" defaultValue="false" tooltip="Show/Hide advanced settings for this feature.">

@@ -37,7 +37,7 @@ __copyright__ = Dave.__copyright__
 __license__   = Dave.__license__
 __build__     = Dave.__build__
 __title__     = 'OWServer Plugin for Indigo Home Control'
-__version__   = '2025.2.8'
+__version__   = '2025.2.9'
 
 
 # =============================================================================
@@ -63,6 +63,7 @@ class Plugin(indigo.PluginBase):
         self.plugin_is_shutting_down = False
         self.state_dict              = stateDict.OWServer(self)
         self.device_list             = []
+        self.device_last_poll        = {}  # dev.id -> last time the device was found in a server response.
         self.number_of_sensors       = 0
         self.number_of_servers       = 0
         self.pad_log = "\n" + (" " * 34)  # 34 spaces to continue in line with log margin.
@@ -278,9 +279,15 @@ class Plugin(indigo.PluginBase):
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = httpx.get(write_url, timeout=time_out)
+            reply.raise_for_status()
 
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
+
+        except httpx.HTTPStatusError as error:
+            self.logger.warning(
+                "sendToServer(): server rejected the write (HTTP %s): %s", error.response.status_code, write_url
+            )
 
         except Exception:  # noqa
             self.logger.exception("sendToServer()")
@@ -315,9 +322,16 @@ class Plugin(indigo.PluginBase):
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = httpx.get(write_url, timeout=time_out)
+            reply.raise_for_status()
             self.logger.info(f"Updated [{rom_id}] {variable} to {value}.")
             self.logger.debug("Write to server URL: %s", write_url)
             self.logger.debug("Reply: %s", reply)
+
+        except httpx.HTTPStatusError as error:
+            self.logger.warning(
+                "sendToServerAction(): server rejected the write (HTTP %s) for [%s] %s.",
+                error.response.status_code, rom_id, variable
+            )
 
         except Exception:  # noqa
             self.logger.exception("sendToServerAction()")
@@ -388,16 +402,16 @@ class Plugin(indigo.PluginBase):
         try:
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             reply = httpx.get(write_to_url, timeout=time_out)
+            reply.raise_for_status()
             self.logger.info("%s: %s written successfully.", write_to_variable, write_to_value)
             self.logger.info("Reply: %s", reply)
             return True
 
         # What happens if we're unsuccessful.
-        # except httpx.HTTPStatusError as error:
-        #     self.logger.exception("General exception:")
-        #     self.logger.critical("HTTP error writing server data.")
-        #     error_msg_dict['writeToServer'] = f"{error.reason}"
-        #     return False, values_dict, error_msg_dict
+        except httpx.HTTPStatusError as error:
+            self.logger.warning("HTTP error writing server data (HTTP %s).", error.response.status_code)
+            error_msg_dict['writeToServer'] = f"Server rejected the write (HTTP {error.response.status_code})."
+            return False, values_dict, error_msg_dict
         except IOError as error:  # TODO: Check to see if these are IOErrors.
             self.logger.exception("General exception:")
             self.logger.warning("Exception error getting server data.")
@@ -470,6 +484,7 @@ class Plugin(indigo.PluginBase):
             url      = f"http://{server_ip}/details.xml"  # noqa
             time_out = int(self.pluginPrefs.get('configMenuServerTimeout', 15))
             response = httpx.get(url, timeout=time_out)
+            response.raise_for_status()
             self.logger.debug("details.xml file retrieved successfully.")
             return response.text
 
@@ -639,16 +654,23 @@ class Plugin(indigo.PluginBase):
         """
         Log a warning when a sensor has been offline
 
-        spot_dead_sensors(self): This method compares the time each plugin device was last updated to the current
-        Indigo time. If the difference exceeds a set interval (currently set to 60 seconds), then the sensor's
-        onOffState is set to false and an error is thrown to the log. This condition could be for a number of reasons
-        including sensor fail, wiring fail, 1-Wire network collisions, etc.
+        spot_dead_sensors(self): This method compares the time each plugin device was last successfully found in a
+        server response to the current Indigo time. If the difference exceeds a set interval (currently set to 60
+        seconds), then the sensor's onOffState is set to false and an error is thrown to the log. This condition
+        could be for a number of reasons including sensor fail, wiring fail, 1-Wire network collisions, etc.
+
+        Note: this deliberately does not use dev.lastChanged, which only updates when a device's state actually
+        changes value. A sensor reporting a perfectly stable reading (e.g. an unchanging temperature) would
+        otherwise be incorrectly flagged as dead even though it's being polled successfully every cycle.
+        self.device_last_poll is updated in updateDeviceStates() each time a device is matched in a server's
+        response, regardless of whether any of its state values actually changed.
         """
         self.logger.debug("spot_dead_sensors() method called.")
 
         for dev in indigo.devices.itervalues("self"):
             if dev.enabled:
-                diff_time = indigo.server.getTime() - dev.lastChanged
+                last_poll = self.device_last_poll.get(dev.id, dev.lastChanged)
+                diff_time = indigo.server.getTime() - last_poll
                 pref_poll = int(self.pluginPrefs.get('configMenuPollInterval', 900))
                 dead_time = dt.timedelta(seconds=pref_poll) + dt.timedelta(seconds=60)
 
@@ -1003,6 +1025,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue2406'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1059,11 +1089,8 @@ class Plugin(indigo.PluginBase):
             # The user can select which of the following values become the main sensorValue.
             try:
                 # We need to parse the switch state out of the binary number stored in PIOOutputLatchState.
-                latch_state     = float(dev.states['owsPIOOutputLatchState'])
-                latch_state_int = int(latch_state)
-                latch_state_bin = int(bin(latch_state_int)[2:])
-                latch_state_str = str(latch_state_bin)
-                latch_state_str = latch_state_str.zfill(8)
+                latch_state_int = int(float(dev.states['owsPIOOutputLatchState']))
+                latch_state_str = bin(latch_state_int)[2:].zfill(8)
 
                 # These states don't exist in the details.xml file. We impute them from <PIOOutputLatchState>.
                 # latch_state_str[0] is the MSB; bit N (input N) lives at index 7-N.
@@ -1122,6 +1149,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue2408'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1178,6 +1213,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue2423'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -1319,6 +1362,14 @@ class Plugin(indigo.PluginBase):
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
                 dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue2450'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1401,6 +1452,14 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0064'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -1504,6 +1563,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0065'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1598,6 +1665,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0066'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1685,6 +1760,14 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0067'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -1809,6 +1892,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': local['input_value'], 'uiValue': local['input_value']})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0068'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -1877,6 +1968,14 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0070'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -1963,6 +2062,14 @@ class Plugin(indigo.PluginBase):
                         dev.updateStateImageOnServer(indigo.kStateImageSel.TemperatureSensor)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0071'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -2069,6 +2176,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0080'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -2171,6 +2286,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0082'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -2254,6 +2377,14 @@ class Plugin(indigo.PluginBase):
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
 
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0083'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
+
             except Exception:  # noqa
                 self.logger.exception("General exception:")
                 self.logger.debug(f"Unable to update device state on server. Device: {dev.name}")
@@ -2336,6 +2467,14 @@ class Plugin(indigo.PluginBase):
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0085'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -2442,6 +2581,14 @@ class Plugin(indigo.PluginBase):
                             dev.updateStateImageOnServer(indigo.kStateImageSel.SensorOff)
 
                 state_list.append({'key': 'sensorValue', 'value': input_value, 'uiValue': input_value})
+
+            except KeyError:
+                self.logger.warning(
+                    "%s: device configuration is missing 'prefSensorValue0090'. Open the device's configuration "
+                    "dialog and save it to fix this.", dev.name
+                )
+                state_list.append({'key': 'sensorValue', 'value': "Unsupported", 'uiValue': "Unsupported"})
+                dev.updateStateImageOnServer(indigo.kStateImageSel.Error)
 
             except Exception:  # noqa
                 self.logger.exception("General exception:")
@@ -2579,7 +2726,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (values_dict['serverList'], values_dict['romID'], "DewpointHighConditionalSearchState", "0")
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DewPointHighConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -2597,7 +2744,7 @@ class Plugin(indigo.PluginBase):
         :param str fltr:
         :return:
         """
-        parm_list = (values_dict['serverList'], values_dict['romID'], "DewpointLowConditionalSearchState", "0")
+        parm_list = (values_dict['serverList'], values_dict['romID'], "DewPointLowConditionalSearchState", "0")
         self.sendToServer(parm_list)
 
     # =============================================================================
@@ -3864,6 +4011,7 @@ class Plugin(indigo.PluginBase):
                             if (dev.deviceTypeId == "owsOWSServer"
                                     and dev.pluginProps['serverList'] == server_ip):
                                 self.updateOWServer(dev, root, server_ip)
+                                self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureSensor':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS18B20'):
@@ -3872,6 +4020,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS18B20(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureSensor_S':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS18S20'):
@@ -3880,6 +4029,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS18S20(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsDualSwitchPlusMemory':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS2406'):
@@ -3888,6 +4038,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS2406(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsUserSwitch':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS2408'):
@@ -3896,6 +4047,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS2408(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsCounterDevice':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS2423'):
@@ -3904,6 +4056,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS2423(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsSmartBatteryMonitor':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS2438'):
@@ -3912,6 +4065,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS2438(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsQuadConverter':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_DS2450'):
@@ -3920,6 +4074,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateDS2450(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureSensor64':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0064'):
@@ -3928,6 +4083,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0064(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureHumiditySensor65':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0065'):
@@ -3936,6 +4092,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0065(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperaturePressureSensor66':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0066'):
@@ -3944,6 +4101,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0066(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureLight':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0067'):
@@ -3952,6 +4110,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0067(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsTemperatureHumidityBarometricPressureLight':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0068'):
@@ -3960,6 +4119,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0068(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsVibrationSensor':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0070'):
@@ -3968,6 +4128,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0070(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsRTDinterfaceFourWire71':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0071'):
@@ -3976,6 +4137,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0071(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsOctalMilliampInput80':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0080'):
@@ -3984,6 +4146,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0080(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsOctalCurrentDevice':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0082'):
@@ -3992,6 +4155,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0082(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsOctalCurrentDevice83':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0083'):
@@ -4000,6 +4164,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0083(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsQuadCurrentDevice':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0085'):
@@ -4008,6 +4173,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0085(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                             elif dev.deviceTypeId == 'owsOctalDiscreteIO90':
                                 for owsSensor in root.findall('./' + self.xmlns + 'owd_EDS0090'):
@@ -4016,6 +4182,7 @@ class Plugin(indigo.PluginBase):
                                     if dev.pluginProps['romID'] == rom_id \
                                             and dev.pluginProps['serverList'] == server_ip:
                                         self.updateEDS0090(dev, owsSensor, server_ip)
+                                        self.device_last_poll[dev.id] = indigo.server.getTime()
 
                         except Exception:  # noqa
                             self.logger.critical("Error in server parsing routine.")

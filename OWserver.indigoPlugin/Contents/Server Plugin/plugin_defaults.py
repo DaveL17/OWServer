@@ -8,6 +8,6 @@ kDefaultPluginPrefs = {
     "configMenuServerType": "OW",      # What kind of server is it?
     "OWServerIP": "",                  # List of server IP address(es).
     "showDebugInfo": False,            # Verbose debug logging?
-    "showDebugLevel": "1",             # Low, Medium or High debug output.
+    "showDebugLevel": "30",            # Low, Medium or High debug output.
     "suppressResultsLogging": False,   # Don't log unless there's a problem.
 }
